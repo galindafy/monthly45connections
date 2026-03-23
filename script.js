@@ -1,231 +1,85 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   const SIZE = 45;
-  const STORAGE_KEY = "connections-polished-45x45-v1";
+  const STORAGE_KEY = "connections-clean-45x45";
   const GROUP_COLORS = ["#f9df6d","#a0c35a","#b0c4ef","#ba81c5"];
-const CATEGORY_BANK = {
-  "FRUITS": [...],
-  "COLOURS": [...],
-  "CITIES": [...],
-  "SINGERS": [...],
-  "ACTORS": [...],
-  "CLOTHING BRANDS": [...],
-  "ANIMALS": [...],
-  "DESSERTS": [...],
-  "BREAKFAST FOODS": [...],
-  "PHONE APPS": [...],
-  "THINGS AT THE BEACH": [...],
-  "COMMON PASSWORD WORDS": [...],
-  "BOOKS": [...],
-  "COUNTRIES": [...],
-  "SPORTS": [...],
-  "FLOWERS": [...],
-  "BEVERAGES": [...],
-  "THINGS IN A HOME": [...],
-  "JOBS": [...],
-  "MOVIE TITLES": [...],
-  "SONG TITLES": [...],
-  "FOODS": [...],
-  "VEGETABLES": [...],
-  "TOOLS": [...],
-  "FURNITURE": [...],
-  "VEHICLES": [...],
-  "MUSICAL INSTRUMENTS": [...],
-  "BOARD GAMES": [...],
-  "CARD GAMES": [...],
-  "SOCIAL MEDIA PLATFORMS": [...],
-  "STREAMING SERVICES": [...],
-  "FAST FOOD CHAINS": [...],
-  "COFFEE DRINKS": [...],
-  "ALCOHOL TYPES": [...],
-  "CHEESES": [...],
-  "PASTA TYPES": [...],
-  "BREAD TYPES": [...],
-  "CANDY": [...],
-  "ICE CREAM FLAVOURS": [...],
-  "MAKEUP PRODUCTS": [...],
-  "SKINCARE": [...],
-  "HAIR PRODUCTS": [...],
-  "EXERCISES": [...],
-  "SPORTS TEAMS": [...],
-  "AIRLINES": [...],
-};  const board = document.getElementById("board");
+
+  const CATEGORY_BANK = {
+    "FRUITS": ["apple","banana","orange","grape","pear","peach","plum","mango","kiwi","papaya","pineapple","strawberry","raspberry","blueberry","blackberry","melon","watermelon","coconut","lemon","lime","apricot","fig","guava","lychee","nectarine","passionfruit","pomegranate","dragon fruit","persimmon","tangerine","cranberry","date","grapefruit","mulberry","quince","starfruit","currant","boysenberry","cantaloupe","honeydew","jackfruit","kumquat","yuzu","pomelo","longan"],
+
+    "COLOURS": ["red","blue","green","yellow","purple","pink","black","white","orange colour","brown","teal","navy","gold colour","silver colour","cyan","magenta","beige","maroon","olive","indigo","charcoal","ivory","lavender","turquoise","mustard","burgundy","mint","tan","cream","scarlet","crimson","amber","bronze","lilac","periwinkle","sage","coral","taupe","ochre","russet","khaki","fuchsia","aqua","jade","slate"],
+
+    "CITIES": ["Paris","Rome","Tokyo","London","Berlin","Madrid","Vienna","Prague","Dublin","Lisbon","Oslo","Athens","Warsaw","Zurich","Helsinki","Budapest","Seoul","Bangkok","Delhi","Cairo","Montreal","Toronto","Vancouver","Ottawa","Chicago","Boston","Miami","Seattle","Sydney","Melbourne","Auckland","Brussels","Munich","Hamburg","Florence","Naples","Kyoto","Busan","Lima","Santiago","Bogota","Reykjavik","Doha","Dubai","Marrakesh"],
+
+    "ANIMALS": ["lion","tiger","bear","wolf","fox","dog","cat","zebra","panda","horse","eagle","shark","whale","snake","frog","deer","otter","camel","goat","sheep","rabbit","owl","falcon","moose","bison","beaver","lynx","cougar","koala","lemur","rhino","hippo","gecko","iguana","salmon","trout","crab","lobster","octopus","squid","penguin","seal","dolphin","orca","buffalo"],
+
+    "COUNTRIES": ["Canada","USA","Mexico","Brazil","Argentina","Chile","Peru","Colombia","France","Germany","Spain","Italy","Portugal","Netherlands","Belgium","Switzerland","Austria","Poland","Sweden","Norway","Finland","Denmark","Ireland","UK","Iceland","Greece","Turkey","Egypt","Morocco","South Africa","India","China","Japan","South Korea","Thailand","Vietnam","Indonesia","Philippines","Australia","New Zealand","Nigeria","Kenya","Ethiopia","Saudi Arabia","Qatar"],
+
+    "JOBS": ["doctor","teacher","pilot","chef","lawyer","artist","nurse","driver","engineer","farmer","actor","writer","plumber","carpenter","dentist","designer","analyst","manager","clerk","mechanic","electrician","cashier","barista","baker","therapist","receptionist","architect","journalist","photographer","librarian","musician","accountant","paramedic","firefighter","police officer","florist","veterinarian","optometrist","tailor","surgeon","translator","developer","coordinator","salesperson","agent"],
+
+    "MOVIES": ["Inception","Interstellar","Titanic","Barbie","Jaws","Frozen","Rocky","Skyfall","Cars","Elf","Shrek","Moana","Gladiator","Arrival","Whiplash","Coco","Soul","Matrix","Grease","Chicago","Parasite","Her","Gravity","Drive","Dune","Brooklyn","Spotlight","Juno","Selma","Hook","Bambi","Tangled","Up","Speed","Twister","Hitch","Clueless","Scream","Memento","Braveheart","Love Actually","Casablanca","Psycho","Nope","Lincoln"],
+
+    "SONGS": ["Firework","Imagine","Halo","Toxic","Royals","Happy","Umbrella","Grenade","Sorry","Believer","Dreams","Waterfalls","Chandelier","Hero","Vogue","Call Me Maybe","Bad Guy","Hello","Formation","Applause","Ironic","Zombie","Valerie","Respect","Irreplaceable","Photograph","Clocks","Riptide","Torn","Bleeding Love","No Scrubs","Watermelon Sugar","Stay","Yellow","Poker Face","Levitating","Single Ladies","Shivers","Vampire","Rolling in the Deep","Complicated","Genie in a Bottle","Tik Tok","Style","Blank Space"],
+
+    "FOOD": ["pizza","burger","pasta","salad","soup","sandwich","steak","rice","noodles","sushi","taco","burrito","wrap","curry","dumpling","ramen","paella","risotto","lasagna","pancake","waffle","omelette","toast","bagel","croissant","muffin","cake","pie","cookie","brownie","donut","gelato","sorbet","yogurt","granola","smoothie","milkshake","fries","onion rings","nachos","popcorn","chocolate","candy","ice cream","cheesecake"],
+
+    "TECH BRANDS": ["Apple","Samsung","Google","Microsoft","Amazon","Meta","Sony","LG","Intel","AMD","Nvidia","Dell","HP","Lenovo","Asus","Acer","Huawei","Xiaomi","OnePlus","Oppo","Vivo","Tesla","IBM","Oracle","Cisco","Adobe","Spotify","Netflix","Uber","Airbnb","PayPal","Shopify","Slack","Zoom","Dropbox","eBay","Pinterest","Snapchat","TikTok","Reddit","Discord","Twitch","Square","Stripe","Canva"],
+
+    "SPORTS": ["soccer","basketball","baseball","hockey","tennis","golf","rugby","cricket","boxing","swimming","running","cycling","skiing","snowboarding","volleyball","badminton","surfing","rowing","wrestling","archery","skateboarding","lacrosse","curling","water polo","fencing","gymnastics","triathlon","marathon","handball","softball","squash","table tennis","figure skating","kayaking","canoeing","diving","judo","karate","taekwondo","sailing","bobsled","luge","biathlon","climbing","pickleball"]
+  };
+
+  const board = document.getElementById("board");
   const mistakesEl = document.getElementById("mistakes");
   const dateEl = document.getElementById("puzzleDate");
-  const shuffleBtn = document.getElementById("shuffleBtn");
-  const deselectBtn = document.getElementById("deselectBtn");
+
   function seedForToday() {
     const d = new Date();
     return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
   }
-  function formatLongDate(k) {
-    const y = Number(k.slice(0,4)), m = Number(k.slice(4,6))-1, d = Number(k.slice(6,8));
+
+  function formatDate(k){
+    const y = Number(k.slice(0,4));
+    const m = Number(k.slice(4,6))-1;
+    const d = Number(k.slice(6,8));
     return new Date(y,m,d).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   }
-  function seedNumber(str) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-    return h;
-  }
-  function rand(seed) { const x = Math.sin(seed) * 10000; return x - Math.floor(x); }
-  function shuffle(arr, seed) {
-    const copy = [...arr]; let s = seed;
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(rand(s++) * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-  }
-  function pick45(arr, seed) {
-    const uniq = [...new Set(arr)];
-    return shuffle(uniq, seed).slice(0, 45);
-  }
-function createDailyCategories(key) {
-  const seed = seedNumber(key);
 
-  const entries = Object.entries(CATEGORY_BANK);
+  function shuffle(arr){
+    return [...arr].sort(()=>Math.random()-0.5);
+  }
 
-  // pick 45 categories
-  const chosen = shuffle(entries, seed).slice(0, 45);
+  function build(){
+    const key = seedForToday();
+    const entries = Object.entries(CATEGORY_BANK).slice(0,45);
 
-  return chosen.map(([name, words], i) => ({
-    name,
-    words: shuffle(words, seed + i * 100).slice(0, 45)
-  }));
-}
-  function buildFreshState() {
-    const dateKey = seedForToday();
-    const cats = createDailyCategories(dateKey);
-    const tiles = [];
-    const lookup = {};
-    cats.forEach((cat, idx) => {
-      cat.words.forEach(word => {
-        tiles.push(word);
-        lookup[word] = { name: cat.name, color: GROUP_COLORS[idx % GROUP_COLORS.length] };
+    const tiles=[];
+    const lookup={};
+
+    entries.forEach(([name,words],i)=>{
+      words.slice(0,45).forEach(w=>{
+        tiles.push(w);
+        lookup[w]={name,color:GROUP_COLORS[i%4]};
       });
     });
-    return { dateKey, lookup, groups: shuffle(tiles, seedNumber(dateKey) + 999).map(word => ({ words:[word], solved:false, category:null, color:null })), selectedIndex:null, mistakes:0 };
+
+    return {
+      key,
+      lookup,
+      groups: shuffle(tiles).map(w=>({words:[w],solved:false}))
+    };
   }
-  function validSaved(saved, fresh) {
-    if (!saved || saved.dateKey !== fresh.dateKey || !Array.isArray(saved.groups)) return false;
-    const words = saved.groups.flatMap(g => g.words || []);
-    if (words.length !== SIZE * SIZE) return false;
-    const uniq = new Set(words);
-    if (uniq.size !== SIZE * SIZE) return false;
-    const valid = new Set(Object.keys(fresh.lookup));
-    for (const w of uniq) if (!valid.has(w)) return false;
-    return true;
-  }
-  function loadState() {
-    const fresh = buildFreshState();
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return fresh;
-      const saved = JSON.parse(raw);
-      if (!validSaved(saved, fresh)) return fresh;
-      return { dateKey:fresh.dateKey, lookup:fresh.lookup, groups:saved.groups, selectedIndex:null, mistakes:Number.isFinite(saved.mistakes)?saved.mistakes:0 };
-    } catch { return fresh; }
-  }
-  let state = loadState();
-  function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ dateKey:state.dateKey, groups:state.groups, mistakes:state.mistakes }));
-  }
-  function preview(group) {
-    const t = group.words.slice(0,2).join(", ");
-    return group.words.length >= 3 ? `${t}, ... [${group.words.length}]` : t;
-  }
-  function categoryForWords(words) {
-    const first = state.lookup[words[0]];
-    if (!first) return null;
-    for (const w of words) {
-      const info = state.lookup[w];
-      if (!info || info.name !== first.name) return null;
-    }
-    return first;
-  }
-  function shakeIndex(i) {
-    const tile = board.children[i];
-    if (tile) { tile.classList.add("shake"); setTimeout(() => tile.classList.remove("shake"), 280); }
-  }
-  function rejectMerge(i) {
-    state.mistakes += 1;
-    requestAnimationFrame(() => shakeIndex(i));
-  }
-  function mergeIntoSecond(a, b) {
-    const mergedWords = [...state.groups[a].words, ...state.groups[b].words];
-    const category = categoryForWords(mergedWords);
-    if (!category) { rejectMerge(b); return; }
-    const merged = { words: mergedWords, solved:false, category:null, color:null };
-    let insertIndex = b;
-    if (a > b) {
-      state.groups.splice(a, 1);
-      state.groups.splice(b, 1);
-    } else {
-      state.groups.splice(b, 1);
-      state.groups.splice(a, 1);
-      insertIndex -= 1;
-    }
-    state.groups.splice(insertIndex, 0, merged);
-    if (merged.words.length === SIZE) {
-      merged.solved = true;
-      merged.category = category.name;
-      merged.color = category.color;
-    }
-  }
-  function shuffleUnsolvedInPlace() {
-    const seed = seedNumber(state.dateKey) + (Date.now() % 1000);
-    const unsolvedIdx = [];
-    const unsolvedGroups = [];
-    state.groups.forEach((g, i) => {
-      if (!g.solved) { unsolvedIdx.push(i); unsolvedGroups.push(g); }
-    });
-    const shuffled = shuffle(unsolvedGroups, seed);
-    unsolvedIdx.forEach((idx, i) => { state.groups[idx] = shuffled[i]; });
-  }
-  function handleClick(i) {
-    const g = state.groups[i];
-    if (!g || g.solved) return;
-    if (state.selectedIndex === null) { state.selectedIndex = i; render(); return; }
-    if (state.selectedIndex === i) { state.selectedIndex = null; render(); return; }
-    mergeIntoSecond(state.selectedIndex, i);
-    state.selectedIndex = null;
-    saveState();
-    render();
-  }
-  function render() {
-    dateEl.textContent = formatLongDate(state.dateKey);
-    mistakesEl.textContent = String(state.mistakes);
-    board.innerHTML = "";
-    state.groups.forEach((g, i) => {
-      const tile = document.createElement("div");
-      tile.className = "tile";
-      if (g.solved) {
-        tile.classList.add("solved-tile", "hoverable");
-        tile.style.background = g.color || GROUP_COLORS[0];
-      } else {
-        tile.classList.add(g.words.length > 1 ? "merged" : "single");
-        if (state.selectedIndex === i) tile.classList.add("selected");
-        if (g.words.length >= 3) tile.classList.add("hoverable");
-      }
-      const label = document.createElement("div");
-      label.textContent = g.solved ? (g.category || "") : preview(g);
-      tile.appendChild(label);
-      if (g.solved || g.words.length >= 3) {
-        const hover = document.createElement("div");
-        hover.className = "hover-content";
-        hover.textContent = g.words.join(", ");
-        tile.appendChild(hover);
-      }
-      if (!g.solved) tile.addEventListener("click", () => handleClick(i));
-      board.appendChild(tile);
+
+  let state = build();
+
+  function render(){
+    dateEl.textContent = formatDate(state.key);
+    board.innerHTML="";
+    state.groups.forEach((g,i)=>{
+      const t=document.createElement("div");
+      t.className="tile "+(g.words.length>1?"merged":"single");
+      t.textContent=g.words.slice(0,2).join(", ");
+      board.appendChild(t);
     });
   }
-  shuffleBtn.addEventListener("click", () => {
-    shuffleUnsolvedInPlace();
-    state.selectedIndex = null;
-    saveState();
-    render();
-  });
-  deselectBtn.addEventListener("click", () => { state.selectedIndex = null; render(); });
+
   render();
 });
