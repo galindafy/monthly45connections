@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const SIZE = 45;
-  const STORAGE_KEY = "connections-45x45-autogen-v1";
+  const STORAGE_KEY = "connections-45x45-autogen-v2";
   const GROUP_COLORS = ["#f9df6d", "#a0c35a", "#b0c4ef", "#ba81c5"];
 
   const DIRECT_BANKS = {
@@ -25,31 +25,117 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const PHRASE_BANKS = {
-  "WORDS WITH APPLE": [
-    "apple pie","apple juice","apple cider","apple watch","apple store",
-    "apple core","apple seed","apple tart","apple sauce","apple jam",
-    "apple peel","apple orchard","apple crisp","apple slice","apple cake",
-    "apple skin","apple pulp","apple snack","apple bite","apple tree"
-  ],
-  "WORDS WITH BREAK": [
-    "break down","break up","break in","break out","break even",
-    "break free","break away","break point","break news","break habit",
-    "break silence","break code","break lock","break record","break chain",
-    "break rank","break stride","break time","break line","break rule"
-  ],
-  "WORDS WITH LIGHT": [
-    "light bulb","light switch","light year","light house","light show",
-    "light rail","light beam","light post","light box","light meter",
-    "light ring","light source","light shade","light touch","light line",
-    "light path","light table","light wave","light signal","light screen"
-  ],
-  "WORDS WITH MOON": [
-    "moonlight","moonbeam","moonstone","moonwalk","moonshine",
-    "moonrise","moonfall","moonshadow","moonglow","moon river",
-    "moon dust","moon rock","moon phase","moon roof","moon cake",
-    "moon jar","moon gate","moon garden","moon pool","moon flower"
-  ]
-};
+    "WORDS WITH APPLE": [
+      "apple pie","apple juice","apple cider","apple watch","apple store",
+      "apple core","apple seed","apple tart","apple sauce","apple jam",
+      "apple peel","apple orchard","apple crisp","apple slice","apple cake",
+      "apple skin","apple pulp","apple snack","apple bite","apple tree",
+      "apple butter","apple fritter","apple turnover","apple dumpling","apple muffin",
+      "apple strudel","apple compote","apple jelly","apple chips","apple salad",
+      "apple crate","apple picker","apple farm","apple press","apple barrel",
+      "apple branch","apple blossom","apple cobbler","apple syrup","apple ring",
+      "apple candy","apple tartlet","apple smoothie","apple harvest","apple stand"
+    ],
+    "WORDS WITH BREAK": [
+      "break down","break up","break in","break out","break even",
+      "break free","break away","break point","break news","break habit",
+      "break silence","break code","break lock","break record","break chain",
+      "break rank","break stride","break time","break line","break rule",
+      "break dance","break camp","break room","break glass","break wall",
+      "break water","break wind","break beat","break bulk","break shot",
+      "break step","break string","break fall","break ground","break mark",
+      "break neck","break pack","break pad","break seal","break spell",
+      "break through","break trail","break turn","break word","break wave"
+    ],
+    "WORDS WITH LIGHT": [
+      "light bulb","light switch","light year","light house","light show",
+      "light rail","light beam","light post","light box","light meter",
+      "light ring","light source","light shade","light touch","light line",
+      "light path","light table","light wave","light signal","light screen",
+      "light frame","light guide","light print","light stand","light panel",
+      "light storm","light field","light mark","light trail","light fall",
+      "light work","light cone","light breeze","light lift","light dance",
+      "light garden","light stone","light flash","light glow","light spark",
+      "light blue","light green","light red","light pink","light gold"
+    ],
+    "WORDS WITH MOON": [
+      "moonlight","moonbeam","moonstone","moonwalk","moonshine",
+      "moonrise","moonfall","moonshadow","moonglow","moon river",
+      "moon dust","moon rock","moon phase","moon roof","moon cake",
+      "moon jar","moon gate","moon garden","moon pool","moon flower",
+      "moon path","moon watch","moon trail","moon field","moon tree",
+      "moon mark","moon print","moon house","moon bloom","moon stream",
+      "moon ring","moon frame","moon signal","moon drift","moon crest",
+      "moon bridge","moon valley","moon table","moon road","moon mist",
+      "moon flare","moon panel","moon screen","moon harbor","moon box"
+    ],
+    "WORDS WITH WATER": [
+      "water bottle","water park","waterfall","water line","water table",
+      "water tank","water pump","water meter","water tower","water pipe",
+      "water glass","water heater","water hose","water filter","water cooler",
+      "water bed","water jet","water system","water feature","water basin",
+      "water mark","water color","water proof","water front","water way",
+      "water side","water wheel","water melon","water course","water gate",
+      "water level","water lily","water drop","water sign","water trail",
+      "water view","water stream","water garden","water works","water bird",
+      "water field","water shade","water room","water stone","water house"
+    ],
+    "WORDS WITH STAR": [
+      "starfish","stardust","starlight","starboard","starburst",
+      "star player","star power","star chart","star sign","star turn",
+      "star pupil","star quality","star trail","star fruit","star map",
+      "star field","star point","star cluster","star system","star rating",
+      "star line","star fall","star shape","star maker","star watch",
+      "star shine","star path","star spark","star case","star gate",
+      "star stream","star stone","star print","star song","star room",
+      "star frame","star route","star talk","star side","star box",
+      "star value","star mark","star cast","star city","star phase"
+    ],
+    "WORDS WITH FIRE": [
+      "fire truck","fire drill","fire alarm","fire station","fire escape",
+      "fire pit","fire hydrant","fire door","fire engine","fire extinguisher",
+      "fire code","fire lane","fire wall","fire place","fire ball",
+      "fire fly","firewood","firestorm","firelight","fireproof",
+      "fire line","fire sale","fire watch","fire tower","fire house",
+      "fire brick","fire poker","fire ring","fire screen","fire bowl",
+      "fire glass","fire road","fire trail","fire mark","fire damage",
+      "fire risk","fire safety","fire blanket","fire guard","fire chief",
+      "fire crew","fire boat","fire cart","fire training","fire service"
+    ],
+    "WORDS WITH BLUE": [
+      "blue moon","blue bird","blue jeans","blue sky","blue whale",
+      "blue jay","blue print","blue screen","blue light","blue ribbon",
+      "blue collar","blue blood","blue berry","blue book","blue line",
+      "blue chip","blue grass","blue water","blue note","blue stone",
+      "blue coat","blue plate","blue box","blue flag","blue team",
+      "blue room","blue shade","blue gem","blue field","blue wave",
+      "blue card","blue mark","blue check","blue signal","blue flower",
+      "blue glass","blue ink","blue lamp","blue trail","blue eye",
+      "blue road","blue star","blue path","blue paint","blue zone"
+    ],
+    "WORDS WITH GREEN": [
+      "green light","green room","green house","green tea","green thumb",
+      "green card","green bean","green screen","green belt","green onion",
+      "green flag","green space","green energy","green roof","green salad",
+      "green apple","green line","green fee","green day","green wood",
+      "green field","green wave","green zone","green gem","green lamp",
+      "green glass","green paint","green path","green shade","green box",
+      "green river","green mark","green signal","green flower","green trail",
+      "green team","green coat","green book","green chart","green screen saver",
+      "green market","green planet","green growth","green stone","green valley"
+    ],
+    "WORDS WITH HOUSE": [
+      "house plant","house party","house guest","house wine","house cat",
+      "house band","house key","house rule","house boat","house coat",
+      "house fly","house lights","house music","house sitter","house work",
+      "house arrest","house warming","house blend","house style","house call",
+      "house line","house salad","house brand","house sign","house view",
+      "house staff","house keeper","house mouse","house pet","house phone",
+      "house mate","house deck","house frame","house number","house paint",
+      "house plan","house tour","house seat","house bill","house party game",
+      "house room","house shift","house path","house market","house plant stand"
+    ]
+  };
 
   const board = document.getElementById("board");
   const mistakesEl = document.getElementById("mistakes");
@@ -69,11 +155,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function buildCategoryPool() {
-  return {
-    ...DIRECT_BANKS,
-    ...PHRASE_BANKS
-  };
-}
+    return {
+      ...DIRECT_BANKS,
+      ...PHRASE_BANKS
+    };
+  }
 
   function weekStartDate() {
     const d = new Date();
@@ -128,8 +214,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const dateKey = weekKey();
     const seed = seedNumber(dateKey);
     const categoryPool = buildCategoryPool();
-
     const entries = Object.entries(categoryPool);
+
     if (entries.length < SIZE) {
       throw new Error(`Need at least ${SIZE} categories, found ${entries.length}.`);
     }
