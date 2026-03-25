@@ -1,12 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
   const SIZE = 45;
-  const STORAGE_KEY = "connections-45x45-weekly-generated-v1";
+  const STORAGE_KEY = "connections-45x45-working-v1";
   const GROUP_COLORS = ["#f9df6d", "#a0c35a", "#b0c4ef", "#ba81c5"];
 
   const DIRECT_BANKS = {
     "FRUITS": ["apple","banana","orange","grape","pear","peach","plum","mango","kiwi","papaya","pineapple","strawberry","raspberry","blueberry","blackberry","melon","watermelon","coconut","lemon","lime","apricot","fig","guava","lychee","nectarine","passionfruit","pomegranate","dragon fruit","persimmon","tangerine","cranberry","date","grapefruit","mulberry","quince","starfruit","currant","boysenberry","cantaloupe","honeydew","jackfruit","kumquat","yuzu","pomelo","longan"],
     "VEGETABLES": ["carrot","broccoli","spinach","lettuce","cabbage","kale","cauliflower","celery","cucumber","zucchini","eggplant","pepper","tomato","potato","sweet potato","onion","garlic","beet","radish","turnip","parsnip","leek","shallot","okra","artichoke","asparagus","pea","green bean","corn","pumpkin","squash","yam","fennel","brussels sprouts","bok choy","chard","arugula","watercress","rutabaga","jicama","daikon","cassava","taro","edamame","collard greens"],
     "ANIMALS": ["lion","tiger","bear","wolf","fox","dog","cat","zebra","panda","horse","eagle","shark","whale","snake","frog","deer","otter","camel","goat","sheep","rabbit","owl","falcon","moose","bison","beaver","lynx","cougar","koala","lemur","rhino","hippo","gecko","iguana","salmon","trout","crab","lobster","octopus","squid","penguin","seal","dolphin","orca","buffalo"],
+    "BIRDS": ["sparrow","robin","blue jay","cardinal","crow","raven","hawk","parrot","canary","finch","woodpecker","hummingbird","pelican","seagull","albatross","flamingo","heron","stork","duck","goose","swan","turkey","peacock","ostrich","emu","kiwi","loon","oriole","blackbird","kingfisher","magpie","mockingbird","nightingale","phoebe","pigeon","dove","quail","wren","warbler","vulture","condor","cockatoo","chickadee","swallow","falcon"],
     "COLOURS": ["red","blue","green","yellow","purple","pink","black","white","orange colour","brown","teal","navy","gold colour","silver colour","cyan","magenta","beige","maroon","olive","indigo","charcoal","ivory","lavender colour","turquoise colour","mustard","burgundy","mint","tan","cream","scarlet","crimson","amber colour","bronze","lilac","periwinkle","sage","coral","taupe","ochre","russet","khaki","fuchsia","aqua","jade colour","slate colour"],
     "CITIES": ["Paris","Rome","Tokyo","London","Berlin","Madrid","Vienna","Prague","Dublin","Lisbon","Oslo","Athens","Warsaw","Zurich","Helsinki","Budapest","Seoul","Bangkok","Delhi","Cairo","Montreal","Toronto","Vancouver","Ottawa","Chicago","Boston","Miami","Seattle","Sydney","Melbourne","Auckland","Brussels","Munich","Hamburg","Florence","Naples","Kyoto","Busan","Lima","Santiago","Bogota","Reykjavik","Doha","Dubai","Marrakesh"],
     "COUNTRIES": ["Canada","United States","Mexico","Brazil","Argentina","Chile","Peru","Colombia","France","Germany","Spain","Italy","Portugal","Netherlands","Belgium","Switzerland","Austria","Poland","Sweden","Norway","Finland","Denmark","Ireland","United Kingdom","Iceland","Greece","Turkey","Egypt","Morocco","South Africa","India","China","Japan","South Korea","Thailand","Vietnam","Indonesia","Philippines","Australia","New Zealand","Nigeria","Kenya","Ethiopia","Saudi Arabia","Qatar"],
@@ -35,9 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "line","light","mark","song","road","path","field","house","garden","stone",
     "glass","trail","watch","fall","rise","drift","shade","spark","beam","print",
     "box","ring","screen","guide","turn","crest","bloom","bridge","table","panel",
-    "stand","view","cart","frame","gate","talk","signal","route","sparkle","storm",
-    "room","shade","shine","stream","mist","flare","drive","harbor","pool","valley",
-    "candy","juice","pie","cider","watch","store","core","seed","tart","sauce"
+    "stand","view","cart","frame","gate","talk","signal","route","storm","room",
+    "shine","stream","mist","flare","drive"
   ];
 
   const board = document.getElementById("board");
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function normalizeSourceWord(word) {
     return String(word)
       .replace(/\s+\[.*?\]$/, "")
-      .replace(/\s+(film|song|novel|app|platform|service|company|book|game|drink|beverage|instrument|flower|tree|fish|seafood|vehicle|state|bird|colour)$/i, "")
+      .replace(/\s+(film|song|novel|app|platform|service|company|book|chain|colour)$/i, "")
       .trim();
   }
 
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const banks = {};
     GENERATED_ROOTS.forEach((root, rootIndex) => {
       const values = GENERATED_TAILS.map((tail, tailIndex) => {
-        if (tailIndex < 10 && rootIndex % 5 === 0) {
+        if (rootIndex % 4 === 0 && tailIndex < 8) {
           return `${root}${tail}`;
         }
         return `${root} ${tail}`;
@@ -130,9 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function buildFreshState() {
     const dateKey = weekKey();
     const seed = seedNumber(dateKey);
-    const CATEGORY_POOL = buildCategoryPool();
+    const categoryPool = buildCategoryPool();
 
-    const entries = Object.entries(CATEGORY_POOL);
+    const entries = Object.entries(categoryPool);
     if (entries.length < SIZE) {
       throw new Error(`Need at least ${SIZE} categories, found ${entries.length}.`);
     }
@@ -142,9 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const categories = chosen.map(([name, words], idx) => {
       const cleaned = words.map(normalizeSourceWord);
       const unique = [...new Set(cleaned)];
-      if (unique.length < SIZE) {
-        throw new Error(`${name} needs at least ${SIZE} unique entries after cleanup.`);
-      }
       return {
         name,
         words: shuffle(unique, seed + idx).slice(0, SIZE)
@@ -184,6 +181,24 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  function validSaved(saved, fresh) {
+    if (!saved || saved.dateKey !== fresh.dateKey || !Array.isArray(saved.groups)) {
+      return false;
+    }
+
+    const words = saved.groups.flatMap(g => g.words || []);
+    const validWords = Object.keys(fresh.lookup);
+
+    if (words.length !== validWords.length) return false;
+    if (new Set(words).size !== validWords.length) return false;
+
+    const validSet = new Set(validWords);
+    for (const w of words) {
+      if (!validSet.has(w)) return false;
+    }
+    return true;
+  }
+
   function loadState() {
     const fresh = buildFreshState();
 
@@ -192,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!raw) return fresh;
 
       const saved = JSON.parse(raw);
-      if (!saved || saved.dateKey !== fresh.dateKey) {
+      if (!validSaved(saved, fresh)) {
         localStorage.removeItem(STORAGE_KEY);
         return fresh;
       }
@@ -202,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lookup: fresh.lookup,
         groups: saved.groups,
         selectedIndex: null,
-        mistakes: saved.mistakes || 0
+        mistakes: Number.isFinite(saved.mistakes) ? saved.mistakes : 0
       };
     } catch {
       localStorage.removeItem(STORAGE_KEY);
@@ -229,8 +244,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function findCategory(words) {
     const first = state.lookup[words[0]];
     if (!first) return null;
+
     for (const w of words) {
-      if (!state.lookup[w] || state.lookup[w].name !== first.name) return null;
+      const info = state.lookup[w];
+      if (!info || info.name !== first.name) return null;
     }
     return first;
   }
@@ -273,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleClick(i) {
     const g = state.groups[i];
-    if (g.solved) return;
+    if (!g || g.solved) return;
 
     if (state.selectedIndex === null) {
       state.selectedIndex = i;
@@ -295,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function render() {
     dateEl.textContent = formatLongDate(state.dateKey);
-    mistakesEl.textContent = state.mistakes;
+    mistakesEl.textContent = String(state.mistakes);
     board.innerHTML = "";
 
     state.groups.forEach((g, i) => {
@@ -304,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (g.solved) {
         tile.classList.add("solved-tile", "hoverable");
-        tile.style.background = g.color;
+        tile.style.background = g.color || GROUP_COLORS[0];
       } else {
         tile.classList.add(g.words.length > 1 ? "merged" : "single");
         if (state.selectedIndex === i) tile.classList.add("selected");
@@ -312,10 +329,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const label = document.createElement("div");
-      label.textContent = g.solved ? g.category : preview(g);
+      label.textContent = g.solved ? (g.category || "") : preview(g);
       tile.appendChild(label);
 
-      if (g.words.length >= 3 || g.solved) {
+      if (g.solved || g.words.length >= 3) {
         const hover = document.createElement("div");
         hover.className = "hover-content";
         hover.textContent = g.words.map(displayWord).join(", ");
@@ -330,9 +347,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function shuffleUnsolvedInPlace() {
+    const seed = seedNumber(state.dateKey) + (Date.now() % 1000);
+    const unsolvedIdx = [];
+    const unsolvedGroups = [];
+
+    state.groups.forEach((g, i) => {
+      if (!g.solved) {
+        unsolvedIdx.push(i);
+        unsolvedGroups.push(g);
+      }
+    });
+
+    const shuffled = shuffle(unsolvedGroups, seed);
+    unsolvedIdx.forEach((idx, i) => {
+      state.groups[idx] = shuffled[i];
+    });
+  }
+
   shuffleBtn.addEventListener("click", () => {
-    const seed = seedNumber(state.dateKey) + Date.now();
-    state.groups = shuffle(state.groups, seed);
+    shuffleUnsolvedInPlace();
     state.selectedIndex = null;
     saveState();
     render();
