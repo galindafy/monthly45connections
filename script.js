@@ -24,21 +24,32 @@ document.addEventListener("DOMContentLoaded", () => {
     "COFFEE DRINKS": ["latte","cappuccino","espresso","americano","mocha","macchiato","flat white","cortado","cold brew","frappuccino","iced coffee","irish coffee","affogato","ristretto","lungo","red eye","black coffee","drip coffee","pour over","french press","cafe au lait","doppio","breve","mocha latte","vanilla latte","caramel latte","hazelnut latte","iced latte","nitro cold brew","espresso con panna","dirty chai","pumpkin spice latte","turkish coffee","cuban coffee","vienna coffee","romano","freddo espresso","freddo cappuccino","iced americano","white mocha","marocchino","cafe bombon","shakerato","flat black","bulletproof coffee"]
   };
 
-  const GENERATED_ROOTS = [
-    "apple","break","light","star","moon","water","fire","sun","snow","wind",
-    "rain","night","day","dream","love","heart","hand","house","road","sky",
-    "sea","stone","gold","silver","blue","green","black","white","red","sound",
-    "time","ring","line","glass","bird","flower","tree","cloud","wave","spark",
-    "shadow","storm","field","river","garden","screen","signal","frame","trail","mark"
-  ];
-
-  const GENERATED_TAILS = [
-    "line","light","mark","song","road","path","field","house","garden","stone",
-    "glass","trail","watch","fall","rise","drift","shade","spark","beam","print",
-    "box","ring","screen","guide","turn","crest","bloom","bridge","table","panel",
-    "stand","view","cart","frame","gate","talk","signal","route","storm","room",
-    "shine","stream","mist","flare","drive"
-  ];
+  const PHRASE_BANKS = {
+  "WORDS WITH APPLE": [
+    "apple pie","apple juice","apple cider","apple watch","apple store",
+    "apple core","apple seed","apple tart","apple sauce","apple jam",
+    "apple peel","apple orchard","apple crisp","apple slice","apple cake",
+    "apple skin","apple pulp","apple snack","apple bite","apple tree"
+  ],
+  "WORDS WITH BREAK": [
+    "break down","break up","break in","break out","break even",
+    "break free","break away","break point","break news","break habit",
+    "break silence","break code","break lock","break record","break chain",
+    "break rank","break stride","break time","break line","break rule"
+  ],
+  "WORDS WITH LIGHT": [
+    "light bulb","light switch","light year","light house","light show",
+    "light rail","light beam","light post","light box","light meter",
+    "light ring","light source","light shade","light touch","light line",
+    "light path","light table","light wave","light signal","light screen"
+  ],
+  "WORDS WITH MOON": [
+    "moonlight","moonbeam","moonstone","moonwalk","moonshine",
+    "moonrise","moonfall","moonshadow","moonglow","moon river",
+    "moon dust","moon rock","moon phase","moon roof","moon cake",
+    "moon jar","moon gate","moon garden","moon pool","moon flower"
+  ]
+};
 
   const board = document.getElementById("board");
   const mistakesEl = document.getElementById("mistakes");
