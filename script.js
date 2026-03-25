@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const SIZE = 45;
-  const STORAGE_KEY = "connections-45x45-working-v1";
+  const STORAGE_KEY = "connections-45x45-autogen-v1";
   const GROUP_COLORS = ["#f9df6d", "#a0c35a", "#b0c4ef", "#ba81c5"];
 
   const DIRECT_BANKS = {
@@ -57,6 +57,25 @@ document.addEventListener("DOMContentLoaded", () => {
     return normalizeSourceWord(word);
   }
 
+  function buildGeneratedBanks() {
+    const banks = {};
+    GENERATED_ROOTS.forEach((root, rootIndex) => {
+      const values = GENERATED_TAILS.map((tail, tailIndex) => {
+        if (tailIndex < 8 && rootIndex % 4 === 0) return `${root}${tail}`;
+        return `${root} ${tail}`;
+      });
+      banks[`WORDS WITH ${root.toUpperCase()}`] = values.slice(0, SIZE);
+    });
+    return banks;
+  }
+
+  function buildCategoryPool() {
+    return {
+      ...DIRECT_BANKS,
+      ...buildGeneratedBanks()
+    };
+  }
+
   function weekStartDate() {
     const d = new Date();
     const local = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -106,27 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return copy;
   }
 
-  function buildGeneratedBanks() {
-    const banks = {};
-    GENERATED_ROOTS.forEach((root, rootIndex) => {
-      const values = GENERATED_TAILS.map((tail, tailIndex) => {
-        if (rootIndex % 4 === 0 && tailIndex < 8) {
-          return `${root}${tail}`;
-        }
-        return `${root} ${tail}`;
-      });
-      banks[`WORDS WITH ${root.toUpperCase()}`] = values.slice(0, SIZE);
-    });
-    return banks;
-  }
-
-  function buildCategoryPool() {
-    return {
-      ...DIRECT_BANKS,
-      ...buildGeneratedBanks()
-    };
-  }
-
   function buildFreshState() {
     const dateKey = weekKey();
     const seed = seedNumber(dateKey);
@@ -142,6 +140,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const categories = chosen.map(([name, words], idx) => {
       const cleaned = words.map(normalizeSourceWord);
       const unique = [...new Set(cleaned)];
+      if (unique.length < SIZE) {
+        throw new Error(`${name} needs at least ${SIZE} unique entries after cleanup.`);
+      }
       return {
         name,
         words: shuffle(unique, seed + idx).slice(0, SIZE)
@@ -149,8 +150,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const seen = new Set();
-    const tiles = [];
     const lookup = {};
+    const tiles = [];
 
     categories.forEach((cat, idx) => {
       cat.words.forEach(word => {
@@ -159,11 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
           w = `${w} [${cat.name}]`;
         }
         seen.add(w);
+        lookup[w] = { name: cat.name, color: GROUP_COLORS[idx % GROUP_COLORS.length] };
         tiles.push(w);
-        lookup[w] = {
-          name: cat.name,
-          color: GROUP_COLORS[idx % GROUP_COLORS.length]
-        };
       });
     });
 
@@ -182,13 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function validSaved(saved, fresh) {
-    if (!saved || saved.dateKey !== fresh.dateKey || !Array.isArray(saved.groups)) {
-      return false;
-    }
-
+    if (!saved || saved.dateKey !== fresh.dateKey || !Array.isArray(saved.groups)) return false;
     const words = saved.groups.flatMap(g => g.words || []);
     const validWords = Object.keys(fresh.lookup);
-
     if (words.length !== validWords.length) return false;
     if (new Set(words).size !== validWords.length) return false;
 
@@ -201,17 +195,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function loadState() {
     const fresh = buildFreshState();
-
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return fresh;
-
       const saved = JSON.parse(raw);
       if (!validSaved(saved, fresh)) {
         localStorage.removeItem(STORAGE_KEY);
         return fresh;
       }
-
       return {
         dateKey: fresh.dateKey,
         lookup: fresh.lookup,
@@ -241,10 +232,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return shown.length >= 3 ? `${firstTwo}, ... [${shown.length}]` : firstTwo;
   }
 
-  function findCategory(words) {
+  function categoryForWords(words) {
     const first = state.lookup[words[0]];
     if (!first) return null;
-
     for (const w of words) {
       const info = state.lookup[w];
       if (!info || info.name !== first.name) return null;
@@ -254,20 +244,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function mergeIntoSecond(a, b) {
     const mergedWords = [...state.groups[a].words, ...state.groups[b].words];
-    const category = findCategory(mergedWords);
+    const category = categoryForWords(mergedWords);
 
     if (!category) {
       state.mistakes += 1;
       return;
     }
 
-    const merged = {
-      words: mergedWords,
-      solved: false,
-      category: null,
-      color: null
-    };
-
+    const merged = { words: mergedWords, solved: false, category: null, color: null };
     let insertIndex = b;
 
     if (a > b) {
@@ -310,6 +294,24 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   }
 
+  function shuffleUnsolvedInPlace() {
+    const seed = seedNumber(state.dateKey) + (Date.now() % 1000);
+    const unsolvedIdx = [];
+    const unsolvedGroups = [];
+
+    state.groups.forEach((g, i) => {
+      if (!g.solved) {
+        unsolvedIdx.push(i);
+        unsolvedGroups.push(g);
+      }
+    });
+
+    const shuffled = shuffle(unsolvedGroups, seed);
+    unsolvedIdx.forEach((idx, i) => {
+      state.groups[idx] = shuffled[i];
+    });
+  }
+
   function render() {
     dateEl.textContent = formatLongDate(state.dateKey);
     mistakesEl.textContent = String(state.mistakes);
@@ -344,24 +346,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       board.appendChild(tile);
-    });
-  }
-
-  function shuffleUnsolvedInPlace() {
-    const seed = seedNumber(state.dateKey) + (Date.now() % 1000);
-    const unsolvedIdx = [];
-    const unsolvedGroups = [];
-
-    state.groups.forEach((g, i) => {
-      if (!g.solved) {
-        unsolvedIdx.push(i);
-        unsolvedGroups.push(g);
-      }
-    });
-
-    const shuffled = shuffle(unsolvedGroups, seed);
-    unsolvedIdx.forEach((idx, i) => {
-      state.groups[idx] = shuffled[i];
     });
   }
 
