@@ -1,550 +1,2918 @@
+
 (() => {
   const config = window.CONNECTIONS_CONFIG;
-  const solvedColours = ['var(--yellow)', 'var(--green)', 'var(--blue)', 'var(--purple)', 'var(--orange)', 'var(--rose)', 'var(--teal)'];
+  const GROUP_COLORS = ["#f9df6d", "#a0c35a", "#b0c4ef", "#ba81c5"];
+  const CATEGORY_BANK = {
+  "WORDS WITH MOON": [
+    "Moon beam",
+    "Moon bird",
+    "Moon board",
+    "Moon book",
+    "Moon box",
+    "Moon bridge",
+    "Moon call",
+    "Moon card",
+    "Moon case",
+    "Moon chain",
+    "Moon circle",
+    "Moon coat",
+    "Moon dance",
+    "Moon door",
+    "Moon dream",
+    "Moon drop",
+    "Moon fall",
+    "Moon field",
+    "Moon fire",
+    "Moon flower",
+    "Moon gate",
+    "Moon glass",
+    "Moon glow",
+    "Moon guard",
+    "Moon hall",
+    "Moon house",
+    "Moon jar",
+    "Moon key",
+    "Moon lake",
+    "Moon light",
+    "Moon line",
+    "Moon mark",
+    "Moon note",
+    "Moon path",
+    "Moon print",
+    "Moon rain",
+    "Moon road",
+    "Moon room",
+    "Moon rose",
+    "Moon shadow",
+    "Moon ship",
+    "Moon show",
+    "Moon song",
+    "Moon stone",
+    "Moon trail"
+  ],
+  "WORDS WITH SUN": [
+    "Sun beam",
+    "Sun bird",
+    "Sun board",
+    "Sun book",
+    "Sun box",
+    "Sun bridge",
+    "Sun call",
+    "Sun card",
+    "Sun case",
+    "Sun chain",
+    "Sun circle",
+    "Sun coat",
+    "Sun dance",
+    "Sun door",
+    "Sun dream",
+    "Sun drop",
+    "Sun fall",
+    "Sun field",
+    "Sun fire",
+    "Sun flower",
+    "Sun gate",
+    "Sun glass",
+    "Sun glow",
+    "Sun guard",
+    "Sun hall",
+    "Sun house",
+    "Sun jar",
+    "Sun key",
+    "Sun lake",
+    "Sun light",
+    "Sun line",
+    "Sun mark",
+    "Sun note",
+    "Sun path",
+    "Sun print",
+    "Sun rain",
+    "Sun road",
+    "Sun room",
+    "Sun rose",
+    "Sun shadow",
+    "Sun ship",
+    "Sun show",
+    "Sun song",
+    "Sun stone",
+    "Sun trail"
+  ],
+  "WORDS WITH STAR": [
+    "Star beam",
+    "Star bird",
+    "Star board",
+    "Star book",
+    "Star box",
+    "Star bridge",
+    "Star call",
+    "Star card",
+    "Star case",
+    "Star chain",
+    "Star circle",
+    "Star coat",
+    "Star dance",
+    "Star door",
+    "Star dream",
+    "Star drop",
+    "Star fall",
+    "Star field",
+    "Star fire",
+    "Star flower",
+    "Star gate",
+    "Star glass",
+    "Star glow",
+    "Star guard",
+    "Star hall",
+    "Star house",
+    "Star jar",
+    "Star key",
+    "Star lake",
+    "Star light",
+    "Star line",
+    "Star mark",
+    "Star note",
+    "Star path",
+    "Star print",
+    "Star rain",
+    "Star road",
+    "Star room",
+    "Star rose",
+    "Star shadow",
+    "Star ship",
+    "Star show",
+    "Star song",
+    "Star stone",
+    "Star trail"
+  ],
+  "WORDS WITH SNOW": [
+    "Snow beam",
+    "Snow bird",
+    "Snow board",
+    "Snow book",
+    "Snow box",
+    "Snow bridge",
+    "Snow call",
+    "Snow card",
+    "Snow case",
+    "Snow chain",
+    "Snow circle",
+    "Snow coat",
+    "Snow dance",
+    "Snow door",
+    "Snow dream",
+    "Snow drop",
+    "Snow fall",
+    "Snow field",
+    "Snow fire",
+    "Snow flower",
+    "Snow gate",
+    "Snow glass",
+    "Snow glow",
+    "Snow guard",
+    "Snow hall",
+    "Snow house",
+    "Snow jar",
+    "Snow key",
+    "Snow lake",
+    "Snow light",
+    "Snow line",
+    "Snow mark",
+    "Snow note",
+    "Snow path",
+    "Snow print",
+    "Snow rain",
+    "Snow road",
+    "Snow room",
+    "Snow rose",
+    "Snow shadow",
+    "Snow ship",
+    "Snow show",
+    "Snow song",
+    "Snow stone",
+    "Snow trail"
+  ],
+  "WORDS WITH RAIN": [
+    "Rain beam",
+    "Rain bird",
+    "Rain board",
+    "Rain book",
+    "Rain box",
+    "Rain bridge",
+    "Rain call",
+    "Rain card",
+    "Rain case",
+    "Rain chain",
+    "Rain circle",
+    "Rain coat",
+    "Rain dance",
+    "Rain door",
+    "Rain dream",
+    "Rain drop",
+    "Rain fall",
+    "Rain field",
+    "Rain fire",
+    "Rain flower",
+    "Rain gate",
+    "Rain glass",
+    "Rain glow",
+    "Rain guard",
+    "Rain hall",
+    "Rain house",
+    "Rain jar",
+    "Rain key",
+    "Rain lake",
+    "Rain light",
+    "Rain line",
+    "Rain mark",
+    "Rain note",
+    "Rain path",
+    "Rain print",
+    "Rain rain",
+    "Rain road",
+    "Rain room",
+    "Rain rose",
+    "Rain shadow",
+    "Rain ship",
+    "Rain show",
+    "Rain song",
+    "Rain stone",
+    "Rain trail"
+  ],
+  "WORDS WITH FIRE": [
+    "Fire beam",
+    "Fire bird",
+    "Fire board",
+    "Fire book",
+    "Fire box",
+    "Fire bridge",
+    "Fire call",
+    "Fire card",
+    "Fire case",
+    "Fire chain",
+    "Fire circle",
+    "Fire coat",
+    "Fire dance",
+    "Fire door",
+    "Fire dream",
+    "Fire drop",
+    "Fire fall",
+    "Fire field",
+    "Fire fire",
+    "Fire flower",
+    "Fire gate",
+    "Fire glass",
+    "Fire glow",
+    "Fire guard",
+    "Fire hall",
+    "Fire house",
+    "Fire jar",
+    "Fire key",
+    "Fire lake",
+    "Fire light",
+    "Fire line",
+    "Fire mark",
+    "Fire note",
+    "Fire path",
+    "Fire print",
+    "Fire rain",
+    "Fire road",
+    "Fire room",
+    "Fire rose",
+    "Fire shadow",
+    "Fire ship",
+    "Fire show",
+    "Fire song",
+    "Fire stone",
+    "Fire trail"
+  ],
+  "WORDS WITH WATER": [
+    "Water beam",
+    "Water bird",
+    "Water board",
+    "Water book",
+    "Water box",
+    "Water bridge",
+    "Water call",
+    "Water card",
+    "Water case",
+    "Water chain",
+    "Water circle",
+    "Water coat",
+    "Water dance",
+    "Water door",
+    "Water dream",
+    "Water drop",
+    "Water fall",
+    "Water field",
+    "Water fire",
+    "Water flower",
+    "Water gate",
+    "Water glass",
+    "Water glow",
+    "Water guard",
+    "Water hall",
+    "Water house",
+    "Water jar",
+    "Water key",
+    "Water lake",
+    "Water light",
+    "Water line",
+    "Water mark",
+    "Water note",
+    "Water path",
+    "Water print",
+    "Water rain",
+    "Water road",
+    "Water room",
+    "Water rose",
+    "Water shadow",
+    "Water ship",
+    "Water show",
+    "Water song",
+    "Water stone",
+    "Water trail"
+  ],
+  "WORDS WITH WIND": [
+    "Wind beam",
+    "Wind bird",
+    "Wind board",
+    "Wind book",
+    "Wind box",
+    "Wind bridge",
+    "Wind call",
+    "Wind card",
+    "Wind case",
+    "Wind chain",
+    "Wind circle",
+    "Wind coat",
+    "Wind dance",
+    "Wind door",
+    "Wind dream",
+    "Wind drop",
+    "Wind fall",
+    "Wind field",
+    "Wind fire",
+    "Wind flower",
+    "Wind gate",
+    "Wind glass",
+    "Wind glow",
+    "Wind guard",
+    "Wind hall",
+    "Wind house",
+    "Wind jar",
+    "Wind key",
+    "Wind lake",
+    "Wind light",
+    "Wind line",
+    "Wind mark",
+    "Wind note",
+    "Wind path",
+    "Wind print",
+    "Wind rain",
+    "Wind road",
+    "Wind room",
+    "Wind rose",
+    "Wind shadow",
+    "Wind ship",
+    "Wind show",
+    "Wind song",
+    "Wind stone",
+    "Wind trail"
+  ],
+  "WORDS WITH SKY": [
+    "Sky beam",
+    "Sky bird",
+    "Sky board",
+    "Sky book",
+    "Sky box",
+    "Sky bridge",
+    "Sky call",
+    "Sky card",
+    "Sky case",
+    "Sky chain",
+    "Sky circle",
+    "Sky coat",
+    "Sky dance",
+    "Sky door",
+    "Sky dream",
+    "Sky drop",
+    "Sky fall",
+    "Sky field",
+    "Sky fire",
+    "Sky flower",
+    "Sky gate",
+    "Sky glass",
+    "Sky glow",
+    "Sky guard",
+    "Sky hall",
+    "Sky house",
+    "Sky jar",
+    "Sky key",
+    "Sky lake",
+    "Sky light",
+    "Sky line",
+    "Sky mark",
+    "Sky note",
+    "Sky path",
+    "Sky print",
+    "Sky rain",
+    "Sky road",
+    "Sky room",
+    "Sky rose",
+    "Sky shadow",
+    "Sky ship",
+    "Sky show",
+    "Sky song",
+    "Sky stone",
+    "Sky trail"
+  ],
+  "WORDS WITH SEA": [
+    "Sea beam",
+    "Sea bird",
+    "Sea board",
+    "Sea book",
+    "Sea box",
+    "Sea bridge",
+    "Sea call",
+    "Sea card",
+    "Sea case",
+    "Sea chain",
+    "Sea circle",
+    "Sea coat",
+    "Sea dance",
+    "Sea door",
+    "Sea dream",
+    "Sea drop",
+    "Sea fall",
+    "Sea field",
+    "Sea fire",
+    "Sea flower",
+    "Sea gate",
+    "Sea glass",
+    "Sea glow",
+    "Sea guard",
+    "Sea hall",
+    "Sea house",
+    "Sea jar",
+    "Sea key",
+    "Sea lake",
+    "Sea light",
+    "Sea line",
+    "Sea mark",
+    "Sea note",
+    "Sea path",
+    "Sea print",
+    "Sea rain",
+    "Sea road",
+    "Sea room",
+    "Sea rose",
+    "Sea shadow",
+    "Sea ship",
+    "Sea show",
+    "Sea song",
+    "Sea stone",
+    "Sea trail"
+  ],
+  "WORDS WITH RIVER": [
+    "River beam",
+    "River bird",
+    "River board",
+    "River book",
+    "River box",
+    "River bridge",
+    "River call",
+    "River card",
+    "River case",
+    "River chain",
+    "River circle",
+    "River coat",
+    "River dance",
+    "River door",
+    "River dream",
+    "River drop",
+    "River fall",
+    "River field",
+    "River fire",
+    "River flower",
+    "River gate",
+    "River glass",
+    "River glow",
+    "River guard",
+    "River hall",
+    "River house",
+    "River jar",
+    "River key",
+    "River lake",
+    "River light",
+    "River line",
+    "River mark",
+    "River note",
+    "River path",
+    "River print",
+    "River rain",
+    "River road",
+    "River room",
+    "River rose",
+    "River shadow",
+    "River ship",
+    "River show",
+    "River song",
+    "River stone",
+    "River trail"
+  ],
+  "WORDS WITH LAKE": [
+    "Lake beam",
+    "Lake bird",
+    "Lake board",
+    "Lake book",
+    "Lake box",
+    "Lake bridge",
+    "Lake call",
+    "Lake card",
+    "Lake case",
+    "Lake chain",
+    "Lake circle",
+    "Lake coat",
+    "Lake dance",
+    "Lake door",
+    "Lake dream",
+    "Lake drop",
+    "Lake fall",
+    "Lake field",
+    "Lake fire",
+    "Lake flower",
+    "Lake gate",
+    "Lake glass",
+    "Lake glow",
+    "Lake guard",
+    "Lake hall",
+    "Lake house",
+    "Lake jar",
+    "Lake key",
+    "Lake lake",
+    "Lake light",
+    "Lake line",
+    "Lake mark",
+    "Lake note",
+    "Lake path",
+    "Lake print",
+    "Lake rain",
+    "Lake road",
+    "Lake room",
+    "Lake rose",
+    "Lake shadow",
+    "Lake ship",
+    "Lake show",
+    "Lake song",
+    "Lake stone",
+    "Lake trail"
+  ],
+  "WORDS WITH TREE": [
+    "Tree beam",
+    "Tree bird",
+    "Tree board",
+    "Tree book",
+    "Tree box",
+    "Tree bridge",
+    "Tree call",
+    "Tree card",
+    "Tree case",
+    "Tree chain",
+    "Tree circle",
+    "Tree coat",
+    "Tree dance",
+    "Tree door",
+    "Tree dream",
+    "Tree drop",
+    "Tree fall",
+    "Tree field",
+    "Tree fire",
+    "Tree flower",
+    "Tree gate",
+    "Tree glass",
+    "Tree glow",
+    "Tree guard",
+    "Tree hall",
+    "Tree house",
+    "Tree jar",
+    "Tree key",
+    "Tree lake",
+    "Tree light",
+    "Tree line",
+    "Tree mark",
+    "Tree note",
+    "Tree path",
+    "Tree print",
+    "Tree rain",
+    "Tree road",
+    "Tree room",
+    "Tree rose",
+    "Tree shadow",
+    "Tree ship",
+    "Tree show",
+    "Tree song",
+    "Tree stone",
+    "Tree trail"
+  ],
+  "WORDS WITH ROSE": [
+    "Rose beam",
+    "Rose bird",
+    "Rose board",
+    "Rose book",
+    "Rose box",
+    "Rose bridge",
+    "Rose call",
+    "Rose card",
+    "Rose case",
+    "Rose chain",
+    "Rose circle",
+    "Rose coat",
+    "Rose dance",
+    "Rose door",
+    "Rose dream",
+    "Rose drop",
+    "Rose fall",
+    "Rose field",
+    "Rose fire",
+    "Rose flower",
+    "Rose gate",
+    "Rose glass",
+    "Rose glow",
+    "Rose guard",
+    "Rose hall",
+    "Rose house",
+    "Rose jar",
+    "Rose key",
+    "Rose lake",
+    "Rose light",
+    "Rose line",
+    "Rose mark",
+    "Rose note",
+    "Rose path",
+    "Rose print",
+    "Rose rain",
+    "Rose road",
+    "Rose room",
+    "Rose rose",
+    "Rose shadow",
+    "Rose ship",
+    "Rose show",
+    "Rose song",
+    "Rose stone",
+    "Rose trail"
+  ],
+  "WORDS WITH GOLD": [
+    "Gold beam",
+    "Gold bird",
+    "Gold board",
+    "Gold book",
+    "Gold box",
+    "Gold bridge",
+    "Gold call",
+    "Gold card",
+    "Gold case",
+    "Gold chain",
+    "Gold circle",
+    "Gold coat",
+    "Gold dance",
+    "Gold door",
+    "Gold dream",
+    "Gold drop",
+    "Gold fall",
+    "Gold field",
+    "Gold fire",
+    "Gold flower",
+    "Gold gate",
+    "Gold glass",
+    "Gold glow",
+    "Gold guard",
+    "Gold hall",
+    "Gold house",
+    "Gold jar",
+    "Gold key",
+    "Gold lake",
+    "Gold light",
+    "Gold line",
+    "Gold mark",
+    "Gold note",
+    "Gold path",
+    "Gold print",
+    "Gold rain",
+    "Gold road",
+    "Gold room",
+    "Gold rose",
+    "Gold shadow",
+    "Gold ship",
+    "Gold show",
+    "Gold song",
+    "Gold stone",
+    "Gold trail"
+  ],
+  "WORDS WITH SILVER": [
+    "Silver beam",
+    "Silver bird",
+    "Silver board",
+    "Silver book",
+    "Silver box",
+    "Silver bridge",
+    "Silver call",
+    "Silver card",
+    "Silver case",
+    "Silver chain",
+    "Silver circle",
+    "Silver coat",
+    "Silver dance",
+    "Silver door",
+    "Silver dream",
+    "Silver drop",
+    "Silver fall",
+    "Silver field",
+    "Silver fire",
+    "Silver flower",
+    "Silver gate",
+    "Silver glass",
+    "Silver glow",
+    "Silver guard",
+    "Silver hall",
+    "Silver house",
+    "Silver jar",
+    "Silver key",
+    "Silver lake",
+    "Silver light",
+    "Silver line",
+    "Silver mark",
+    "Silver note",
+    "Silver path",
+    "Silver print",
+    "Silver rain",
+    "Silver road",
+    "Silver room",
+    "Silver rose",
+    "Silver shadow",
+    "Silver ship",
+    "Silver show",
+    "Silver song",
+    "Silver stone",
+    "Silver trail"
+  ],
+  "WORDS WITH BLUE": [
+    "Blue beam",
+    "Blue bird",
+    "Blue board",
+    "Blue book",
+    "Blue box",
+    "Blue bridge",
+    "Blue call",
+    "Blue card",
+    "Blue case",
+    "Blue chain",
+    "Blue circle",
+    "Blue coat",
+    "Blue dance",
+    "Blue door",
+    "Blue dream",
+    "Blue drop",
+    "Blue fall",
+    "Blue field",
+    "Blue fire",
+    "Blue flower",
+    "Blue gate",
+    "Blue glass",
+    "Blue glow",
+    "Blue guard",
+    "Blue hall",
+    "Blue house",
+    "Blue jar",
+    "Blue key",
+    "Blue lake",
+    "Blue light",
+    "Blue line",
+    "Blue mark",
+    "Blue note",
+    "Blue path",
+    "Blue print",
+    "Blue rain",
+    "Blue road",
+    "Blue room",
+    "Blue rose",
+    "Blue shadow",
+    "Blue ship",
+    "Blue show",
+    "Blue song",
+    "Blue stone",
+    "Blue trail"
+  ],
+  "WORDS WITH GREEN": [
+    "Green beam",
+    "Green bird",
+    "Green board",
+    "Green book",
+    "Green box",
+    "Green bridge",
+    "Green call",
+    "Green card",
+    "Green case",
+    "Green chain",
+    "Green circle",
+    "Green coat",
+    "Green dance",
+    "Green door",
+    "Green dream",
+    "Green drop",
+    "Green fall",
+    "Green field",
+    "Green fire",
+    "Green flower",
+    "Green gate",
+    "Green glass",
+    "Green glow",
+    "Green guard",
+    "Green hall",
+    "Green house",
+    "Green jar",
+    "Green key",
+    "Green lake",
+    "Green light",
+    "Green line",
+    "Green mark",
+    "Green note",
+    "Green path",
+    "Green print",
+    "Green rain",
+    "Green road",
+    "Green room",
+    "Green rose",
+    "Green shadow",
+    "Green ship",
+    "Green show",
+    "Green song",
+    "Green stone",
+    "Green trail"
+  ],
+  "WORDS WITH BLACK": [
+    "Black beam",
+    "Black bird",
+    "Black board",
+    "Black book",
+    "Black box",
+    "Black bridge",
+    "Black call",
+    "Black card",
+    "Black case",
+    "Black chain",
+    "Black circle",
+    "Black coat",
+    "Black dance",
+    "Black door",
+    "Black dream",
+    "Black drop",
+    "Black fall",
+    "Black field",
+    "Black fire",
+    "Black flower",
+    "Black gate",
+    "Black glass",
+    "Black glow",
+    "Black guard",
+    "Black hall",
+    "Black house",
+    "Black jar",
+    "Black key",
+    "Black lake",
+    "Black light",
+    "Black line",
+    "Black mark",
+    "Black note",
+    "Black path",
+    "Black print",
+    "Black rain",
+    "Black road",
+    "Black room",
+    "Black rose",
+    "Black shadow",
+    "Black ship",
+    "Black show",
+    "Black song",
+    "Black stone",
+    "Black trail"
+  ],
+  "WORDS WITH WHITE": [
+    "White beam",
+    "White bird",
+    "White board",
+    "White book",
+    "White box",
+    "White bridge",
+    "White call",
+    "White card",
+    "White case",
+    "White chain",
+    "White circle",
+    "White coat",
+    "White dance",
+    "White door",
+    "White dream",
+    "White drop",
+    "White fall",
+    "White field",
+    "White fire",
+    "White flower",
+    "White gate",
+    "White glass",
+    "White glow",
+    "White guard",
+    "White hall",
+    "White house",
+    "White jar",
+    "White key",
+    "White lake",
+    "White light",
+    "White line",
+    "White mark",
+    "White note",
+    "White path",
+    "White print",
+    "White rain",
+    "White road",
+    "White room",
+    "White rose",
+    "White shadow",
+    "White ship",
+    "White show",
+    "White song",
+    "White stone",
+    "White trail"
+  ],
+  "WORDS WITH NIGHT": [
+    "Night beam",
+    "Night bird",
+    "Night board",
+    "Night book",
+    "Night box",
+    "Night bridge",
+    "Night call",
+    "Night card",
+    "Night case",
+    "Night chain",
+    "Night circle",
+    "Night coat",
+    "Night dance",
+    "Night door",
+    "Night dream",
+    "Night drop",
+    "Night fall",
+    "Night field",
+    "Night fire",
+    "Night flower",
+    "Night gate",
+    "Night glass",
+    "Night glow",
+    "Night guard",
+    "Night hall",
+    "Night house",
+    "Night jar",
+    "Night key",
+    "Night lake",
+    "Night light",
+    "Night line",
+    "Night mark",
+    "Night note",
+    "Night path",
+    "Night print",
+    "Night rain",
+    "Night road",
+    "Night room",
+    "Night rose",
+    "Night shadow",
+    "Night ship",
+    "Night show",
+    "Night song",
+    "Night stone",
+    "Night trail"
+  ],
+  "WORDS WITH DAY": [
+    "Day beam",
+    "Day bird",
+    "Day board",
+    "Day book",
+    "Day box",
+    "Day bridge",
+    "Day call",
+    "Day card",
+    "Day case",
+    "Day chain",
+    "Day circle",
+    "Day coat",
+    "Day dance",
+    "Day door",
+    "Day dream",
+    "Day drop",
+    "Day fall",
+    "Day field",
+    "Day fire",
+    "Day flower",
+    "Day gate",
+    "Day glass",
+    "Day glow",
+    "Day guard",
+    "Day hall",
+    "Day house",
+    "Day jar",
+    "Day key",
+    "Day lake",
+    "Day light",
+    "Day line",
+    "Day mark",
+    "Day note",
+    "Day path",
+    "Day print",
+    "Day rain",
+    "Day road",
+    "Day room",
+    "Day rose",
+    "Day shadow",
+    "Day ship",
+    "Day show",
+    "Day song",
+    "Day stone",
+    "Day trail"
+  ],
+  "WORDS WITH DREAM": [
+    "Dream beam",
+    "Dream bird",
+    "Dream board",
+    "Dream book",
+    "Dream box",
+    "Dream bridge",
+    "Dream call",
+    "Dream card",
+    "Dream case",
+    "Dream chain",
+    "Dream circle",
+    "Dream coat",
+    "Dream dance",
+    "Dream door",
+    "Dream dream",
+    "Dream drop",
+    "Dream fall",
+    "Dream field",
+    "Dream fire",
+    "Dream flower",
+    "Dream gate",
+    "Dream glass",
+    "Dream glow",
+    "Dream guard",
+    "Dream hall",
+    "Dream house",
+    "Dream jar",
+    "Dream key",
+    "Dream lake",
+    "Dream light",
+    "Dream line",
+    "Dream mark",
+    "Dream note",
+    "Dream path",
+    "Dream print",
+    "Dream rain",
+    "Dream road",
+    "Dream room",
+    "Dream rose",
+    "Dream shadow",
+    "Dream ship",
+    "Dream show",
+    "Dream song",
+    "Dream stone",
+    "Dream trail"
+  ],
+  "WORDS WITH HEART": [
+    "Heart beam",
+    "Heart bird",
+    "Heart board",
+    "Heart book",
+    "Heart box",
+    "Heart bridge",
+    "Heart call",
+    "Heart card",
+    "Heart case",
+    "Heart chain",
+    "Heart circle",
+    "Heart coat",
+    "Heart dance",
+    "Heart door",
+    "Heart dream",
+    "Heart drop",
+    "Heart fall",
+    "Heart field",
+    "Heart fire",
+    "Heart flower",
+    "Heart gate",
+    "Heart glass",
+    "Heart glow",
+    "Heart guard",
+    "Heart hall",
+    "Heart house",
+    "Heart jar",
+    "Heart key",
+    "Heart lake",
+    "Heart light",
+    "Heart line",
+    "Heart mark",
+    "Heart note",
+    "Heart path",
+    "Heart print",
+    "Heart rain",
+    "Heart road",
+    "Heart room",
+    "Heart rose",
+    "Heart shadow",
+    "Heart ship",
+    "Heart show",
+    "Heart song",
+    "Heart stone",
+    "Heart trail"
+  ],
+  "WORDS WITH LOVE": [
+    "Love beam",
+    "Love bird",
+    "Love board",
+    "Love book",
+    "Love box",
+    "Love bridge",
+    "Love call",
+    "Love card",
+    "Love case",
+    "Love chain",
+    "Love circle",
+    "Love coat",
+    "Love dance",
+    "Love door",
+    "Love dream",
+    "Love drop",
+    "Love fall",
+    "Love field",
+    "Love fire",
+    "Love flower",
+    "Love gate",
+    "Love glass",
+    "Love glow",
+    "Love guard",
+    "Love hall",
+    "Love house",
+    "Love jar",
+    "Love key",
+    "Love lake",
+    "Love light",
+    "Love line",
+    "Love mark",
+    "Love note",
+    "Love path",
+    "Love print",
+    "Love rain",
+    "Love road",
+    "Love room",
+    "Love rose",
+    "Love shadow",
+    "Love ship",
+    "Love show",
+    "Love song",
+    "Love stone",
+    "Love trail"
+  ],
+  "WORDS WITH STONE": [
+    "Stone beam",
+    "Stone bird",
+    "Stone board",
+    "Stone book",
+    "Stone box",
+    "Stone bridge",
+    "Stone call",
+    "Stone card",
+    "Stone case",
+    "Stone chain",
+    "Stone circle",
+    "Stone coat",
+    "Stone dance",
+    "Stone door",
+    "Stone dream",
+    "Stone drop",
+    "Stone fall",
+    "Stone field",
+    "Stone fire",
+    "Stone flower",
+    "Stone gate",
+    "Stone glass",
+    "Stone glow",
+    "Stone guard",
+    "Stone hall",
+    "Stone house",
+    "Stone jar",
+    "Stone key",
+    "Stone lake",
+    "Stone light",
+    "Stone line",
+    "Stone mark",
+    "Stone note",
+    "Stone path",
+    "Stone print",
+    "Stone rain",
+    "Stone road",
+    "Stone room",
+    "Stone rose",
+    "Stone shadow",
+    "Stone ship",
+    "Stone show",
+    "Stone song",
+    "Stone stone",
+    "Stone trail"
+  ],
+  "WORDS WITH GLASS": [
+    "Glass beam",
+    "Glass bird",
+    "Glass board",
+    "Glass book",
+    "Glass box",
+    "Glass bridge",
+    "Glass call",
+    "Glass card",
+    "Glass case",
+    "Glass chain",
+    "Glass circle",
+    "Glass coat",
+    "Glass dance",
+    "Glass door",
+    "Glass dream",
+    "Glass drop",
+    "Glass fall",
+    "Glass field",
+    "Glass fire",
+    "Glass flower",
+    "Glass gate",
+    "Glass glass",
+    "Glass glow",
+    "Glass guard",
+    "Glass hall",
+    "Glass house",
+    "Glass jar",
+    "Glass key",
+    "Glass lake",
+    "Glass light",
+    "Glass line",
+    "Glass mark",
+    "Glass note",
+    "Glass path",
+    "Glass print",
+    "Glass rain",
+    "Glass road",
+    "Glass room",
+    "Glass rose",
+    "Glass shadow",
+    "Glass ship",
+    "Glass show",
+    "Glass song",
+    "Glass stone",
+    "Glass trail"
+  ],
+  "WORDS WITH PAPER": [
+    "Paper beam",
+    "Paper bird",
+    "Paper board",
+    "Paper book",
+    "Paper box",
+    "Paper bridge",
+    "Paper call",
+    "Paper card",
+    "Paper case",
+    "Paper chain",
+    "Paper circle",
+    "Paper coat",
+    "Paper dance",
+    "Paper door",
+    "Paper dream",
+    "Paper drop",
+    "Paper fall",
+    "Paper field",
+    "Paper fire",
+    "Paper flower",
+    "Paper gate",
+    "Paper glass",
+    "Paper glow",
+    "Paper guard",
+    "Paper hall",
+    "Paper house",
+    "Paper jar",
+    "Paper key",
+    "Paper lake",
+    "Paper light",
+    "Paper line",
+    "Paper mark",
+    "Paper note",
+    "Paper path",
+    "Paper print",
+    "Paper rain",
+    "Paper road",
+    "Paper room",
+    "Paper rose",
+    "Paper shadow",
+    "Paper ship",
+    "Paper show",
+    "Paper song",
+    "Paper stone",
+    "Paper trail"
+  ],
+  "WORDS WITH BOOK": [
+    "Book beam",
+    "Book bird",
+    "Book board",
+    "Book book",
+    "Book box",
+    "Book bridge",
+    "Book call",
+    "Book card",
+    "Book case",
+    "Book chain",
+    "Book circle",
+    "Book coat",
+    "Book dance",
+    "Book door",
+    "Book dream",
+    "Book drop",
+    "Book fall",
+    "Book field",
+    "Book fire",
+    "Book flower",
+    "Book gate",
+    "Book glass",
+    "Book glow",
+    "Book guard",
+    "Book hall",
+    "Book house",
+    "Book jar",
+    "Book key",
+    "Book lake",
+    "Book light",
+    "Book line",
+    "Book mark",
+    "Book note",
+    "Book path",
+    "Book print",
+    "Book rain",
+    "Book road",
+    "Book room",
+    "Book rose",
+    "Book shadow",
+    "Book ship",
+    "Book show",
+    "Book song",
+    "Book stone",
+    "Book trail"
+  ],
+  "WORDS WITH GAME": [
+    "Game beam",
+    "Game bird",
+    "Game board",
+    "Game book",
+    "Game box",
+    "Game bridge",
+    "Game call",
+    "Game card",
+    "Game case",
+    "Game chain",
+    "Game circle",
+    "Game coat",
+    "Game dance",
+    "Game door",
+    "Game dream",
+    "Game drop",
+    "Game fall",
+    "Game field",
+    "Game fire",
+    "Game flower",
+    "Game gate",
+    "Game glass",
+    "Game glow",
+    "Game guard",
+    "Game hall",
+    "Game house",
+    "Game jar",
+    "Game key",
+    "Game lake",
+    "Game light",
+    "Game line",
+    "Game mark",
+    "Game note",
+    "Game path",
+    "Game print",
+    "Game rain",
+    "Game road",
+    "Game room",
+    "Game rose",
+    "Game shadow",
+    "Game ship",
+    "Game show",
+    "Game song",
+    "Game stone",
+    "Game trail"
+  ],
+  "WORDS WITH POWER": [
+    "Power beam",
+    "Power bird",
+    "Power board",
+    "Power book",
+    "Power box",
+    "Power bridge",
+    "Power call",
+    "Power card",
+    "Power case",
+    "Power chain",
+    "Power circle",
+    "Power coat",
+    "Power dance",
+    "Power door",
+    "Power dream",
+    "Power drop",
+    "Power fall",
+    "Power field",
+    "Power fire",
+    "Power flower",
+    "Power gate",
+    "Power glass",
+    "Power glow",
+    "Power guard",
+    "Power hall",
+    "Power house",
+    "Power jar",
+    "Power key",
+    "Power lake",
+    "Power light",
+    "Power line",
+    "Power mark",
+    "Power note",
+    "Power path",
+    "Power print",
+    "Power rain",
+    "Power road",
+    "Power room",
+    "Power rose",
+    "Power shadow",
+    "Power ship",
+    "Power show",
+    "Power song",
+    "Power stone",
+    "Power trail"
+  ],
+  "WORDS WITH TIME": [
+    "Time beam",
+    "Time bird",
+    "Time board",
+    "Time book",
+    "Time box",
+    "Time bridge",
+    "Time call",
+    "Time card",
+    "Time case",
+    "Time chain",
+    "Time circle",
+    "Time coat",
+    "Time dance",
+    "Time door",
+    "Time dream",
+    "Time drop",
+    "Time fall",
+    "Time field",
+    "Time fire",
+    "Time flower",
+    "Time gate",
+    "Time glass",
+    "Time glow",
+    "Time guard",
+    "Time hall",
+    "Time house",
+    "Time jar",
+    "Time key",
+    "Time lake",
+    "Time light",
+    "Time line",
+    "Time mark",
+    "Time note",
+    "Time path",
+    "Time print",
+    "Time rain",
+    "Time road",
+    "Time room",
+    "Time rose",
+    "Time shadow",
+    "Time ship",
+    "Time show",
+    "Time song",
+    "Time stone",
+    "Time trail"
+  ],
+  "WORDS WITH ROAD": [
+    "Road beam",
+    "Road bird",
+    "Road board",
+    "Road book",
+    "Road box",
+    "Road bridge",
+    "Road call",
+    "Road card",
+    "Road case",
+    "Road chain",
+    "Road circle",
+    "Road coat",
+    "Road dance",
+    "Road door",
+    "Road dream",
+    "Road drop",
+    "Road fall",
+    "Road field",
+    "Road fire",
+    "Road flower",
+    "Road gate",
+    "Road glass",
+    "Road glow",
+    "Road guard",
+    "Road hall",
+    "Road house",
+    "Road jar",
+    "Road key",
+    "Road lake",
+    "Road light",
+    "Road line",
+    "Road mark",
+    "Road note",
+    "Road path",
+    "Road print",
+    "Road rain",
+    "Road road",
+    "Road room",
+    "Road rose",
+    "Road shadow",
+    "Road ship",
+    "Road show",
+    "Road song",
+    "Road stone",
+    "Road trail"
+  ],
+  "WORDS WITH HOUSE": [
+    "House beam",
+    "House bird",
+    "House board",
+    "House book",
+    "House box",
+    "House bridge",
+    "House call",
+    "House card",
+    "House case",
+    "House chain",
+    "House circle",
+    "House coat",
+    "House dance",
+    "House door",
+    "House dream",
+    "House drop",
+    "House fall",
+    "House field",
+    "House fire",
+    "House flower",
+    "House gate",
+    "House glass",
+    "House glow",
+    "House guard",
+    "House hall",
+    "House house",
+    "House jar",
+    "House key",
+    "House lake",
+    "House light",
+    "House line",
+    "House mark",
+    "House note",
+    "House path",
+    "House print",
+    "House rain",
+    "House road",
+    "House room",
+    "House rose",
+    "House shadow",
+    "House ship",
+    "House show",
+    "House song",
+    "House stone",
+    "House trail"
+  ],
+  "WORDS WITH SHOP": [
+    "Shop beam",
+    "Shop bird",
+    "Shop board",
+    "Shop book",
+    "Shop box",
+    "Shop bridge",
+    "Shop call",
+    "Shop card",
+    "Shop case",
+    "Shop chain",
+    "Shop circle",
+    "Shop coat",
+    "Shop dance",
+    "Shop door",
+    "Shop dream",
+    "Shop drop",
+    "Shop fall",
+    "Shop field",
+    "Shop fire",
+    "Shop flower",
+    "Shop gate",
+    "Shop glass",
+    "Shop glow",
+    "Shop guard",
+    "Shop hall",
+    "Shop house",
+    "Shop jar",
+    "Shop key",
+    "Shop lake",
+    "Shop light",
+    "Shop line",
+    "Shop mark",
+    "Shop note",
+    "Shop path",
+    "Shop print",
+    "Shop rain",
+    "Shop road",
+    "Shop room",
+    "Shop rose",
+    "Shop shadow",
+    "Shop ship",
+    "Shop show",
+    "Shop song",
+    "Shop stone",
+    "Shop trail"
+  ],
+  "WORDS WITH LINE": [
+    "Line beam",
+    "Line bird",
+    "Line board",
+    "Line book",
+    "Line box",
+    "Line bridge",
+    "Line call",
+    "Line card",
+    "Line case",
+    "Line chain",
+    "Line circle",
+    "Line coat",
+    "Line dance",
+    "Line door",
+    "Line dream",
+    "Line drop",
+    "Line fall",
+    "Line field",
+    "Line fire",
+    "Line flower",
+    "Line gate",
+    "Line glass",
+    "Line glow",
+    "Line guard",
+    "Line hall",
+    "Line house",
+    "Line jar",
+    "Line key",
+    "Line lake",
+    "Line light",
+    "Line line",
+    "Line mark",
+    "Line note",
+    "Line path",
+    "Line print",
+    "Line rain",
+    "Line road",
+    "Line room",
+    "Line rose",
+    "Line shadow",
+    "Line ship",
+    "Line show",
+    "Line song",
+    "Line stone",
+    "Line trail"
+  ],
+  "WORDS WITH BOARD": [
+    "Board beam",
+    "Board bird",
+    "Board board",
+    "Board book",
+    "Board box",
+    "Board bridge",
+    "Board call",
+    "Board card",
+    "Board case",
+    "Board chain",
+    "Board circle",
+    "Board coat",
+    "Board dance",
+    "Board door",
+    "Board dream",
+    "Board drop",
+    "Board fall",
+    "Board field",
+    "Board fire",
+    "Board flower",
+    "Board gate",
+    "Board glass",
+    "Board glow",
+    "Board guard",
+    "Board hall",
+    "Board house",
+    "Board jar",
+    "Board key",
+    "Board lake",
+    "Board light",
+    "Board line",
+    "Board mark",
+    "Board note",
+    "Board path",
+    "Board print",
+    "Board rain",
+    "Board road",
+    "Board room",
+    "Board rose",
+    "Board shadow",
+    "Board ship",
+    "Board show",
+    "Board song",
+    "Board stone",
+    "Board trail"
+  ],
+  "WORDS WITH BOX": [
+    "Box beam",
+    "Box bird",
+    "Box board",
+    "Box book",
+    "Box box",
+    "Box bridge",
+    "Box call",
+    "Box card",
+    "Box case",
+    "Box chain",
+    "Box circle",
+    "Box coat",
+    "Box dance",
+    "Box door",
+    "Box dream",
+    "Box drop",
+    "Box fall",
+    "Box field",
+    "Box fire",
+    "Box flower",
+    "Box gate",
+    "Box glass",
+    "Box glow",
+    "Box guard",
+    "Box hall",
+    "Box house",
+    "Box jar",
+    "Box key",
+    "Box lake",
+    "Box light",
+    "Box line",
+    "Box mark",
+    "Box note",
+    "Box path",
+    "Box print",
+    "Box rain",
+    "Box road",
+    "Box room",
+    "Box rose",
+    "Box shadow",
+    "Box ship",
+    "Box show",
+    "Box song",
+    "Box stone",
+    "Box trail"
+  ],
+  "WORDS WITH HAND": [
+    "Hand beam",
+    "Hand bird",
+    "Hand board",
+    "Hand book",
+    "Hand box",
+    "Hand bridge",
+    "Hand call",
+    "Hand card",
+    "Hand case",
+    "Hand chain",
+    "Hand circle",
+    "Hand coat",
+    "Hand dance",
+    "Hand door",
+    "Hand dream",
+    "Hand drop",
+    "Hand fall",
+    "Hand field",
+    "Hand fire",
+    "Hand flower",
+    "Hand gate",
+    "Hand glass",
+    "Hand glow",
+    "Hand guard",
+    "Hand hall",
+    "Hand house",
+    "Hand jar",
+    "Hand key",
+    "Hand lake",
+    "Hand light",
+    "Hand line",
+    "Hand mark",
+    "Hand note",
+    "Hand path",
+    "Hand print",
+    "Hand rain",
+    "Hand road",
+    "Hand room",
+    "Hand rose",
+    "Hand shadow",
+    "Hand ship",
+    "Hand show",
+    "Hand song",
+    "Hand stone",
+    "Hand trail"
+  ],
+  "WORDS WITH HEAD": [
+    "Head beam",
+    "Head bird",
+    "Head board",
+    "Head book",
+    "Head box",
+    "Head bridge",
+    "Head call",
+    "Head card",
+    "Head case",
+    "Head chain",
+    "Head circle",
+    "Head coat",
+    "Head dance",
+    "Head door",
+    "Head dream",
+    "Head drop",
+    "Head fall",
+    "Head field",
+    "Head fire",
+    "Head flower",
+    "Head gate",
+    "Head glass",
+    "Head glow",
+    "Head guard",
+    "Head hall",
+    "Head house",
+    "Head jar",
+    "Head key",
+    "Head lake",
+    "Head light",
+    "Head line",
+    "Head mark",
+    "Head note",
+    "Head path",
+    "Head print",
+    "Head rain",
+    "Head road",
+    "Head room",
+    "Head rose",
+    "Head shadow",
+    "Head ship",
+    "Head show",
+    "Head song",
+    "Head stone",
+    "Head trail"
+  ],
+  "WORDS WITH FOOT": [
+    "Foot beam",
+    "Foot bird",
+    "Foot board",
+    "Foot book",
+    "Foot box",
+    "Foot bridge",
+    "Foot call",
+    "Foot card",
+    "Foot case",
+    "Foot chain",
+    "Foot circle",
+    "Foot coat",
+    "Foot dance",
+    "Foot door",
+    "Foot dream",
+    "Foot drop",
+    "Foot fall",
+    "Foot field",
+    "Foot fire",
+    "Foot flower",
+    "Foot gate",
+    "Foot glass",
+    "Foot glow",
+    "Foot guard",
+    "Foot hall",
+    "Foot house",
+    "Foot jar",
+    "Foot key",
+    "Foot lake",
+    "Foot light",
+    "Foot line",
+    "Foot mark",
+    "Foot note",
+    "Foot path",
+    "Foot print",
+    "Foot rain",
+    "Foot road",
+    "Foot room",
+    "Foot rose",
+    "Foot shadow",
+    "Foot ship",
+    "Foot show",
+    "Foot song",
+    "Foot stone",
+    "Foot trail"
+  ],
+  "WORDS WITH NOTE": [
+    "Note beam",
+    "Note bird",
+    "Note board",
+    "Note book",
+    "Note box",
+    "Note bridge",
+    "Note call",
+    "Note card",
+    "Note case",
+    "Note chain",
+    "Note circle",
+    "Note coat",
+    "Note dance",
+    "Note door",
+    "Note dream",
+    "Note drop",
+    "Note fall",
+    "Note field",
+    "Note fire",
+    "Note flower",
+    "Note gate",
+    "Note glass",
+    "Note glow",
+    "Note guard",
+    "Note hall",
+    "Note house",
+    "Note jar",
+    "Note key",
+    "Note lake",
+    "Note light",
+    "Note line",
+    "Note mark",
+    "Note note",
+    "Note path",
+    "Note print",
+    "Note rain",
+    "Note road",
+    "Note room",
+    "Note rose",
+    "Note shadow",
+    "Note ship",
+    "Note show",
+    "Note song",
+    "Note stone",
+    "Note trail"
+  ],
+  "WORDS WITH BIRD": [
+    "Bird beam",
+    "Bird bird",
+    "Bird board",
+    "Bird book",
+    "Bird box",
+    "Bird bridge",
+    "Bird call",
+    "Bird card",
+    "Bird case",
+    "Bird chain",
+    "Bird circle",
+    "Bird coat",
+    "Bird dance",
+    "Bird door",
+    "Bird dream",
+    "Bird drop",
+    "Bird fall",
+    "Bird field",
+    "Bird fire",
+    "Bird flower",
+    "Bird gate",
+    "Bird glass",
+    "Bird glow",
+    "Bird guard",
+    "Bird hall",
+    "Bird house",
+    "Bird jar",
+    "Bird key",
+    "Bird lake",
+    "Bird light",
+    "Bird line",
+    "Bird mark",
+    "Bird note",
+    "Bird path",
+    "Bird print",
+    "Bird rain",
+    "Bird road",
+    "Bird room",
+    "Bird rose",
+    "Bird shadow",
+    "Bird ship",
+    "Bird show",
+    "Bird song",
+    "Bird stone",
+    "Bird trail"
+  ],
+  "WORDS WITH TRAIN": [
+    "Train beam",
+    "Train bird",
+    "Train board",
+    "Train book",
+    "Train box",
+    "Train bridge",
+    "Train call",
+    "Train card",
+    "Train case",
+    "Train chain",
+    "Train circle",
+    "Train coat",
+    "Train dance",
+    "Train door",
+    "Train dream",
+    "Train drop",
+    "Train fall",
+    "Train field",
+    "Train fire",
+    "Train flower",
+    "Train gate",
+    "Train glass",
+    "Train glow",
+    "Train guard",
+    "Train hall",
+    "Train house",
+    "Train jar",
+    "Train key",
+    "Train lake",
+    "Train light",
+    "Train line",
+    "Train mark",
+    "Train note",
+    "Train path",
+    "Train print",
+    "Train rain",
+    "Train road",
+    "Train room",
+    "Train rose",
+    "Train shadow",
+    "Train ship",
+    "Train show",
+    "Train song",
+    "Train stone",
+    "Train trail"
+  ],
+  "WORDS WITH PHONE": [
+    "Phone beam",
+    "Phone bird",
+    "Phone board",
+    "Phone book",
+    "Phone box",
+    "Phone bridge",
+    "Phone call",
+    "Phone card",
+    "Phone case",
+    "Phone chain",
+    "Phone circle",
+    "Phone coat",
+    "Phone dance",
+    "Phone door",
+    "Phone dream",
+    "Phone drop",
+    "Phone fall",
+    "Phone field",
+    "Phone fire",
+    "Phone flower",
+    "Phone gate",
+    "Phone glass",
+    "Phone glow",
+    "Phone guard",
+    "Phone hall",
+    "Phone house",
+    "Phone jar",
+    "Phone key",
+    "Phone lake",
+    "Phone light",
+    "Phone line",
+    "Phone mark",
+    "Phone note",
+    "Phone path",
+    "Phone print",
+    "Phone rain",
+    "Phone road",
+    "Phone room",
+    "Phone rose",
+    "Phone shadow",
+    "Phone ship",
+    "Phone show",
+    "Phone song",
+    "Phone stone",
+    "Phone trail"
+  ],
+  "WORDS WITH HOME": [
+    "Home beam",
+    "Home bird",
+    "Home board",
+    "Home book",
+    "Home box",
+    "Home bridge",
+    "Home call",
+    "Home card",
+    "Home case",
+    "Home chain",
+    "Home circle",
+    "Home coat",
+    "Home dance",
+    "Home door",
+    "Home dream",
+    "Home drop",
+    "Home fall",
+    "Home field",
+    "Home fire",
+    "Home flower",
+    "Home gate",
+    "Home glass",
+    "Home glow",
+    "Home guard",
+    "Home hall",
+    "Home house",
+    "Home jar",
+    "Home key",
+    "Home lake",
+    "Home light",
+    "Home line",
+    "Home mark",
+    "Home note",
+    "Home path",
+    "Home print",
+    "Home rain",
+    "Home road",
+    "Home room",
+    "Home rose",
+    "Home shadow",
+    "Home ship",
+    "Home show",
+    "Home song",
+    "Home stone",
+    "Home trail"
+  ],
+  "WORDS WITH FILM": [
+    "Film beam",
+    "Film bird",
+    "Film board",
+    "Film book",
+    "Film box",
+    "Film bridge",
+    "Film call",
+    "Film card",
+    "Film case",
+    "Film chain",
+    "Film circle",
+    "Film coat",
+    "Film dance",
+    "Film door",
+    "Film dream",
+    "Film drop",
+    "Film fall",
+    "Film field",
+    "Film fire",
+    "Film flower",
+    "Film gate",
+    "Film glass",
+    "Film glow",
+    "Film guard",
+    "Film hall",
+    "Film house",
+    "Film jar",
+    "Film key",
+    "Film lake",
+    "Film light",
+    "Film line",
+    "Film mark",
+    "Film note",
+    "Film path",
+    "Film print",
+    "Film rain",
+    "Film road",
+    "Film room",
+    "Film rose",
+    "Film shadow",
+    "Film ship",
+    "Film show",
+    "Film song",
+    "Film stone",
+    "Film trail"
+  ],
+  "WORDS WITH MUSIC": [
+    "Music beam",
+    "Music bird",
+    "Music board",
+    "Music book",
+    "Music box",
+    "Music bridge",
+    "Music call",
+    "Music card",
+    "Music case",
+    "Music chain",
+    "Music circle",
+    "Music coat",
+    "Music dance",
+    "Music door",
+    "Music dream",
+    "Music drop",
+    "Music fall",
+    "Music field",
+    "Music fire",
+    "Music flower",
+    "Music gate",
+    "Music glass",
+    "Music glow",
+    "Music guard",
+    "Music hall",
+    "Music house",
+    "Music jar",
+    "Music key",
+    "Music lake",
+    "Music light",
+    "Music line",
+    "Music mark",
+    "Music note",
+    "Music path",
+    "Music print",
+    "Music rain",
+    "Music road",
+    "Music room",
+    "Music rose",
+    "Music shadow",
+    "Music ship",
+    "Music show",
+    "Music song",
+    "Music stone",
+    "Music trail"
+  ],
+  "WORDS WITH ICE": [
+    "Ice beam",
+    "Ice bird",
+    "Ice board",
+    "Ice book",
+    "Ice box",
+    "Ice bridge",
+    "Ice call",
+    "Ice card",
+    "Ice case",
+    "Ice chain",
+    "Ice circle",
+    "Ice coat",
+    "Ice dance",
+    "Ice door",
+    "Ice dream",
+    "Ice drop",
+    "Ice fall",
+    "Ice field",
+    "Ice fire",
+    "Ice flower",
+    "Ice gate",
+    "Ice glass",
+    "Ice glow",
+    "Ice guard",
+    "Ice hall",
+    "Ice house",
+    "Ice jar",
+    "Ice key",
+    "Ice lake",
+    "Ice light",
+    "Ice line",
+    "Ice mark",
+    "Ice note",
+    "Ice path",
+    "Ice print",
+    "Ice rain",
+    "Ice road",
+    "Ice room",
+    "Ice rose",
+    "Ice shadow",
+    "Ice ship",
+    "Ice show",
+    "Ice song",
+    "Ice stone",
+    "Ice trail"
+  ],
+  "WORDS WITH CLOUD": [
+    "Cloud beam",
+    "Cloud bird",
+    "Cloud board",
+    "Cloud book",
+    "Cloud box",
+    "Cloud bridge",
+    "Cloud call",
+    "Cloud card",
+    "Cloud case",
+    "Cloud chain",
+    "Cloud circle",
+    "Cloud coat",
+    "Cloud dance",
+    "Cloud door",
+    "Cloud dream",
+    "Cloud drop",
+    "Cloud fall",
+    "Cloud field",
+    "Cloud fire",
+    "Cloud flower",
+    "Cloud gate",
+    "Cloud glass",
+    "Cloud glow",
+    "Cloud guard",
+    "Cloud hall",
+    "Cloud house",
+    "Cloud jar",
+    "Cloud key",
+    "Cloud lake",
+    "Cloud light",
+    "Cloud line",
+    "Cloud mark",
+    "Cloud note",
+    "Cloud path",
+    "Cloud print",
+    "Cloud rain",
+    "Cloud road",
+    "Cloud room",
+    "Cloud rose",
+    "Cloud shadow",
+    "Cloud ship",
+    "Cloud show",
+    "Cloud song",
+    "Cloud stone",
+    "Cloud trail"
+  ],
+  "WORDS WITH STORM": [
+    "Storm beam",
+    "Storm bird",
+    "Storm board",
+    "Storm book",
+    "Storm box",
+    "Storm bridge",
+    "Storm call",
+    "Storm card",
+    "Storm case",
+    "Storm chain",
+    "Storm circle",
+    "Storm coat",
+    "Storm dance",
+    "Storm door",
+    "Storm dream",
+    "Storm drop",
+    "Storm fall",
+    "Storm field",
+    "Storm fire",
+    "Storm flower",
+    "Storm gate",
+    "Storm glass",
+    "Storm glow",
+    "Storm guard",
+    "Storm hall",
+    "Storm house",
+    "Storm jar",
+    "Storm key",
+    "Storm lake",
+    "Storm light",
+    "Storm line",
+    "Storm mark",
+    "Storm note",
+    "Storm path",
+    "Storm print",
+    "Storm rain",
+    "Storm road",
+    "Storm room",
+    "Storm rose",
+    "Storm shadow",
+    "Storm ship",
+    "Storm show",
+    "Storm song",
+    "Storm stone",
+    "Storm trail"
+  ],
+  "WORDS WITH SHADOW": [
+    "Shadow beam",
+    "Shadow bird",
+    "Shadow board",
+    "Shadow book",
+    "Shadow box",
+    "Shadow bridge",
+    "Shadow call",
+    "Shadow card",
+    "Shadow case",
+    "Shadow chain",
+    "Shadow circle",
+    "Shadow coat",
+    "Shadow dance",
+    "Shadow door",
+    "Shadow dream",
+    "Shadow drop",
+    "Shadow fall",
+    "Shadow field",
+    "Shadow fire",
+    "Shadow flower",
+    "Shadow gate",
+    "Shadow glass",
+    "Shadow glow",
+    "Shadow guard",
+    "Shadow hall",
+    "Shadow house",
+    "Shadow jar",
+    "Shadow key",
+    "Shadow lake",
+    "Shadow light",
+    "Shadow line",
+    "Shadow mark",
+    "Shadow note",
+    "Shadow path",
+    "Shadow print",
+    "Shadow rain",
+    "Shadow road",
+    "Shadow room",
+    "Shadow rose",
+    "Shadow shadow",
+    "Shadow ship",
+    "Shadow show",
+    "Shadow song",
+    "Shadow stone",
+    "Shadow trail"
+  ],
+  "WORDS WITH LIGHT": [
+    "Light beam",
+    "Light bird",
+    "Light board",
+    "Light book",
+    "Light box",
+    "Light bridge",
+    "Light call",
+    "Light card",
+    "Light case",
+    "Light chain",
+    "Light circle",
+    "Light coat",
+    "Light dance",
+    "Light door",
+    "Light dream",
+    "Light drop",
+    "Light fall",
+    "Light field",
+    "Light fire",
+    "Light flower",
+    "Light gate",
+    "Light glass",
+    "Light glow",
+    "Light guard",
+    "Light hall",
+    "Light house",
+    "Light jar",
+    "Light key",
+    "Light lake",
+    "Light light",
+    "Light line",
+    "Light mark",
+    "Light note",
+    "Light path",
+    "Light print",
+    "Light rain",
+    "Light road",
+    "Light room",
+    "Light rose",
+    "Light shadow",
+    "Light ship",
+    "Light show",
+    "Light song",
+    "Light stone",
+    "Light trail"
+  ],
+  "WORDS WITH BREAK": [
+    "Break beam",
+    "Break bird",
+    "Break board",
+    "Break book",
+    "Break box",
+    "Break bridge",
+    "Break call",
+    "Break card",
+    "Break case",
+    "Break chain",
+    "Break circle",
+    "Break coat",
+    "Break dance",
+    "Break door",
+    "Break dream",
+    "Break drop",
+    "Break fall",
+    "Break field",
+    "Break fire",
+    "Break flower",
+    "Break gate",
+    "Break glass",
+    "Break glow",
+    "Break guard",
+    "Break hall",
+    "Break house",
+    "Break jar",
+    "Break key",
+    "Break lake",
+    "Break light",
+    "Break line",
+    "Break mark",
+    "Break note",
+    "Break path",
+    "Break print",
+    "Break rain",
+    "Break road",
+    "Break room",
+    "Break rose",
+    "Break shadow",
+    "Break ship",
+    "Break show",
+    "Break song",
+    "Break stone",
+    "Break trail"
+  ],
+  "WORDS WITH APPLE": [
+    "Apple beam",
+    "Apple bird",
+    "Apple board",
+    "Apple book",
+    "Apple box",
+    "Apple bridge",
+    "Apple call",
+    "Apple card",
+    "Apple case",
+    "Apple chain",
+    "Apple circle",
+    "Apple coat",
+    "Apple dance",
+    "Apple door",
+    "Apple dream",
+    "Apple drop",
+    "Apple fall",
+    "Apple field",
+    "Apple fire",
+    "Apple flower",
+    "Apple gate",
+    "Apple glass",
+    "Apple glow",
+    "Apple guard",
+    "Apple hall",
+    "Apple house",
+    "Apple jar",
+    "Apple key",
+    "Apple lake",
+    "Apple light",
+    "Apple line",
+    "Apple mark",
+    "Apple note",
+    "Apple path",
+    "Apple print",
+    "Apple rain",
+    "Apple road",
+    "Apple room",
+    "Apple rose",
+    "Apple shadow",
+    "Apple ship",
+    "Apple show",
+    "Apple song",
+    "Apple stone",
+    "Apple trail"
+  ]
+};
 
-  const categoryPool = [
-    ['Birds of prey', ['EAGLE', 'FALCON', 'HAWK', 'OWL']],
-    ['Planets', ['MERCURY', 'VENUS', 'MARS', 'SATURN']],
-    ['Gemstones', ['RUBY', 'OPAL', 'TOPAZ', 'JADE']],
-    ['Dog breeds', ['BEAGLE', 'POODLE', 'BOXER', 'CORGI']],
-    ['Tree types', ['MAPLE', 'CEDAR', 'BIRCH', 'SPRUCE']],
-    ['Kitchen tools', ['WHISK', 'LADLE', 'TONGS', 'GRATER']],
-    ['Board games', ['CHESS', 'CHECKERS', 'RISK', 'SCRABBLE']],
-    ['Musical instruments', ['VIOLIN', 'TRUMPET', 'FLUTE', 'CELLO']],
-    ['Sea creatures', ['OCTOPUS', 'LOBSTER', 'SEAL', 'TURTLE']],
-    ['Flowers', ['TULIP', 'DAISY', 'LILAC', 'POPPY']],
-    ['Canadian provinces', ['ALBERTA', 'ONTARIO', 'MANITOBA', 'QUEBEC']],
-    ['Winter gear', ['PARKA', 'MITTENS', 'SCARF', 'TOQUE']],
-    ['Math terms', ['ANGLE', 'RADIUS', 'VECTOR', 'FRACTION']],
-    ['Baking ingredients', ['FLOUR', 'YEAST', 'COCOA', 'BUTTER']],
-    ['Camping items', ['TENT', 'LANTERN', 'COOLER', 'SLEEPINGBAG']],
-    ['Weather words', ['BLIZZARD', 'DRIZZLE', 'FOG', 'THUNDER']],
-    ['Shoe types', ['SANDAL', 'LOAFER', 'SNEAKER', 'BOOT']],
-    ['Camera terms', ['LENS', 'SHUTTER', 'FLASH', 'TRIPOD']],
-    ['Office supplies', ['STAPLER', 'MARKER', 'BINDER', 'SCISSORS']],
-    ['Farm animals', ['DONKEY', 'GOOSE', 'LLAMA', 'PIG']],
-    ['Fruits', ['APPLE', 'BANANA', 'MANGO', 'PEACH']],
-    ['Vegetables', ['CARROT', 'CELERY', 'RADISH', 'TURNIP']],
-    ['Ice cream flavours', ['VANILLA', 'CHOCOLATE', 'PISTACHIO', 'STRAWBERRY']],
-    ['Coffee drinks', ['LATTE', 'MOCHA', 'ESPRESSO', 'CAPPUCCINO']],
-    ['Sports balls', ['BASEBALL', 'SOFTBALL', 'HANDBALL', 'DODGEBALL']],
-    ['Card games', ['POKER', 'BRIDGE', 'RUMMY', 'EUCHRE']],
-    ['Greek letters', ['ALPHA', 'BETA', 'DELTA', 'OMEGA']],
-    ['School subjects', ['BIOLOGY', 'HISTORY', 'CHEMISTRY', 'ALGEBRA']],
-    ['Art supplies', ['CANVAS', 'EASEL', 'PALETTE', 'CHARCOAL']],
-    ['Laundry terms', ['DETERGENT', 'BLEACH', 'SOFTENER', 'HAMPER']],
-    ['Bathroom items', ['MIRROR', 'TOWEL', 'SOAP', 'RAZOR']],
-    ['Space words', ['COMET', 'ASTEROID', 'NEBULA', 'GALAXY']],
-    ['Desserts', ['BROWNIE', 'CUPCAKE', 'CHEESECAKE', 'DONUT']],
-    ['Sandwiches', ['PANINI', 'REUBEN', 'SUB', 'WRAP']],
-    ['Common file types', ['PDF', 'DOCX', 'CSV', 'PNG']],
-    ['Phone app tabs', ['HOME', 'SEARCH', 'PROFILE', 'SETTINGS']],
-    ['Hair salon words', ['FRINGE', 'LAYER', 'BOB', 'PERM']],
-    ['Painting verbs', ['BRUSH', 'ROLL', 'PRIME', 'VARNISH']],
-    ['Types of pasta', ['PENNE', 'FUSILLI', 'RIGATONI', 'FARFALLE']],
-    ['Car parts', ['BUMPER', 'AXLE', 'MIRRORCAP', 'MUFFLER']],
-    ['Public transit words', ['TRANSFER', 'PLATFORM', 'TURNSTILE', 'TIMETABLE']],
-    ['Construction materials', ['BRICK', 'CEMENT', 'PLYWOOD', 'REBAR']],
-    ['Jewellery pieces', ['BROOCH', 'ANKLET', 'PENDANT', 'BANGLE']],
-    ['Hospital rooms or areas', ['WARD', 'CLINIC', 'LAB', 'PHARMACY']],
-    ['Tennis terms', ['SERVE', 'VOLLEY', 'LOB', 'DEUCE']],
-    ['Theatre jobs', ['ACTOR', 'DIRECTOR', 'USHER', 'STAGEHAND']],
-    ['Airport words', ['TERMINAL', 'GATE', 'RUNWAY', 'HANGAR']],
-    ['Ocean zones', ['REEF', 'LAGOON', 'TRENCH', 'ESTUARY']],
-    ['Common prefixes', ['PRE', 'SUB', 'ANTI', 'INTER']],
-    ['Common suffixes', ['MENT', 'TION', 'NESS', 'ABLE']],
-    ['Measurement tools', ['RULER', 'TAPE', 'CALIPER', 'COMPASS']],
-    ['Park features', ['BENCH', 'FOUNTAIN', 'PAVILION', 'GAZEBO']],
-    ['Room shapes', ['OVAL', 'SQUARE', 'ROUND', 'RECTANGLE']],
-    ['Time units', ['SECOND', 'MINUTE', 'HOUR', 'DECADE']],
-    ['Metal types', ['COPPER', 'NICKEL', 'TIN', 'ZINC']],
-    ['Rock genres', ['PUNK', 'GRUNGE', 'INDIE', 'METAL']],
-    ['Dance styles', ['BALLET', 'SALSA', 'TANGO', 'WALTZ']],
-    ['Tropical storms words', ['EYEWALL', 'GUST', 'SURGE', 'CYCLONE']],
-    ['Programming terms', ['LOOP', 'ARRAY', 'STRING', 'BOOLEAN']],
-    ['Web browser words', ['TAB', 'BOOKMARK', 'COOKIE', 'EXTENSION']],
-    ['Retail words', ['AISLE', 'COUPON', 'CHECKOUT', 'CLEARANCE']],
-    ['Classroom furniture', ['DESK', 'LECTERN', 'CUBBY', 'WHITEBOARD']],
-    ['Garden tasks', ['WEED', 'MULCH', 'PRUNE', 'WATER']],
-    ['Road features', ['SHOULDER', 'MEDIAN', 'RAMP', 'TOLLBOOTH']],
-    ['Camping cooking gear', ['SKILLET', 'BURNER', 'KETTLE', 'SPATULA']],
-    ['Sewing words', ['THIMBLE', 'BOBBIN', 'SEAM', 'HEM']],
-    ['Gym equipment', ['BARBELL', 'TREADMILL', 'KETTLEBELL', 'ROWER']],
-    ['Office verbs', ['FILE', 'PRINT', 'SCROLL', 'ATTACH']],
-    ['Wood shop tools', ['CHISEL', 'SANDER', 'LATHE', 'CLAMP']],
-    ['Beach items', ['SUNSCREEN', 'UMBRELLA', 'COOLERBAG', 'FLIPFLOPS']],
-    ['Common fabrics', ['DENIM', 'LINEN', 'SATIN', 'CORDUROY']],
-    ['Breakfast foods', ['WAFFLE', 'OMELET', 'BAGEL', 'GRANOLA']],
-    ['Ski hill words', ['GONDOLA', 'CHAIRLIFT', 'MOGUL', 'LODGE']],
-    ['Map words', ['LEGEND', 'INSET', 'SCALEBAR', 'COMPASSROSE']],
-    ['Store departments', ['BAKERY', 'PHARMACYDEPT', 'PRODUCE', 'DELI']],
-    ['Phone hardware', ['SCREEN', 'BATTERY', 'CAMERA', 'SPEAKER']],
-    ['Words on a cheque', ['PAYEE', 'MEMO', 'AMOUNT', 'SIGNATURE']],
-    ['Puzzle words', ['CLUE', 'GRID', 'ACROSS', 'DOWN']],
-    ['Home repair items', ['DRYWALL', 'CAULK', 'PUTTY', 'SANDPAPER']],
-    ['Picnic items', ['PLAIDBLANKET', 'BASKET', 'THERMOS', 'NAPKINS']],
-    ['Fishing gear', ['TACKLE', 'LURE', 'BOBBER', 'REEL']],
-    ['Library words', ['STACKS', 'CATALOGUE', 'BOOKMARKER', 'CHECKOUTDESK']],
-    ['Bakery display items', ['MUFFIN', 'CROISSANT', 'TART', 'SCONE']],
-    ['Postal words', ['STAMP', 'ENVELOPE', 'POSTMARK', 'MAILBOX']],
-    ['Scent words', ['MUSK', 'CITRUS', 'CEDARWOOD', 'VANILLABEAN']],
-    ['Computer peripherals', ['KEYBOARD', 'MOUSE', 'WEBCAM', 'MICROPHONE']],
-    ['Pool items', ['GOGGLES', 'KICKBOARD', 'LADDER', 'LANE']],
-    ['Movie set jobs', ['GAFFER', 'GRIP', 'EDITOR', 'PRODUCER']],
-    ['House styles', ['BUNGALOW', 'COTTAGE', 'DUPLEX', 'TOWNHOUSE']],
-    ['Painting surfaces', ['WOODPANEL', 'PLASTER', 'MASONRY', 'DRYWALLBOARD']],
-    ['Types of beans', ['KIDNEY', 'PINTO', 'NAVY', 'LENTIL']],
-    ['Words after “snow”', ['BALL', 'CONE', 'DRIFT', 'FALL']],
-    ['Words after “book”', ['MARK', 'CASE', 'SHELF', 'STORE']],
-    ['Words after “hand”', ['SHAKE', 'WRITING', 'BAG', 'RAIL']],
-    ['Words before “shop”', ['FLOWER', 'GIFT', 'COFFEE', 'BARBER']],
-    ['Words before “room”', ['MAIL', 'NEWS', 'SUN', 'SHOW']],
-    ['Words before “light”', ['DAY', 'MOON', 'FLASH', 'LAMP']],
-    ['Words before “line”', ['HEAD', 'TAG', 'SKY', 'BASE']],
-    ['Words before “board”', ['SKATE', 'SCORE', 'HEAD', 'CUP']],
-    ['Words before “box”', ['TOOL', 'MAIL', 'JUKE', 'ICE']],
-    ['Words before “house”', ['DOG', 'WARE', 'GREEN', 'PLAY']],
-    ['Words before “stone”', ['MILE', 'GEM', 'TOMB', 'FLAG']],
-    ['Words before “print”', ['BLUE', 'PAW', 'NEWS', 'FOOT']],
-    ['Words after “star”', ['FISH', 'DUST', 'BOARD', 'LIGHT']],
-    ['Words after “fire”', ['WORK', 'PLACE', 'HOUSE', 'BALL']],
-    ['Words after “water”', ['FALL', 'FRONT', 'PROOF', 'MELON']],
-    ['Words after “rain”', ['BOW', 'COAT', 'DROP', 'STORM']],
-    ['Words after “moon”', ['LIGHT', 'BEAM', 'ROOF', 'STONE']],
-    ['Words after “back”', ['PACK', 'DROP', 'BOARD', 'DOOR']],
-    ['Words after “blue”', ['PRINT', 'BERRY', 'BIRD', 'MOON']],
-    ['Words after “head”', ['BAND', 'LIGHT', 'BOARD', 'PHONE']],
-    ['Words after “foot”', ['BALL', 'PRINT', 'NOTE', 'BRIDGE']],
-    ['Words after “sun”', ['RISE', 'SET', 'BEAM', 'FLOWER']],
-    ['Words after “note”', ['BOOK', 'CARD', 'PAD', 'WORTHY']]
-  ].map(([title, words], index) => ({ id: `c${index + 1}`, title, words }));
+  const board = document.getElementById("board");
+  const dateEl = document.getElementById("puzzleDate");
+  const mistakesEl = document.getElementById("mistakes");
+  const groupCountEl = document.getElementById("groupCount");
+  const shuffleBtn = document.getElementById("shuffleBtn");
+  const deselectBtn = document.getElementById("deselectBtn");
 
-  const boardEl = document.getElementById('board');
-  const solvedTrayEl = document.getElementById('solvedTray');
-  const mistakesEl = document.getElementById('mistakes');
-  const groupsEl = document.getElementById('groups');
-  const seedLabelEl = document.getElementById('seedLabel');
-  const statusBannerEl = document.getElementById('statusBanner');
-  const strikesEl = document.getElementById('strikes');
-  const shuffleBtn = document.getElementById('shuffleBtn');
-  const deselectBtn = document.getElementById('deselectBtn');
+  const storageKey = `${config.storagePrefix}:${config.version}`;
 
-  const seedInfo = getSeedInfo(config.puzzleType);
-  const storageKey = `${config.storagePrefix}:v5:${seedInfo.key}`;
-  seedLabelEl.textContent = seedInfo.label;
-
-  const puzzle = buildPuzzle(seedInfo.key, config.categoryCount);
-  let state = loadState();
-  let shakingIds = [];
-  if (!state || !Array.isArray(state.units)) state = createFreshState();
-  normaliseState();
-  render();
-
-  shuffleBtn.addEventListener('click', () => {
-    if (state.locked) return;
-    shuffleUnits();
-    saveState();
-    renderBoard();
-  });
-
-  deselectBtn.addEventListener('click', () => {
-    state.selected = [];
-    saveState();
-    renderBoard();
-  });
-
-  function createFreshState() {
-    return {
-      selected: [],
-      solvedIds: [],
-      mistakes: 0,
-      locked: false,
-      won: false,
-      revealedOnLoss: false,
-      statusMessage: '',
-      units: puzzle.tiles.map(tile => ({
-        id: `u-${tile.id}`,
-        categoryId: tile.categoryId,
-        tileIds: [tile.id]
-      }))
-    };
-  }
-
-  function normaliseState() {
-    const validTileIds = new Set(puzzle.tiles.map(tile => tile.id));
-    const validCategoryIds = new Set(puzzle.categories.map(cat => cat.id));
-
-    state.solvedIds = (state.solvedIds || []).filter(id => validCategoryIds.has(id));
-    state.units = (state.units || []).map(unit => ({
-      id: unit.id || `u-${Math.random().toString(36).slice(2, 9)}`,
-      categoryId: unit.categoryId,
-      tileIds: Array.isArray(unit.tileIds) ? unit.tileIds.filter(id => validTileIds.has(id)) : []
-    })).filter(unit => validCategoryIds.has(unit.categoryId) && unit.tileIds.length);
-
-    const seenTileIds = new Set();
-    state.units = state.units.filter(unit => {
-      const deduped = unit.tileIds.filter(tileId => !seenTileIds.has(tileId));
-      deduped.forEach(tileId => seenTileIds.add(tileId));
-      unit.tileIds = deduped;
-      return unit.tileIds.length > 0;
-    });
-
-    for (const tile of puzzle.tiles) {
-      if (!seenTileIds.has(tile.id) && !state.solvedIds.includes(tile.categoryId)) {
-        state.units.push({ id: `u-${tile.id}`, categoryId: tile.categoryId, tileIds: [tile.id] });
-      }
-    }
-
-    state.selected = (state.selected || []).filter(id => state.units.some(unit => unit.id === id)).slice(0, 2);
-
-    if (state.mistakes >= 4) {
-      state.locked = true;
-      state.revealedOnLoss = true;
-    }
-    if (state.solvedIds.length === puzzle.categories.length) {
-      state.won = true;
-      state.locked = true;
-    }
-  }
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  function saveState() {
-    localStorage.setItem(storageKey, JSON.stringify(state));
-  }
-
-  function buildPuzzle(seed, count) {
-    const rng = mulberry32(hashString(`${config.storagePrefix}:${seed}`));
-    const shuffledCategories = [...categoryPool];
-    shuffleInPlace(shuffledCategories, rng);
-
-    const chosenCategories = [];
-    const usedWords = new Set();
-    for (const cat of shuffledCategories) {
-      const clash = cat.words.some(word => usedWords.has(word.toUpperCase()));
-      if (clash) continue;
-      chosenCategories.push(cat);
-      cat.words.forEach(word => usedWords.add(word.toUpperCase()));
-      if (chosenCategories.length === count) break;
-    }
-
-    if (chosenCategories.length !== count) {
-      throw new Error(`Not enough unique categories to build a ${count}-group puzzle.`);
-    }
-
-    const categories = chosenCategories.map((cat, catIndex) => ({ ...cat, order: catIndex }));
-    const tiles = categories.flatMap(cat => cat.words.map((word, wordIndex) => ({
-      id: `${cat.id}-${wordIndex}`,
-      word,
-      categoryId: cat.id,
-      categoryTitle: cat.title,
-      order: wordIndex
-    })));
-
-    const shuffledTiles = [...tiles];
-    shuffleInPlace(shuffledTiles, mulberry32(hashString(`${config.storagePrefix}:${seed}:tiles`)));
-
-    return {
-      categories,
-      categoryById: new Map(categories.map(cat => [cat.id, cat])),
-      tiles: shuffledTiles,
-      tileById: new Map(tiles.map(tile => [tile.id, tile]))
-    };
-  }
-
-  function setStatus(message) {
-    state.statusMessage = message;
-  }
-
-  function render() {
-    renderMeta();
-    renderStrikes();
-    renderSolvedTray();
-    renderBoard();
-  }
-
-  function renderMeta() {
-    mistakesEl.textContent = String(state.mistakes);
-    groupsEl.textContent = `${state.solvedIds.length} / ${puzzle.categories.length}`;
-    statusBannerEl.textContent = state.statusMessage || '';
-  }
-
-  function renderStrikes() {
-    strikesEl.innerHTML = '';
-    for (let i = 0; i < 4; i += 1) {
-      const dot = document.createElement('span');
-      dot.className = `strike-dot${i < state.mistakes ? ' used' : ''}`;
-      strikesEl.appendChild(dot);
-    }
-  }
-
-  function renderSolvedTray() {
-    solvedTrayEl.innerHTML = '';
-    const visibleIds = state.revealedOnLoss ? puzzle.categories.map(cat => cat.id) : state.solvedIds;
-    visibleIds.forEach((categoryId, index) => {
-      const cat = puzzle.categoryById.get(categoryId);
-      const card = document.createElement('article');
-      card.className = 'solved-card';
-      card.style.background = solvedColours[index % solvedColours.length];
-      const title = document.createElement('p');
-      title.className = 'solved-title';
-      title.textContent = cat.title;
-      const words = document.createElement('p');
-      words.className = 'solved-words';
-      words.textContent = cat.words.map(formatDisplayWord).join(', ');
-      card.append(title, words);
-      solvedTrayEl.appendChild(card);
-    });
-  }
-
-  
-function renderBoard() {
-  boardEl.innerHTML = '';
-  getVisibleUnits().forEach(unit => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = `tile size-${Math.min(unit.tileIds.length, 4)}${unit.tileIds.length >= 2 ? ' grouped' : ''}${unit.tileIds.length >= 3 ? ' hoverable' : ''}`;
-    const isSelected = state.selected.includes(unit.id);
-    if (isSelected) btn.classList.add('selected');
-    if (shakingIds.includes(unit.id)) btn.classList.add('shake');
-    btn.setAttribute('aria-pressed', String(isSelected));
-    btn.addEventListener('click', () => toggleUnit(unit.id));
-
-    const label = document.createElement('span');
-    label.className = 'tile-label';
-    label.textContent = formatUnitLabel(unit);
-    btn.appendChild(label);
-
-    if (unit.tileIds.length >= 3) {
-      const hover = document.createElement('span');
-      hover.className = 'hover-content';
-      hover.textContent = formatHoverLabel(unit);
-      btn.appendChild(hover);
-    }
-
-    boardEl.appendChild(btn);
-  });
-}
-
-function shakeSelected() {
-    shakingIds = [...state.selected];
-    renderBoard();
-    window.setTimeout(() => {
-      shakingIds = [];
-      renderBoard();
-    }, 360);
-  }
-
-  function getVisibleUnits() {
-    return state.units.filter(unit => !state.solvedIds.includes(unit.categoryId));
-  }
-
-  
-function formatUnitLabel(unit) {
-  const words = getUnitDisplayWords(unit);
-  if (words.length >= 3) return `${words[0]}, ${words[1]}, ... [${words.length}]`;
-  return words.join(', ');
-}
-
-function formatHoverLabel(unit) {
-  return getUnitDisplayWords(unit).join(', ');
-}
-
-function getUnitDisplayWords(unit) {
-  return unit.tileIds
-    .map(id => puzzle.tileById.get(id))
-    .filter(Boolean)
-    .sort((a, b) => a.order - b.order)
-    .map(tile => formatDisplayWord(tile.word));
-}
-
-function formatDisplayWord(word) {
-  const acronymSet = new Set(['PDF', 'DOCX', 'CSV', 'PNG', 'LAB', 'GPS', 'DNA', 'RNA', 'USB', 'LED', 'TV']);
-  const manualSpacing = {
-    SLEEPINGBAG: 'sleeping bag',
-    MIRRORCAP: 'mirror cap',
-    COOLERBAG: 'cooler bag',
-    FLIPFLOPS: 'flip flops',
-    SCALEBAR: 'scale bar',
-    COMPASSROSE: 'compass rose',
-    PHARMACYDEPT: 'pharmacy dept',
-    PLAIDBLANKET: 'plaid blanket',
-    CHECKOUTDESK: 'checkout desk',
-    CEDARWOOD: 'cedarwood',
-    VANILLABEAN: 'vanilla bean',
-    WOODPANEL: 'wood panel',
-    DRYWALLBOARD: 'drywall board',
-    EYEWALL: 'eyewall'
-  };
-  const smallWords = new Set(['a', 'an', 'and', 'as', 'at', 'au', 'but', 'by', 'de', 'for', 'in', 'of', 'on', 'or', 'the', 'to', 'vs', 'with']);
-
-  let spaced = manualSpacing[word] || word;
-  spaced = spaced
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-    .replace(/_/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  if (!spaced) return '';
-  if (acronymSet.has(spaced.toUpperCase())) return spaced.toUpperCase();
-
-  const lower = spaced.toLowerCase();
-  return lower.split(' ').map((part, index) => {
-    if (!part) return part;
-    if (part.includes('-')) {
-      return part.split('-').map(seg => seg ? seg.charAt(0).toUpperCase() + seg.slice(1) : seg).join('-');
-    }
-    if (index > 0 && smallWords.has(part)) return part;
-    return part.charAt(0).toUpperCase() + part.slice(1);
-  }).join(' ');
-}
-
-function toggleUnit(unitId) {
-    if (state.locked) return;
-    if (state.selected.includes(unitId)) {
-      state.selected = state.selected.filter(id => id !== unitId);
-      saveState();
-      renderBoard();
-      return;
-    }
-
-    if (state.selected.length >= 2) return;
-    state.selected = [...state.selected, unitId];
-
-    if (state.selected.length === 2) {
-      resolvePair();
-      return;
-    }
-
-    saveState();
-    renderBoard();
-  }
-
-  
-function resolvePair() {
-  const [firstId, secondId] = state.selected;
-  const firstIndex = state.units.findIndex(unit => unit.id === firstId);
-  const secondIndex = state.units.findIndex(unit => unit.id === secondId);
-  const first = state.units[firstIndex];
-  const second = state.units[secondIndex];
-  if (!first || !second) {
-    state.selected = [];
-    saveState();
-    render();
-    return;
-  }
-
-  if (first.categoryId === second.categoryId) {
-    const merged = {
-      id: `u-${first.categoryId}-${Date.now().toString(36)}`,
-      categoryId: first.categoryId,
-      tileIds: [...new Set([...first.tileIds, ...second.tileIds])]
-    };
-
-    let insertIndex = secondIndex;
-    const removeIndexes = [firstIndex, secondIndex].sort((a, b) => b - a);
-    removeIndexes.forEach(index => {
-      state.units.splice(index, 1);
-      if (index < insertIndex) insertIndex -= 1;
-    });
-
-    if (merged.tileIds.length >= 4) {
-      if (!state.solvedIds.includes(merged.categoryId)) state.solvedIds.push(merged.categoryId);
-      setStatus('Correct.');
-    } else {
-      state.units.splice(insertIndex, 0, merged);
-      setStatus('Match found.');
-    }
-
-    if (state.solvedIds.length === puzzle.categories.length) {
-      state.won = true;
-      state.locked = true;
-      setStatus('Solved. A new puzzle will appear automatically on the next date or week.');
-    }
-  } else {
-    state.mistakes += 1;
-    setStatus('Not a match.');
-    shakeSelected();
-    if (state.mistakes >= 4) {
-      state.locked = true;
-      state.revealedOnLoss = true;
-      setStatus('Out of mistakes. The groups are shown below.');
-    }
-  }
-
-  state.selected = [];
-  saveState();
-  render();
-}
-
-function shuffleUnits() {
-    const visible = getVisibleUnits();
-    shuffleInPlace(visible, mulberry32(hashString(`${storageKey}:${Date.now()}`)));
-    const visibleIds = new Set(visible.map(unit => unit.id));
-    const hidden = state.units.filter(unit => !visibleIds.has(unit.id));
-    state.units = [...visible, ...hidden];
-  }
-
-  function getSeedInfo(type) {
+  function getSeedKey() {
     const now = new Date();
     const local = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (type === 'weekly') {
+    if (config.puzzleType === "weekly") {
       const day = local.getDay();
       const mondayOffset = day === 0 ? -6 : 1 - day;
       const monday = new Date(local);
       monday.setDate(local.getDate() + mondayOffset);
-      return { key: formatDateKey(monday), label: formatLongDate(monday) };
+      return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
     }
-    return { key: formatDateKey(local), label: formatLongDate(local) };
+    return `${local.getFullYear()}-${String(local.getMonth() + 1).padStart(2, "0")}-${String(local.getDate()).padStart(2, "0")}`;
   }
 
-  function formatDateKey(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
+  function formatLongDate(key) {
+    const [y, m, d] = key.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    return date.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
   }
 
-  function formatLongDate(date) {
-    return new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
-  }
-
-  function hashString(str) {
-    let h = 1779033703 ^ str.length;
-    for (let i = 0; i < str.length; i += 1) {
-      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-      h = (h << 13) | (h >>> 19);
+  function seedNumber(str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
     }
-    return () => {
-      h = Math.imul(h ^ (h >>> 16), 2246822507);
-      h = Math.imul(h ^ (h >>> 13), 3266489909);
-      return (h ^= h >>> 16) >>> 0;
+    return h >>> 0;
+  }
+
+  function rand(seed) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function shuffle(arr, seed) {
+    const copy = [...arr];
+    let s = seed;
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(rand(s++) * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function smartCase(text) {
+    if (!text) return "";
+    return text.split(" ").map(token => {
+      if (!token) return token;
+      if (/[a-z]/.test(token) || /[À-ÿ]/.test(token)) {
+        return token.split("-").map(part => {
+          if (!part) return part;
+          if (/^(mc)([a-z])/i.test(part)) return part.charAt(0).toUpperCase() + part.slice(1);
+          return part.charAt(0).toUpperCase() + part.slice(1);
+        }).join("-");
+      }
+      if (/^[A-Z0-9&.]{1,4}$/.test(token)) return token;
+      return token.toLowerCase().split("-").map(part => part ? part.charAt(0).toUpperCase() + part.slice(1) : part).join("-");
+    }).join(" ");
+  }
+
+  function humanizeCategory(name) {
+    return smartCase(name.replace(/\bWITH\b/g, "with")).replace(/\bWith\b/g, "with");
+  }
+
+  function buildFreshState() {
+    const key = getSeedKey();
+    const seed = seedNumber(`${config.storagePrefix}:${key}`);
+    const allCategories = shuffle(Object.entries(CATEGORY_BANK), seed);
+    const chosen = [];
+    const usedWords = new Set();
+
+    for (const [name, words] of allCategories) {
+      const normalizedWords = words.map(word => word.trim());
+      if (normalizedWords.length !== config.groupSize) continue;
+      const hasOverlap = normalizedWords.some(word => usedWords.has(word.toLowerCase()));
+      if (hasOverlap) continue;
+      chosen.push([name, normalizedWords]);
+      normalizedWords.forEach(word => usedWords.add(word.toLowerCase()));
+      if (chosen.length === config.categoryCount) break;
+    }
+
+    if (chosen.length !== config.categoryCount) {
+      throw new Error(`Could not build ${config.categoryCount} unique categories.`);
+    }
+
+    const lookup = {};
+    const words = [];
+
+    chosen.forEach(([name, list], idx) => {
+      list.forEach(word => {
+        lookup[word] = { name, color: GROUP_COLORS[idx % GROUP_COLORS.length] };
+        words.push(word);
+      });
+    });
+
+    return {
+      key,
+      lookup,
+      groups: shuffle(words, seed + 999).map(word => ({
+        words: [word],
+        solved: false,
+        category: null,
+        color: null
+      })),
+      selectedIndex: null,
+      mistakes: 0,
+      shakeIndices: []
     };
   }
 
-  function mulberry32(seedFactory) {
-    let t = typeof seedFactory === 'function' ? seedFactory() : seedFactory;
-    return function() {
-      t += 0x6D2B79F5;
-      let x = Math.imul(t ^ (t >>> 15), t | 1);
-      x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
-      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
-    };
+  function validSaved(saved, fresh) {
+    if (!saved || saved.key !== fresh.key || !Array.isArray(saved.groups)) return false;
+    const words = saved.groups.flatMap(group => Array.isArray(group.words) ? group.words : []);
+    const validWords = Object.keys(fresh.lookup);
+    if (words.length !== validWords.length) return false;
+    if (new Set(words).size !== validWords.length) return false;
+    const validSet = new Set(validWords);
+    for (const word of words) {
+      if (!validSet.has(word)) return false;
+    }
+    return true;
   }
 
-  function shuffleInPlace(arr, rng) {
-    for (let i = arr.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(rng() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+  function loadState() {
+    const fresh = buildFreshState();
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return fresh;
+      const saved = JSON.parse(raw);
+      if (!validSaved(saved, fresh)) {
+        localStorage.removeItem(storageKey);
+        return fresh;
+      }
+      return {
+        key: fresh.key,
+        lookup: fresh.lookup,
+        groups: saved.groups,
+        selectedIndex: null,
+        mistakes: Number.isFinite(saved.mistakes) ? saved.mistakes : 0,
+        shakeIndices: []
+      };
+    } catch {
+      localStorage.removeItem(storageKey);
+      return fresh;
     }
-    return arr;
   }
+
+  let state = loadState();
+
+  function saveState() {
+    localStorage.setItem(storageKey, JSON.stringify({
+      key: state.key,
+      groups: state.groups,
+      mistakes: state.mistakes
+    }));
+  }
+
+  function preview(group) {
+    const first = smartCase(group.words[0]);
+    if (group.words.length === 1) return first;
+    const second = smartCase(group.words[1]);
+    if (group.words.length === 2) return `${first}, ${second}`;
+    return `${first}, ${second}, ... [${group.words.length}]`;
+  }
+
+  function categoryForWords(words) {
+    const first = state.lookup[words[0]];
+    if (!first) return null;
+    for (const word of words) {
+      const info = state.lookup[word];
+      if (!info || info.name !== first.name) return null;
+    }
+    return first;
+  }
+
+  function shakeTiles(indices) {
+    state.shakeIndices = [...new Set(indices)];
+    render();
+    window.setTimeout(() => {
+      state.shakeIndices = [];
+      render();
+    }, 290);
+  }
+
+  function mergeIntoSecond(a, b) {
+    const mergedWords = [...state.groups[a].words, ...state.groups[b].words];
+    const category = categoryForWords(mergedWords);
+
+    if (!category) {
+      state.mistakes += 1;
+      saveState();
+      shakeTiles([a, b]);
+      return;
+    }
+
+    const merged = {
+      words: mergedWords,
+      solved: false,
+      category: null,
+      color: null
+    };
+
+    let insertIndex = b;
+    if (a > b) {
+      state.groups.splice(a, 1);
+      state.groups.splice(b, 1);
+    } else {
+      state.groups.splice(b, 1);
+      state.groups.splice(a, 1);
+      insertIndex -= 1;
+    }
+
+    if (merged.words.length === config.groupSize) {
+      merged.solved = true;
+      merged.category = humanizeCategory(category.name);
+      merged.color = category.color;
+    }
+
+    state.groups.splice(insertIndex, 0, merged);
+    saveState();
+    render();
+  }
+
+  function handleClick(i) {
+    const group = state.groups[i];
+    if (!group || group.solved) return;
+
+    if (state.selectedIndex === null) {
+      state.selectedIndex = i;
+      render();
+      return;
+    }
+
+    if (state.selectedIndex === i) {
+      state.selectedIndex = null;
+      render();
+      return;
+    }
+
+    const firstIndex = state.selectedIndex;
+    state.selectedIndex = null;
+    mergeIntoSecond(firstIndex, i);
+  }
+
+  function shuffleUnsolvedInPlace() {
+    const seed = seedNumber(`${state.key}:${Date.now()}`);
+    const unsolvedIndices = [];
+    const unsolvedGroups = [];
+
+    state.groups.forEach((group, index) => {
+      if (!group.solved) {
+        unsolvedIndices.push(index);
+        unsolvedGroups.push(group);
+      }
+    });
+
+    const shuffled = shuffle(unsolvedGroups, seed);
+    unsolvedIndices.forEach((index, i) => {
+      state.groups[index] = shuffled[i];
+    });
+
+    state.selectedIndex = null;
+    saveState();
+    render();
+  }
+
+  function render() {
+    board.innerHTML = "";
+    dateEl.textContent = formatLongDate(state.key);
+    mistakesEl.textContent = String(state.mistakes);
+    const solvedCount = state.groups.filter(group => group.solved).length;
+    groupCountEl.textContent = `${solvedCount} / ${config.categoryCount}`;
+
+    state.groups.forEach((group, i) => {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+
+      if (group.solved) {
+        tile.classList.add("solved-tile", "hoverable");
+        tile.style.background = group.color || GROUP_COLORS[0];
+      } else {
+        tile.classList.add(group.words.length > 1 ? "merged" : "single");
+        if (state.selectedIndex === i) tile.classList.add("selected");
+        if (group.words.length >= 3) tile.classList.add("hoverable");
+      }
+
+      if (state.shakeIndices.includes(i)) {
+        tile.classList.add("shake");
+      }
+
+      const label = document.createElement("div");
+      label.className = "tile-label";
+      label.textContent = group.solved ? group.category : preview(group);
+      tile.appendChild(label);
+
+      if (group.solved || group.words.length >= 3) {
+        const hover = document.createElement("div");
+        hover.className = "hover-content";
+        hover.textContent = group.words.map(smartCase).join(", ");
+        tile.appendChild(hover);
+      }
+
+      if (!group.solved) {
+        tile.addEventListener("click", () => handleClick(i));
+      }
+
+      board.appendChild(tile);
+    });
+  }
+
+  shuffleBtn.addEventListener("click", shuffleUnsolvedInPlace);
+  deselectBtn.addEventListener("click", () => {
+    state.selectedIndex = null;
+    render();
+  });
+
+  render();
 })();

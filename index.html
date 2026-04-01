@@ -1,8 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connections — Weekly 45×45</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -10,22 +10,18 @@
   <main class="app">
     <header class="topbar">
       <h1>Connections</h1>
-      <p class="subtitle">Weekly 45×45</p>
-      <div class="meta-row">
-        <div class="meta-pill"><span class="meta-label">Date</span><span id="seedLabel">—</span></div>
-        <div class="meta-pill"><span class="meta-label">Mistakes</span><span id="mistakes">0</span></div>
-        <div class="meta-pill"><span class="meta-label">Groups</span><span id="groups">0 / 45</span></div>
-      </div>
-      <div id="strikes" class="strikes" aria-label="Mistakes remaining"></div>
+      <p class="subtitle">— Weekly 45×45</p>
     </header>
 
-    <section id="statusBanner" class="status-banner" aria-live="polite"></section>
-
-    <section id="solvedTray" class="solved-tray" aria-label="Solved groups"></section>
-
-    <section class="controls" aria-label="Controls">
+    <section class="controls">
       <button id="shuffleBtn" type="button">Shuffle</button>
-      <button id="deselectBtn" type="button">Deselect All</button>
+      <button id="deselectBtn" type="button">Deselect</button>
+    </section>
+
+    <section class="status">
+      <div>Week of: <span id="puzzleDate">—</span></div>
+      <div>Mistakes: <span id="mistakes">0</span></div>
+      <div>Groups: <span id="groupCount">0 / 45</span></div>
     </section>
 
     <section id="board" class="board" aria-label="Puzzle board"></section>
@@ -33,10 +29,11 @@
 
   <script>
     window.CONNECTIONS_CONFIG = {
-      storagePrefix: 'connections-weekly45',
-      puzzleType: 'weekly',
+      storagePrefix: "connections-weekly45",
+      puzzleType: "weekly",
       categoryCount: 45,
-      headingLabel: 'Week of'
+      groupSize: 45,
+      version: "final-v1"
     };
   </script>
   <script src="app.js"></script>
