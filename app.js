@@ -1,168 +1,102 @@
 const CATEGORY_COUNT = 500;
 const CATEGORY_SIZE = 45;
 const MEGA_PICK_COUNT = 45;
-const MINI_PICK_COUNT = 4;
 
-const colourGroups = [
-  { key: 'yellow', label: 'Straightforward', colour: 'var(--yellow)' },
-  { key: 'green', label: 'Medium', colour: 'var(--green)' },
-  { key: 'blue', label: 'Hard', colour: 'var(--blue)' },
-  { key: 'purple', label: 'Tricky', colour: 'var(--purple)' }
-];
-
-const lexicons = {
-  adjectives: ['Amber','Arctic','Autumn','Bitter','Black','Blue','Brass','Bright','Broken','Burning','Calm','Cedar','City','Clear','Cloud','Cold','Copper','Crimson','Crystal','Dark','Dawn','Deep','Desert','Electric','Emerald','Fallen','Fern','Final','First','Flint','Flying','Foggy','Forest','Golden','Grand','Green','Harbour','Hidden','High','Honey','Iron','Ivory','Jade','June','Lake','Last','Little','Lone','Long','Lucky','Marble','Midnight','Misty','Moon','Morning','Moss','Mountain','Neon','Night','North','Oak','Old','Open','Paper','Pearl','Pine','Prairie','Quiet','Rapid','Red','River','Rose','Royal','Ruby','Rust','Sable','Salt','Scarlet','Shadow','Silver','Small','Snow','Soft','Solar','Spring','Stone','Storm','Summer','Sunset','Swift','Tender','Thunder','True','Velvet','Violet','Warm','West','White','Wild','Winter','Wooden'],
-  nouns: ['Anchor','Arcade','Ash','Beacon','Bell','Bird','Blossom','Bridge','Brook','Cabin','Candle','Canyon','Castle','Circle','Cloud','Coast','Comet','Creek','Crown','Daisy','Delta','Drive','Echo','Falcon','Field','Fire','Forest','Garden','Gate','Grove','Harbour','Haven','Hill','Horizon','House','Island','Junction','King','Lake','Lantern','Line','Market','Meadow','Moon','Mountain','Oak','Ocean','Orchard','Path','Peak','Pine','Plaza','Point','Prairie','River','Road','Rose','Shadow','Shore','Signal','Sky','Song','Spring','Square','Star','Station','Stone','Storm','Street','Summit','Sun','Temple','Thunder','Trail','Valley','View','Wave','Wharf','Wind','Yard'],
-  professions: ['Accountant','Actor','Architect','Archivist','Artist','Astronomer','Attorney','Baker','Barber','Biologist','Builder','Butcher','Carpenter','Chef','Chemist','Clerk','Coach','Composer','Courier','Designer','Director','Doctor','Editor','Electrician','Engineer','Farmer','Florist','Geologist','Historian','Illustrator','Inspector','Journalist','Judge','Lawyer','Librarian','Magician','Manager','Mechanic','Merchant','Musician','Nurse','Painter','Pharmacist','Photographer','Pilot','Plumber','Poet','Professor','Programmer','Publisher','Ranger','Reporter','Researcher','Sailor','Scientist','Sculptor','Singer','Surveyor','Teacher','Technician','Translator','Veterinarian','Writer'],
-  firstNames: ['Avery','Bailey','Bennett','Blair','Briar','Brook','Cameron','Casey','Charlie','Dakota','Drew','Eden','Elliot','Emerson','Finley','Frankie','Gray','Harper','Hayden','Jamie','Jordan','Kai','Kennedy','Lane','Logan','Marlowe','Morgan','Noel','Parker','Payton','Quinn','Reese','Riley','Robin','Rowan','Sage','Sawyer','Shay','Skyler','Spencer','Sydney','Tatum','Taylor','Winter'],
-  surnames: ['Abbott','Alden','Archer','Bennett','Bishop','Bowen','Brooks','Carter','Chandler','Clarke','Collins','Dalton','Dawson','Ellis','Fletcher','Foster','Gardner','Griffin','Hawkins','Hayes','Holland','Hunter','Irving','Jensen','Keller','Lennox','Mercer','Monroe','Morris','Nash','Palmer','Parker','Quincy','Reed','Sawyer','Sloan','Spencer','Tanner','Turner','Vaughn','Walker','Warren','Whitaker','Wilder','Winslow'],
-  eateries: ['Bakery','Bar','Bistro','Café','Cantina','Cellar','Diner','Eatery','Grill','House','Kitchen','Lounge','Oven','Parlour','Pub','Room','Roastery','Tavern'],
-  techNouns: ['Analytics','Atlas','Beacon','Bridge','Canvas','Cloud','Core','Desk','Drive','Flow','Forge','Grid','Hub','Index','Layer','Link','Logic','Loop','Mesh','Node','Pad','Pilot','Pulse','Shift','Signal','Stack','Studio','Sync','Track','Vault','Wave'],
-  medicalTerms: ['Clinic','Code','Cure','Dose','Emergency','Intake','Rounds','Pulse','Trauma','Triage','Vitals','Ward'],
-  dramaWords: ['After Hours','Cold Case','Critical Shift','Double Blind','Final Call','Night Service','Open Heart','Second Opinion','Silent Alarm','Third Floor','White Coat'],
-  cocktails: ['Fizz','Flip','Julep','Mule','Punch','Rickey','Sour','Spritz','Swizzle','Toddy'],
-  appNouns: ['Board','Book','Box','Desk','Drop','File','Frame','Guide','Home','List','Map','Note','Page','Plan','Room','Shelf','Space','Stack','Tile','Track'],
-  boutiqueNouns: ['Atelier','Boutique','Closet','Company','Corner','Goods','Haberdashery','House','Market','Mercantile','Outfitters','Studio'],
-  streetTypes: ['Avenue','Boulevard','Court','Drive','Lane','Path','Road','Square','Street','Terrace','Way'],
-  paints: ['Almond','Ash Rose','Bayleaf','Blue Heron','Candle Wax','Cloud Linen','Copper Dust','Dried Moss','Fieldstone','Frost Glass','Garden Wall','Harbour Mist','Ivory Lace','Juniper','Maple Sugar','Moonbeam','Old Brick','Pale Wheat','Porcelain','Rain Barrel','River Reed','Salt Box','Seaglass','Stone Path','Weathered Pine'],
-  perfumes: ['Amber Silk','Black Iris','Blue Cedar','Crystal Rain','Golden Fig','Juniper Smoke','Moon Salt','Pale Velvet','Rose Static','Silver Moss','Soft Leather','White Tea'],
-  dogNames: ['Archie','Bandit','Basil','Biscuit','Clover','Comet','Duke','Frankie','Ginger','Hazel','Honey','Juniper','Maple','Milo','Olive','Otis','Pepper','Piper','Poppy','Remy','Rosie','Scout','Teddy','Willow','Winnie'],
-  tavernBits: ['Ale','Anvil','Badger','Bell','Boar','Candle','Cloak','Crown','Dagger','Dragon','Falcon','Fox','Gate','Goblet','Hammer','Harp','Hound','Lantern','Lion','Oak','Owl','Pony','Quill','Raven','Stag','Star','Sword','Thistle','Wheel','Wolf'],
-  bandBits: ['Atlas','Comet','Crown','Echo','Harbour','Junction','Lantern','Northline','Orbit','Parade','Radio','Signal','Static','Velvet','Vista'],
-  productBits: ['Air','Arc','Beam','Bold','Dash','Edge','Flow','Glow','Loop','Mint','Nova','Peak','Pixel','Pulse','Spark','Thread','Vista'],
-  legalBits: ['Appeal','Brief','Clause','Counsel','District','Docket','Equity','Ledger','Motion','Verdict'],
-  literaryBits: ['Chapter','Edition','Fable','Folio','Index','Ledger','Library','Margin','Paragraph','Volume'],
-  yachtBits: ['Aurora','Bluefin','Calypso','Daybreak','Mariner','Northwind','Seastar','Solstice','Tempest','Waypoint'],
-  gardenBits: ['Arbour','Compost','Fork','Glove','Grower','Hoe','Mulch','Planter','Rake','Seeder','Shears','Trowel','Waterer'],
-  fashionBits: ['Cotton','Hem','Linen','Pleat','Ribbon','Satin','Seam','Silk','Thread','Velvet'],
-  mediaBits: ['After Dark','City Desk','Deep Cut','Late Edition','Morning Feed','Night Signal','Open Channel','Prime Time','Screen Test','Weekend Wire']
-};
-
-const categoryBlueprints = [
+const FAMILY_POOLS = [
   {
-    family: 'Song titles',
-    makeTitle: v => `Song titles ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 11 + i) % lexicons.adjectives.length]} ${lexicons.nouns[(v * 17 + i * 3) % lexicons.nouns.length]}`
+    family: 'Women names',
+    proper: true,
+    items: ['Abigail','Addison','Alexis','Alice','Amelia','Anna','Aria','Aubrey','Audrey','Ava','Bella','Brooklyn','Camila','Caroline','Charlotte','Chloe','Claire','Eleanor','Elizabeth','Ella','Ellie','Emily','Emma','Evelyn','Gabriella','Grace','Hannah','Harper','Hazel','Isabella','Ivy','Layla','Leah','Lily','Lucy','Luna','Madeline','Maya','Mia','Natalie','Nora','Olivia','Penelope','Riley','Ruby','Samantha','Scarlett','Sophia','Stella','Violet','Willow','Zoe']
   },
   {
-    family: 'Book titles',
-    makeTitle: v => `Book titles ${v + 1}`,
-    makeItem: (v, i) => `The ${lexicons.adjectives[(v * 7 + i * 2) % lexicons.adjectives.length]} ${lexicons.nouns[(v * 13 + i * 5) % lexicons.nouns.length]}`
+    family: 'Men names',
+    proper: true,
+    items: ['Alexander','Andrew','Anthony','Asher','Benjamin','Caleb','Carter','Charles','Christopher','Daniel','David','Dylan','Ethan','Ezra','Gabriel','Grayson','Henry','Hudson','Isaac','Jack','Jackson','Jacob','James','Julian','Leo','Levi','Liam','Lincoln','Logan','Lucas','Luke','Mason','Mateo','Matthew','Michael','Nathan','Noah','Nolan','Oliver','Owen','Samuel','Sebastian','Theodore','Thomas','William','Wyatt']
   },
   {
-    family: 'Band names',
-    makeTitle: v => `Band names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 5 + i) % lexicons.adjectives.length]} ${lexicons.bandBits[(v * 9 + i * 2) % lexicons.bandBits.length]}`
-  },
-  {
-    family: 'Detective names',
-    makeTitle: v => `Detective names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.firstNames[(v * 3 + i) % lexicons.firstNames.length]} ${lexicons.surnames[(v * 7 + i * 2) % lexicons.surnames.length]}`
-  },
-  {
-    family: 'Restaurant names',
-    makeTitle: v => `Restaurant names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 5 + i * 2) % lexicons.adjectives.length]} ${lexicons.eateries[(v * 3 + i) % lexicons.eateries.length]}`
-  },
-  {
-    family: 'Tech products',
-    makeTitle: v => `Tech products ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.productBits[(v * 7 + i) % lexicons.productBits.length]}${lexicons.techNouns[(v * 9 + i * 3) % lexicons.techNouns.length]}`
-  },
-  {
-    family: 'Medical dramas',
-    makeTitle: v => `Medical dramas ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.medicalTerms[(v * 5 + i) % lexicons.medicalTerms.length]} ${lexicons.dramaWords[(v * 4 + i * 2) % lexicons.dramaWords.length]}`
-  },
-  {
-    family: 'Cocktail names',
-    makeTitle: v => `Cocktail names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 6 + i * 2) % lexicons.adjectives.length]} ${lexicons.cocktails[(v * 5 + i) % lexicons.cocktails.length]}`
-  },
-  {
-    family: 'App names',
-    makeTitle: v => `App names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 8 + i) % lexicons.adjectives.length]} ${lexicons.appNouns[(v * 6 + i * 2) % lexicons.appNouns.length]}`
-  },
-  {
-    family: 'Boutique names',
-    makeTitle: v => `Boutique names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 9 + i * 2) % lexicons.adjectives.length]} ${lexicons.boutiqueNouns[(v * 5 + i) % lexicons.boutiqueNouns.length]}`
-  },
-  {
-    family: 'Street names',
-    makeTitle: v => `Street names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 4 + i) % lexicons.adjectives.length]} ${lexicons.streetTypes[(v * 3 + i * 2) % lexicons.streetTypes.length]}`
-  },
-  {
-    family: 'Paint colours',
-    makeTitle: v => `Paint colours ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.paints[(v * 7 + i) % lexicons.paints.length]} ${String.fromCharCode(65 + ((v + i) % 26))}`
-  },
-  {
-    family: 'Perfume names',
-    makeTitle: v => `Perfume names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.perfumes[(v * 4 + i) % lexicons.perfumes.length]} ${String.fromCharCode(65 + ((v * 2 + i) % 26))}`
+    family: 'Surnames',
+    proper: true,
+    items: ['Adams','Allen','Anderson','Bailey','Baker','Bell','Bennett','Brooks','Brown','Campbell','Carter','Clark','Collins','Cook','Cooper','Cox','Davis','Diaz','Edwards','Evans','Foster','Garcia','Gonzalez','Gray','Green','Hall','Harris','Hayes','Henderson','Hill','Howard','Hughes','Jackson','Jenkins','Johnson','Kelly','King','Lee','Lewis','Long','Martinez','Miller','Mitchell','Moore','Morgan','Morris','Murphy','Nelson','Parker','Perez','Perry','Peterson','Phillips','Powell','Price','Ramirez','Reed','Richardson','Rivera','Roberts','Robinson','Rodriguez','Rogers','Ross','Russell','Sanders','Scott','Simmons','Smith','Stewart','Taylor','Thomas','Torres','Turner','Walker','Ward','Washington','Watson','White','Williams','Wilson','Wood','Wright','Young']
   },
   {
     family: 'Dog names',
-    makeTitle: v => `Dog names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.dogNames[(v * 5 + i) % lexicons.dogNames.length]} ${String.fromCharCode(65 + ((v + i) % 26))}`
+    proper: true,
+    items: ['Archie','Bailey','Bandit','Bear','Bella','Bentley','Blue','Bodie','Bruno','Buddy','Charlie','Chester','Cleo','Coco','Cooper','Daisy','Dexter','Duke','Ellie','Finn','Frankie','George','Ginger','Harley','Hazel','Henry','Honey','Jack','Jasper','Koda','Leo','Loki','Louie','Luca','Lucky','Luna','Maggie','Maple','Max','Milo','Murphy','Nala','Nova','Oliver','Ollie','Penny','Pepper','Piper','Poppy','Remi','Rosie','Roxy','Ruby','Sadie','Scout','Shadow','Simba','Stella','Teddy','Winston','Winnie','Ziggy']
   },
   {
-    family: 'Fantasy taverns',
-    makeTitle: v => `Fantasy taverns ${v + 1}`,
-    makeItem: (v, i) => `The ${lexicons.tavernBits[(v * 8 + i) % lexicons.tavernBits.length]} & ${lexicons.tavernBits[(v * 3 + i * 2 + 7) % lexicons.tavernBits.length]}`
+    family: 'Dog breeds',
+    proper: true,
+    items: ['Akita','Basenji','Beagle','Bernese Mountain Dog','Bichon Frise','Bloodhound','Border Collie','Boston Terrier','Boxer','Brittany','Bull Terrier','Bulldog','Cairn Terrier','Cane Corso','Cavalier King Charles Spaniel','Chihuahua','Chow Chow','Cocker Spaniel','Collie','Corgi','Dachshund','Dalmatian','Doberman Pinscher','English Setter','French Bulldog','German Shepherd','German Shorthaired Pointer','Golden Retriever','Great Dane','Greyhound','Havanese','Irish Setter','Jack Russell Terrier','Labrador Retriever','Lhasa Apso','Maltese','Miniature Pinscher','Newfoundland','Old English Sheepdog','Papillon','Pekingese','Pit Bull Terrier','Pomeranian','Poodle','Pug','Rottweiler','Saint Bernard','Samoyed','Schnauzer','Scottish Terrier','Shetland Sheepdog','Shiba Inu','Shih Tzu','Siberian Husky','Springer Spaniel','Vizsla','Weimaraner','West Highland White Terrier','Whippet','Yorkshire Terrier']
   },
   {
-    family: 'Law firms',
-    makeTitle: v => `Law firms ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.surnames[(v * 6 + i) % lexicons.surnames.length]} & ${lexicons.surnames[(v * 9 + i * 2 + 5) % lexicons.surnames.length]}`
+    family: 'Flowers',
+    proper: false,
+    items: ['alyssum','anemone','aster','azalea','begonia','bellflower','black-eyed susan','bluebell','buttercup','camellia','carnation','chrysanthemum','clematis','columbine','coneflower','cosmos','crocus','dahlia','daisy','delphinium','foxglove','freesia','gardenia','geranium','gladiolus','hibiscus','hollyhock','hydrangea','iris','jasmine','lavender','lilac','lily','magnolia','marigold','nasturtium','orchid','pansy','peony','petunia','phlox','poppy','primrose','ranunculus','rose','snapdragon','sunflower','sweet pea','tulip','verbena','violet','wisteria','zinnia']
   },
   {
-    family: 'Publishing imprints',
-    makeTitle: v => `Publishing imprints ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 7 + i) % lexicons.adjectives.length]} ${lexicons.literaryBits[(v * 5 + i * 2) % lexicons.literaryBits.length]}`
+    family: 'Birds',
+    proper: false,
+    items: ['albatross','blue jay','canary','cardinal','chickadee','cockatoo','condor','crane','crow','cuckoo','dove','duck','eagle','egret','falcon','finch','flamingo','goose','gull','hawk','heron','hummingbird','ibis','jay','kingfisher','kiwi','lark','loon','macaw','magpie','mockingbird','nightingale','oriole','osprey','owl','parakeet','parrot','peacock','pelican','penguin','pheasant','pigeon','puffin','quail','raven','robin','seagull','sparrow','starling','stork','swallow','swan','toucan','turkey','vulture','warbler','woodpecker','wren']
   },
   {
-    family: 'Yacht names',
-    makeTitle: v => `Yacht names ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.yachtBits[(v * 4 + i) % lexicons.yachtBits.length]} ${['I','II','III','IV','V'][Math.floor((v + i) % 5)]}`
+    family: 'Insects',
+    proper: false,
+    items: ['ant','aphid','beetle','bee','bumblebee','butterfly','caddisfly','cicada','cockroach','cricket','damselfly','dragonfly','earwig','firefly','flea','fruit fly','gnat','grasshopper','hornet','horsefly','lacewing','ladybug','lanternfly','locust','mantis','mayfly','midge','moth','mosquito','nymph','paper wasp','pill bug','praying mantis','scarab','silverfish','slug moth','stink bug','stonefly','termite','thrips','tick','walking stick','water strider','weevil','whitefly','yellowjacket']
   },
   {
-    family: 'Garden tools',
-    makeTitle: v => `Garden tools ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 5 + i * 2) % lexicons.adjectives.length]} ${lexicons.gardenBits[(v * 4 + i) % lexicons.gardenBits.length]}`
+    family: 'Spices and herbs',
+    proper: false,
+    items: ['allspice','anise','basil','bay leaf','caraway','cardamom','cayenne','celery seed','chervil','chili powder','chives','cilantro','cinnamon','clove','coriander','cumin','curry powder','dill','fennel','fenugreek','garlic powder','ginger','lavender','lemongrass','marjoram','mint','mustard seed','nutmeg','oregano','paprika','parsley','peppermint','rosemary','saffron','sage','savory','sesame','star anise','sumac','tarragon','thyme','turmeric','vanilla']
   },
   {
-    family: 'Fashion labels',
-    makeTitle: v => `Fashion labels ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 3 + i) % lexicons.adjectives.length]} ${lexicons.fashionBits[(v * 7 + i * 2) % lexicons.fashionBits.length]}`
+    family: 'Pasta shapes',
+    proper: false,
+    items: ['acini di pepe','agnolotti','anelli','bigoli','bucatini','campanelle','cannelloni','capellini','casarecce','cavatappi','cavatelli','conchiglie','ditalini','farfalle','fettuccine','filini','fusilli','gemelli','gnocchetti','lasagna','linguine','lumache','macaroni','mafaldine','manicotti','mezzi rigatoni','orecchiette','orzo','paccheri','pappardelle','pastina','penne','perciatelli','radiatori','ravioli','rigatoni','rotelle','rotini','shells','spaghetti','stelline','strozzapreti','tagliatelle','tortellini','trofie','vermicelli','ziti']
   },
   {
-    family: 'News programmes',
-    makeTitle: v => `News programmes ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.mediaBits[(v * 4 + i) % lexicons.mediaBits.length]} ${String.fromCharCode(65 + ((v * 3 + i) % 26))}`
+    family: 'Professions',
+    proper: false,
+    items: ['accountant','actor','architect','astronomer','attorney','baker','barber','biologist','builder','butcher','carpenter','cashier','chef','chemist','coach','dentist','designer','doctor','editor','electrician','engineer','farmer','firefighter','florist','geologist','historian','illustrator','journalist','judge','lawyer','librarian','magician','mechanic','musician','nurse','optician','painter','paramedic','pharmacist','photographer','physicist','pilot','plumber','poet','politician','professor','programmer','reporter','scientist','singer','teacher','translator','veterinarian','waiter','writer']
   },
   {
-    family: 'Design studios',
-    makeTitle: v => `Design studios ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 9 + i) % lexicons.adjectives.length]} ${['Design','Studio','Works','Collective','Office'][Math.floor((v + i) % 5)]}`
+    family: 'Kitchen appliances',
+    proper: false,
+    items: ['air fryer','blender','bread maker','coffee grinder','coffee maker','deep fryer','dishwasher','double oven','electric kettle','espresso machine','food processor','freezer','fridge','griddle','hand mixer','hot plate','ice maker','immersion blender','induction hob','juicer','microwave','oven','pressure cooker','range hood','rice cooker','slow cooker','stand mixer','steam oven','stove','tea kettle','toaster','toaster oven','waffle maker','warming drawer']
   },
   {
-    family: 'Architecture firms',
-    makeTitle: v => `Architecture firms ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.surnames[(v * 5 + i) % lexicons.surnames.length]} ${['Studio','Partners','Group','Office','Atelier'][Math.floor((v + i) % 5)]}`
+    family: 'Book titles',
+    proper: true,
+    items: ['1984','A Farewell to Arms','A Little Life','A Tale of Two Cities','A Wrinkle in Time','Anne of Green Gables','Beloved','Brave New World','Catch-22','Charlotte\'s Web','Crime and Punishment','Dune','Emma','Fahrenheit 451','Frankenstein','Gone Girl','Great Expectations','Hamlet','Jane Eyre','Little Women','Lolita','Moby-Dick','Normal People','Of Mice and Men','On the Road','One Hundred Years of Solitude','Persuasion','Pride and Prejudice','Rebecca','Sense and Sensibility','Slaughterhouse-Five','The Bell Jar','The Book Thief','The Catcher in the Rye','The Color Purple','The Fellowship of the Ring','The Giver','The Goldfinch','The Great Gatsby','The Handmaid\'s Tale','The Hobbit','The Hunger Games','The Kite Runner','The Little Prince','The Lord of the Flies','The Odyssey','The Secret History','The Shining','The Sun Also Rises','The Trial','The Wind-Up Bird Chronicle','To Kill a Mockingbird','Wuthering Heights']
   },
   {
-    family: 'Consultancies',
-    makeTitle: v => `Consultancies ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 4 + i) % lexicons.adjectives.length]} ${['Advisory','Partners','Consulting','Strategy','Group'][Math.floor((v + i) % 5)]}`
+    family: 'Film titles',
+    proper: true,
+    items: ['Alien','Amadeus','Barbie','Black Panther','Blade Runner','Casablanca','Chinatown','Coco','Die Hard','Dune','E.T. the Extra-Terrestrial','Fight Club','Forrest Gump','Get Out','Gladiator','Goodfellas','Gravity','Her','Inception','Inside Out','Interstellar','Jaws','Jurassic Park','La La Land','Mad Max: Fury Road','Memento','Moonlight','No Country for Old Men','Parasite','Psycho','Ratatouille','Rear Window','Rocky','Roma','Scream','Shrek','Spotlight','The Batman','The Dark Knight','The Departed','The Godfather','The Grand Budapest Hotel','The Incredibles','The Matrix','The Silence of the Lambs','The Social Network','The Sound of Music','The Wizard of Oz','Titanic','Toy Story','Up','Whiplash']
   },
   {
-    family: 'Podcast titles',
-    makeTitle: v => `Podcast titles ${v + 1}`,
-    makeItem: (v, i) => `${lexicons.adjectives[(v * 8 + i) % lexicons.adjectives.length]} ${['Talk','Radio','Stories','Notes','Weekly'][Math.floor((v + i) % 5)]}`
+    family: 'Authors',
+    proper: true,
+    items: ['Agatha Christie','Alice Munro','Ann Patchett','Anthony Doerr','Arundhati Roy','Atwood','Barbara Kingsolver','Brandon Sanderson','C.S. Lewis','Charles Dickens','Chimamanda Ngozi Adichie','Colleen Hoover','Cormac McCarthy','Donna Tartt','Douglas Adams','Edith Wharton','Elena Ferrante','Emily Brontë','Ernest Hemingway','F. Scott Fitzgerald','George Eliot','George Orwell','Gillian Flynn','Harper Lee','Hilary Mantel','Ian McEwan','Isabel Allende','J.K. Rowling','J.R.R. Tolkien','Jane Austen','James Baldwin','John Grisham','John Steinbeck','Kazuo Ishiguro','Khaled Hosseini','Louisa May Alcott','Margaret Atwood','Michael Ondaatje','Oscar Wilde','Ray Bradbury','Salman Rushdie','Stephen King','Toni Morrison','Virginia Woolf','Zadie Smith']
+  },
+  {
+    family: 'TV shows',
+    proper: true,
+    items: ['Abbott Elementary','Arrested Development','Better Call Saul','Big Little Lies','Black Mirror','Breaking Bad','Bridgerton','Buffy the Vampire Slayer','Community','Curb Your Enthusiasm','Dawson\'s Creek','Deadwood','ER','Fargo','Friday Night Lights','Friends','Game of Thrones','Gilmore Girls','Gossip Girl','Grey\'s Anatomy','House','How I Met Your Mother','Killing Eve','Law & Order','Lost','Mad Men','Modern Family','New Girl','Only Murders in the Building','Parks and Recreation','Peaky Blinders','Schitt\'s Creek','Seinfeld','Sex and the City','Stranger Things','Succession','Ted Lasso','The Bear','The Crown','The Good Place','The Last of Us','The Office','The Sopranos','The West Wing','The Wire','Twin Peaks','Veep','Yellowjackets']
+  },
+  {
+    family: 'US states',
+    proper: true,
+    items: ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming']
+  },
+  {
+    family: 'European countries',
+    proper: true,
+    items: ['Albania','Andorra','Austria','Belarus','Belgium','Bosnia and Herzegovina','Bulgaria','Croatia','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Iceland','Ireland','Italy','Kosovo','Latvia','Liechtenstein','Lithuania','Luxembourg','Malta','Moldova','Monaco','Montenegro','Netherlands','North Macedonia','Norway','Poland','Portugal','Romania','San Marino','Serbia','Slovakia','Slovenia','Spain','Sweden','Switzerland','Ukraine','United Kingdom','Vatican City']
+  },
+  {
+    family: 'Household items',
+    proper: false,
+    items: ['alarm clock','armchair','bath mat','bed frame','blanket','bookshelf','broom','cabinet','calendar','candlestick','carpet','chair','coat rack','coffee table','cushion','desk lamp','dish rack','dresser','dustpan','duvet','fan','floor lamp','garbage bin','hanger','headboard','iron','ironing board','laundry basket','mattress','mirror','nightstand','ottoman','pillow','plunger','rug','shelf','shoe rack','side table','sofa','stool','table lamp','throw pillow','toilet brush','towel rack','vacuum','wardrobe','wastebasket']
   }
 ];
 
@@ -205,36 +139,22 @@ function getISOWeekInfo(date) {
   };
 }
 
-function uniqueItems(builder, variant) {
-  const items = [];
-  const used = new Set();
-  let i = 0;
-  while (items.length < CATEGORY_SIZE && i < 1000) {
-    let item = builder(variant, i).replace(/\s+/g, ' ').trim();
-    if (used.has(item)) {
-      const suffix = `${lexicons.adjectives[(variant * 19 + i * 7) % lexicons.adjectives.length]} ${String.fromCharCode(65 + (i % 26))}`;
-      item = `${item} ${suffix}`;
-    }
-    if (!used.has(item)) {
-      used.add(item);
-      items.push(item);
-    }
-    i += 1;
-  }
-  if (items.length !== CATEGORY_SIZE) throw new Error('Could not build full category');
-  return items;
+function pickItemsForVariant(pool, familySeed, variant) {
+  const rng = mulberry32(hashString(`${familySeed}:${variant}`));
+  const shuffled = shuffleInPlace(pool.slice(), rng);
+  return shuffled.slice(0, CATEGORY_SIZE);
 }
 
 function generateCategoryDatabase() {
   const categories = [];
-  const variantsPerBlueprint = CATEGORY_COUNT / categoryBlueprints.length;
-  categoryBlueprints.forEach((blueprint, blueprintIndex) => {
-    for (let variant = 0; variant < variantsPerBlueprint; variant += 1) {
+  const variantsPerFamily = CATEGORY_COUNT / FAMILY_POOLS.length;
+  FAMILY_POOLS.forEach((family, familyIndex) => {
+    for (let variant = 0; variant < variantsPerFamily; variant += 1) {
       categories.push({
-        id: `cat-${String(blueprintIndex).padStart(2, '0')}-${String(variant).padStart(2, '0')}`,
-        family: blueprint.family,
-        title: blueprint.makeTitle(variant),
-        items: uniqueItems(blueprint.makeItem, variant)
+        id: `cat-${String(familyIndex).padStart(2, '0')}-${String(variant).padStart(2, '0')}`,
+        family: family.family,
+        title: `${family.family} ${variant + 1}`,
+        items: pickItemsForVariant(family.items, family.id || family.family, variant)
       });
     }
   });
@@ -243,15 +163,15 @@ function generateCategoryDatabase() {
 
 const CATEGORY_DB = generateCategoryDatabase();
 
-function pickWeeklyCategories(count, seedKey, offset = 0) {
-  const rng = mulberry32(hashString(`${seedKey}:${offset}`));
+function pickWeeklyCategories(count, seedKey) {
+  const rng = mulberry32(hashString(`${seedKey}:weekly`));
   const indices = Array.from({ length: CATEGORY_DB.length }, (_, i) => i);
   shuffleInPlace(indices, rng);
   return indices.slice(0, count).map(i => structuredClone(CATEGORY_DB[i]));
 }
 
 function createMegaState(weekKey) {
-  const categories = pickWeeklyCategories(MEGA_PICK_COUNT, weekKey, 1);
+  const categories = pickWeeklyCategories(MEGA_PICK_COUNT, weekKey);
   const tiles = [];
   categories.forEach((category, catIndex) => {
     category.items.forEach((item, itemIndex) => {
@@ -276,32 +196,6 @@ function createMegaState(weekKey) {
   };
 }
 
-function createMiniState(weekKey) {
-  const categories = pickWeeklyCategories(MINI_PICK_COUNT, weekKey, 2).map((category, idx) => ({
-    ...category,
-    difficulty: colourGroups[idx]
-  }));
-  const tiles = categories.flatMap(category => {
-    const rng = mulberry32(hashString(`${weekKey}:${category.id}:mini`));
-    return shuffleInPlace(category.items.slice(0, 4), rng).map((item, itemIndex) => ({
-      id: `mini-${category.id}-${itemIndex}`,
-      categoryId: category.id,
-      text: item,
-      selected: false,
-      solved: false
-    }));
-  });
-  shuffleInPlace(tiles, mulberry32(hashString(`${weekKey}:mini:tiles`)));
-  return {
-    weekKey,
-    mistakesLeft: 4,
-    solvedOrder: [],
-    done: false,
-    categories,
-    tiles
-  };
-}
-
 const weekInfo = getISOWeekInfo(new Date());
 const megaStorageKey = `connections-mega:${weekInfo.key}`;
 
@@ -318,7 +212,7 @@ function loadState(key, fallbackFactory) {
 let megaState = loadState(megaStorageKey, () => createMegaState(weekInfo.key));
 let megaSelectionTick = 0;
 
-function saveStates() {
+function saveState() {
   localStorage.setItem(megaStorageKey, JSON.stringify(megaState));
 }
 
@@ -327,12 +221,25 @@ function megaSelectedTiles() {
 }
 
 function clearMegaSelection() {
-  megaState.tiles.forEach(tile => { tile.selected = false; });
+  megaState.tiles.forEach(tile => {
+    tile.selected = false;
+    delete tile.selectedAt;
+  });
+}
+
+function formatGroup(words, previewCount = null) {
+  const shown = previewCount ? words.slice(0, previewCount) : words;
+  const pieces = shown.map(word => `[${word}]`);
+  if (previewCount && words.length > previewCount) {
+    pieces.push(`… [${words.length}]`);
+  }
+  return pieces.join(', ');
 }
 
 function handleMegaTileClick(id) {
   const tile = megaState.tiles.find(t => t.id === id);
   if (!tile || tile.solved) return;
+
   const selected = megaSelectedTiles();
   if (tile.selected) {
     tile.selected = false;
@@ -340,64 +247,79 @@ function handleMegaTileClick(id) {
     renderMega();
     return;
   }
+
   if (selected.length >= 2) {
     clearMegaSelection();
-    megaState.tiles.forEach(t => { delete t.selectedAt; });
   }
+
   tile.selected = true;
   tile.selectedAt = ++megaSelectionTick;
-  const nowSelected = megaSelectedTiles().sort((x, y) => (x.selectedAt || 0) - (y.selectedAt || 0));
-  if (nowSelected.length === 2) {
-    const [firstTile, secondTile] = nowSelected;
-    if (firstTile.categoryId === secondTile.categoryId) {
-      const originalIndexA = megaState.tiles.findIndex(t => t.id === firstTile.id);
-      const originalIndexB = megaState.tiles.findIndex(t => t.id === secondTile.id);
-      const secondTileIndexAfterRemoval = originalIndexA < originalIndexB ? originalIndexB - 1 : originalIndexB;
-      megaState.tiles = megaState.tiles.filter(t => t.id !== firstTile.id && t.id !== secondTile.id);
-      const combined = {
-        ...secondTile,
-        words: [...firstTile.words, ...secondTile.words],
-        selected: false,
-        solved: firstTile.words.length + secondTile.words.length === CATEGORY_SIZE
-      };
-      delete combined.selectedAt;
-      megaState.tiles.splice(secondTileIndexAfterRemoval, 0, combined);
-      megaState.score += 1;
-      megaState.done = megaState.tiles.filter(t => !t.solved).length === 0;
-    } else {
-      megaState.mistakes += 1;
-      [firstTile, secondTile].forEach(t => {
-        t.bad = true;
-        t.selected = false;
-        delete t.selectedAt;
-      });
-      setTimeout(() => {
-        megaState.tiles.forEach(t => { delete t.bad; });
-        renderMega();
-      }, 300);
-    }
-    saveStates();
+
+  const nowSelected = megaSelectedTiles().sort((a, b) => (a.selectedAt || 0) - (b.selectedAt || 0));
+  if (nowSelected.length !== 2) {
+    renderMega();
+    return;
   }
+
+  const [firstTile, secondTile] = nowSelected;
+  if (firstTile.categoryId === secondTile.categoryId) {
+    const firstIndex = megaState.tiles.findIndex(t => t.id === firstTile.id);
+    const secondIndex = megaState.tiles.findIndex(t => t.id === secondTile.id);
+    const mergedTile = {
+      ...secondTile,
+      words: [...firstTile.words, ...secondTile.words],
+      selected: false,
+      solved: firstTile.words.length + secondTile.words.length === CATEGORY_SIZE
+    };
+    delete mergedTile.selectedAt;
+
+    megaState.tiles = megaState.tiles.filter(t => t.id !== firstTile.id && t.id !== secondTile.id);
+    const insertIndex = firstIndex < secondIndex ? secondIndex - 1 : secondIndex;
+    megaState.tiles.splice(insertIndex, 0, mergedTile);
+    megaState.score += 1;
+    megaState.done = megaState.tiles.every(t => t.solved);
+    saveState();
+    renderMega();
+    return;
+  }
+
+  [firstTile, secondTile].forEach(t => {
+    t.bad = true;
+    t.selected = false;
+    delete t.selectedAt;
+  });
+  megaState.mistakes += 1;
+  saveState();
   renderMega();
+  setTimeout(() => {
+    megaState.tiles.forEach(t => { delete t.bad; });
+    renderMega();
+  }, 300);
 }
 
 function renderMega() {
   const board = document.getElementById('megaBoard');
   const status = document.getElementById('megaStatus');
+
   status.innerHTML = `
     <span class="status-pill">Week ${weekInfo.week}, ${weekInfo.year}</span>
-    <span class="status-pill">Score ${megaState.score}</span>
+    <span class="status-pill">Moves ${megaState.score}</span>
     <span class="status-pill">Mistakes ${megaState.mistakes}</span>
     <span class="status-pill">Open tiles ${megaState.tiles.filter(t => !t.solved).length}</span>
   `;
+
   board.innerHTML = '';
   megaState.tiles.forEach(tile => {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = `tile ${tile.words.length === 1 ? 'single' : 'merged'} ${tile.solved ? 'solved-tile' : ''} ${tile.selected ? 'selected' : ''} ${tile.bad ? 'bad' : ''} ${tile.words.length > 2 ? 'hoverable' : ''}`;
-    const preview = tile.words.length > 2 ? `${tile.words.slice(0, 2).join(', ')}, …` : tile.words.join(', ');
-    const category = megaState.categories.find(c => c.id === tile.categoryId);
-    el.innerHTML = `<span>${preview}</span>${tile.words.length > 2 ? `<span class="hover-content"><strong>${category.title}</strong><br>${tile.words.join(', ')}</span>` : ''}`;
+
+    const preview = tile.words.length === 1 ? tile.words[0] : formatGroup(tile.words, 2);
+    const popup = tile.words.length > 2
+      ? `<span class="hover-content">${formatGroup(tile.words)}<br><br>group size: ${tile.words.length}</span>`
+      : '';
+
+    el.innerHTML = `<span>${preview}</span>${popup}`;
     el.addEventListener('click', () => handleMegaTileClick(tile.id));
     board.appendChild(el);
   });
