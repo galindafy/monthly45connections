@@ -13,12 +13,16 @@
       <p class="subtitle">A weekly 45×45 merge wall.</p>
     </header>
 
-    <section id="megaView" class="view active">
-      <div class="status" id="megaStatus"></div>
-      <div id="megaBoard" class="board"></div>
-    </section>
+    <div class="controls" id="controlsRow">
+      <button id="shuffleBtn" type="button">Shuffle</button>
+      <button id="deselectBtn" type="button">Deselect</button>
+    </div>
+
+    <div class="status" id="megaStatus"></div>
+    <div id="megaBoard" class="board"></div>
   </div>
 
+  <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
