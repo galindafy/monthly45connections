@@ -1,7 +1,6 @@
 const CATEGORY_COUNT = 500;
 const CATEGORY_SIZE = 45;
 const MEGA_PICK_COUNT = 45;
-const SOLVED_COLOURS = ['var(--yellow)', 'var(--green)', 'var(--blue)', 'var(--purple)'];
 
 const FAMILY_POOLS = [
   {
@@ -47,7 +46,7 @@ const FAMILY_POOLS = [
   {
     family: 'Spices and herbs',
     proper: false,
-    items: ['allspice','anise','basil','bay leaf','caraway','cardamom','cayenne','celery seed','chervil','chili powder','chives','cilantro','cinnamon','clove','coriander','cumin','curry powder','dill','fennel','fenugreek','garlic powder','ginger','lavender','lemongrass','marjoram','mint','mustard seed','nutmeg','oregano','paprika','parsley','peppermint','rosemary','saffron','sage','savory','sesame','star anise','sumac','tarragon','thyme','turmeric','vanilla','za’atar','white pepper','black pepper','juniper']
+    items: ['allspice','anise','basil','bay leaf','caraway','cardamom','cayenne','celery seed','chervil','chili powder','chives','cilantro','cinnamon','clove','coriander','cumin','curry powder','dill','fennel','fenugreek','garlic powder','ginger','lavender','lemongrass','marjoram','mint','mustard seed','nutmeg','oregano','paprika','parsley','peppermint','rosemary','saffron','sage','savory','sesame','star anise','sumac','tarragon','thyme','turmeric','vanilla']
   },
   {
     family: 'Pasta shapes',
@@ -97,7 +96,7 @@ const FAMILY_POOLS = [
   {
     family: 'European countries',
     proper: true,
-    items: ['Albania','Andorra','Austria','Belarus','Belgium','Bosnia and Herzegovina','Bulgaria','Croatia','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Iceland','Ireland','Italy','Kosovo','Latvia','Liechtenstein','Lithuania','Luxembourg','Malta','Moldova','Monaco','Montenegro','Netherlands','North Macedonia','Norway','Poland','Portugal','Romania','San Marino','Serbia','Slovakia','Slovenia','Spain','Sweden','Switzerland','Ukraine','United Kingdom','Vatican City','Georgia']
+    items: ['Albania','Andorra','Austria','Belarus','Belgium','Bosnia and Herzegovina','Bulgaria','Croatia','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Iceland','Ireland','Italy','Kosovo','Latvia','Liechtenstein','Lithuania','Luxembourg','Malta','Moldova','Monaco','Montenegro','Netherlands','North Macedonia','Norway','Poland','Portugal','Romania','San Marino','Serbia','Slovakia','Slovenia','Spain','Sweden','Switzerland','Ukraine','United Kingdom','Vatican City']
   },
   {
     family: 'US cities',
@@ -145,43 +144,23 @@ function getISOWeekInfo(date) {
   };
 }
 
-function normaliseWord(word) {
-  return word.trim().toLocaleLowerCase();
-}
-
-function uniqueItems(items) {
-  const seen = new Set();
-  const out = [];
-  items.forEach((item) => {
-    const key = normaliseWord(item);
-    if (!seen.has(key)) {
-      seen.add(key);
-      out.push(item);
-    }
-  });
-  return out;
-}
-
 function pickItemsForVariant(pool, familySeed, variant) {
   const rng = mulberry32(hashString(`${familySeed}:${variant}`));
-  const shuffled = shuffleInPlace(uniqueItems(pool), rng);
+  const shuffled = shuffleInPlace(pool.slice(), rng);
   return shuffled.slice(0, CATEGORY_SIZE);
 }
 
 function generateCategoryDatabase() {
   const categories = [];
-  const variantsPerFamily = Math.floor(CATEGORY_COUNT / FAMILY_POOLS.length);
+  const variantsPerFamily = CATEGORY_COUNT / FAMILY_POOLS.length;
   FAMILY_POOLS.forEach((family, familyIndex) => {
     for (let variant = 0; variant < variantsPerFamily; variant += 1) {
-      const items = pickItemsForVariant(family.items, family.family, variant);
-      if (items.length === CATEGORY_SIZE) {
-        categories.push({
-          id: `cat-${String(familyIndex).padStart(2, '0')}-${String(variant).padStart(2, '0')}`,
-          family: family.family,
-          title: `${family.family} ${variant + 1}`,
-          items
-        });
-      }
+      categories.push({
+        id: `cat-${String(familyIndex).padStart(2, '0')}-${String(variant).padStart(2, '0')}`,
+        family: family.family,
+        title: `${family.family} ${variant + 1}`,
+        items: pickItemsForVariant(family.items, family.id || family.family, variant)
+      });
     }
   });
   return categories;
@@ -193,7 +172,7 @@ function pickWeeklyCategories(count, seedKey) {
   const rng = mulberry32(hashString(`${seedKey}:weekly`));
   const indices = Array.from({ length: CATEGORY_DB.length }, (_, i) => i);
   shuffleInPlace(indices, rng);
-  return indices.slice(0, count).map((i) => structuredClone(CATEGORY_DB[i]));
+  return indices.slice(0, count).map(i => structuredClone(CATEGORY_DB[i]));
 }
 
 function createMegaState(weekKey) {
@@ -206,22 +185,17 @@ function createMegaState(weekKey) {
         categoryId: category.id,
         words: [item],
         solved: false,
-        selected: false,
-        solvedOrder: null,
-        order: tiles.length
+        selected: false
       });
     });
   });
   const rng = mulberry32(hashString(`${weekKey}:mega:tiles`));
-  shuffleInPlace(tiles, rng).forEach((tile, index) => {
-    tile.order = index;
-  });
+  shuffleInPlace(tiles, rng);
   return {
     weekKey,
     score: 0,
     mistakes: 0,
     done: false,
-    solvedCount: 0,
     categories,
     tiles
   };
@@ -234,13 +208,7 @@ function loadState(key, fallbackFactory) {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return fallbackFactory();
-    const parsed = JSON.parse(raw);
-    parsed.solvedCount = parsed.solvedCount || parsed.tiles.filter((tile) => tile.solved).length;
-    parsed.tiles.forEach((tile, index) => {
-      if (typeof tile.order !== 'number') tile.order = index;
-      if (typeof tile.words === 'string') tile.words = tile.words.split(',').map((part) => part.trim()).filter(Boolean);
-    });
-    return parsed;
+    return JSON.parse(raw);
   } catch {
     return fallbackFactory();
   }
@@ -254,44 +222,26 @@ function saveState() {
 }
 
 function megaSelectedTiles() {
-  return megaState.tiles.filter((tile) => tile.selected && !tile.solved);
+  return megaState.tiles.filter(tile => tile.selected && !tile.solved);
 }
 
 function clearMegaSelection() {
-  megaState.tiles.forEach((tile) => {
+  megaState.tiles.forEach(tile => {
     tile.selected = false;
     delete tile.selectedAt;
   });
 }
 
-function uniqueWords(words) {
-  const seen = new Set();
-  const out = [];
-  words.forEach((word) => {
-    const key = normaliseWord(word);
-    if (!seen.has(key)) {
-      seen.add(key);
-      out.push(word);
-    }
-  });
-  return out;
-}
-
 function formatGroup(words, previewCount = null) {
-  const cleanWords = uniqueWords(words);
-  if (previewCount && cleanWords.length > previewCount) {
-    const shown = cleanWords.slice(0, previewCount).join(', ');
-    return `${shown}, ... [${cleanWords.length}]`;
+  if (previewCount && words.length > previewCount) {
+    const shown = words.slice(0, previewCount).join(', ');
+    return `${shown}, ... [${words.length}]`;
   }
-  return cleanWords.join(', ');
-}
-
-function getSolvedColour(order) {
-  return SOLVED_COLOURS[order % SOLVED_COLOURS.length];
+  return words.join(', ');
 }
 
 function handleMegaTileClick(id) {
-  const tile = megaState.tiles.find((entry) => entry.id === id);
+  const tile = megaState.tiles.find(t => t.id === id);
   if (!tile || tile.solved) return;
 
   const selected = megaSelectedTiles();
@@ -317,58 +267,38 @@ function handleMegaTileClick(id) {
 
   const [firstTile, secondTile] = nowSelected;
   if (firstTile.categoryId === secondTile.categoryId) {
-    const firstIndex = megaState.tiles.findIndex((entry) => entry.id === firstTile.id);
-    const secondIndex = megaState.tiles.findIndex((entry) => entry.id === secondTile.id);
-    const mergedWords = uniqueWords([...firstTile.words, ...secondTile.words]);
-    const solved = mergedWords.length === CATEGORY_SIZE;
+    const firstIndex = megaState.tiles.findIndex(t => t.id === firstTile.id);
+    const secondIndex = megaState.tiles.findIndex(t => t.id === secondTile.id);
     const mergedTile = {
       ...secondTile,
-      words: mergedWords,
+      words: [...firstTile.words, ...secondTile.words],
       selected: false,
-      solved,
-      solvedOrder: solved ? megaState.solvedCount : null,
-      order: secondTile.order
+      solved: firstTile.words.length + secondTile.words.length === CATEGORY_SIZE
     };
     delete mergedTile.selectedAt;
 
-    megaState.tiles = megaState.tiles.filter((entry) => entry.id !== firstTile.id && entry.id !== secondTile.id);
+    megaState.tiles = megaState.tiles.filter(t => t.id !== firstTile.id && t.id !== secondTile.id);
     const insertIndex = firstIndex < secondIndex ? secondIndex - 1 : secondIndex;
     megaState.tiles.splice(insertIndex, 0, mergedTile);
-
-    if (solved) {
-      megaState.solvedCount += 1;
-    }
-
     megaState.score += 1;
-    megaState.done = megaState.tiles.every((entry) => entry.solved);
+    megaState.done = megaState.tiles.every(t => t.solved);
     saveState();
     renderMega();
     return;
   }
 
-  [firstTile, secondTile].forEach((entry) => {
-    entry.bad = true;
-    entry.selected = false;
-    delete entry.selectedAt;
+  [firstTile, secondTile].forEach(t => {
+    t.bad = true;
+    t.selected = false;
+    delete t.selectedAt;
   });
   megaState.mistakes += 1;
   saveState();
   renderMega();
   setTimeout(() => {
-    megaState.tiles.forEach((entry) => {
-      delete entry.bad;
-    });
+    megaState.tiles.forEach(t => { delete t.bad; });
     renderMega();
   }, 300);
-}
-
-function tilesForDisplay() {
-  return megaState.tiles.slice().sort((a, b) => {
-    if (a.solved && b.solved) return (a.solvedOrder ?? 0) - (b.solvedOrder ?? 0);
-    if (a.solved) return -1;
-    if (b.solved) return 1;
-    return (a.order ?? 0) - (b.order ?? 0);
-  });
 }
 
 function renderMega() {
@@ -382,25 +312,18 @@ function renderMega() {
   `;
 
   board.innerHTML = '';
-  tilesForDisplay().forEach((tile) => {
+  megaState.tiles.forEach(tile => {
     const el = document.createElement('button');
-    const isHoverable = tile.words.length > 2;
     el.type = 'button';
-    el.className = `tile ${tile.words.length === 1 ? 'single' : 'merged'} ${tile.solved ? 'solved-tile' : ''} ${tile.selected ? 'selected' : ''} ${tile.bad ? 'bad' : ''} ${isHoverable ? 'hoverable' : ''}`;
-    el.disabled = tile.solved;
-    if (tile.solved) {
-      el.style.background = getSolvedColour(tile.solvedOrder || 0);
-      el.style.borderColor = 'rgba(0,0,0,.08)';
-      el.style.cursor = 'default';
-    }
+    el.className = `tile ${tile.words.length === 1 ? 'single' : 'merged'} ${tile.solved ? 'solved-tile' : ''} ${tile.selected ? 'selected' : ''} ${tile.bad ? 'bad' : ''} ${tile.words.length > 2 ? 'hoverable' : ''}`;
 
     const preview = tile.words.length === 1 ? tile.words[0] : formatGroup(tile.words, 2);
-    const popup = isHoverable ? `<span class="hover-content">${formatGroup(tile.words)}</span>` : '';
+    const popup = tile.words.length > 2
+      ? `<span class="hover-content">${formatGroup(tile.words)}<br><br>group size: ${tile.words.length}</span>`
+      : '';
 
     el.innerHTML = `<span>${preview}</span>${popup}`;
-    if (!tile.solved) {
-      el.addEventListener('click', () => handleMegaTileClick(tile.id));
-    }
+    el.addEventListener('click', () => handleMegaTileClick(tile.id));
     board.appendChild(el);
   });
 }

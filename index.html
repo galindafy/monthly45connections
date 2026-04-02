@@ -3,18 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connections Weekly 45x45</title>
+  <title>Weekly Connections Wall</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app">
     <header class="topbar">
-      <h1>Connections<br>Weekly 45x45</h1>
-      <p class="subtitle">A weekly 45×45 merge wall.</p>
+      <h1>Weekly Connections Wall</h1>
+      <p class="subtitle">A weekly puzzle set with a classic 4×4 board and a 45×45 merge wall.</p>
     </header>
 
-    <section id="megaView" class="view active">
+    <div class="controls mode-switch">
+      <button id="miniModeBtn" class="active">Weekly Connections</button>
+      <button id="megaModeBtn">Weekly 45×45</button>
+      <button id="resetWeekBtn">Reset This Week</button>
+    </div>
+
+    <section id="miniView" class="view active">
+      <div class="status" id="miniStatus"></div>
+      <div class="controls mini-controls">
+        <button id="miniShuffleBtn">Shuffle</button>
+        <button id="miniDeselectBtn">Deselect</button>
+        <button id="miniSubmitBtn">Submit</button>
+      </div>
+      <div id="miniSolved" class="solved-groups"></div>
+      <div id="miniBoard" class="mini-board"></div>
+    </section>
+
+    <section id="megaView" class="view">
       <div class="status" id="megaStatus"></div>
+      <div class="controls mega-controls">
+        <button id="megaDeselectBtn">Deselect</button>
+        <button id="megaAutoPackBtn">Pack Left</button>
+      </div>
       <div id="megaBoard" class="board"></div>
     </section>
   </div>
