@@ -34,14 +34,14 @@ const FAMILY_POOLS = [
     items: ['alyssum','anemone','aster','azalea','begonia','bellflower','black-eyed susan','bluebell','buttercup','camellia','carnation','chrysanthemum','clematis','columbine','coneflower','cosmos','crocus','dahlia','daisy','delphinium','foxglove','freesia','gardenia','geranium','gladiolus','hibiscus','hollyhock','hydrangea','iris','jasmine','lavender','lilac','lily','magnolia','marigold','nasturtium','orchid','pansy','peony','petunia','phlox','poppy','primrose','ranunculus','rose','snapdragon','sunflower','sweet pea','tulip','verbena','violet','wisteria','zinnia']
   },
   {
-    family: 'Birds',
-    proper: false,
-    items: ['albatross','blue jay','canary','cardinal','chickadee','cockatoo','condor','crane','crow','cuckoo','dove','duck','eagle','egret','falcon','finch','flamingo','goose','gull','hawk','heron','hummingbird','ibis','jay','kingfisher','kiwi','lark','loon','macaw','magpie','mockingbird','nightingale','oriole','osprey','owl','parakeet','parrot','peacock','pelican','penguin','pheasant','pigeon','puffin','quail','raven','robin','seagull','sparrow','starling','stork','swallow','swan','toucan','turkey','vulture','warbler','woodpecker','wren']
+    family: 'Sci-fi shows',
+    proper: true,
+    items: ['Andor','Battlestar Galactica','Black Mirror','Doctor Who','Fallout','Firefly','For All Mankind','Foundation','Fringe','Futurama','Humans','Lost in Space','Orphan Black','Quantum Leap','Raised by Wolves','Red Dwarf','Silo','Star Trek','Star Trek: Discovery','Star Trek: Picard','Star Trek: Strange New Worlds','Star Wars: The Clone Wars','Stargate Atlantis','Stargate SG-1','Stranger Things','The 100','The Expanse','The Last of Us','The Mandalorian','The OA','The Orville','The Peripheral','The Twilight Zone','Torchwood','Travelers','Westworld','Severance','Snowpiercer','Upload','Terminator: The Sarah Connor Chronicles','Counterpart','Farscape','Dark Matter','The X-Files','Continuum','Caprica','Halo','Lexx','Resident Alien','11.22.63']
   },
   {
-    family: 'Insects',
-    proper: false,
-    items: ['ant','aphid','beetle','bee','bumblebee','butterfly','caddisfly','cicada','cockroach','cricket','damselfly','dragonfly','earwig','firefly','flea','fruit fly','gnat','grasshopper','hornet','horsefly','lacewing','ladybug','lanternfly','locust','mantis','mayfly','midge','moth','mosquito','nymph','paper wasp','pill bug','praying mantis','scarab','silverfish','slug moth','stink bug','stonefly','termite','thrips','tick','walking stick','water strider','weevil','whitefly','yellowjacket']
+    family: 'Comic artists',
+    proper: true,
+    items: ['Al Capp','Alex Ross','Art Spiegelman','Bill Watterson','Charles Addams','Chris Ware','Daniel Clowes','David Mazzucchelli','Frank Cho','Frank Miller','Gary Larson','George Herriman','Gil Kane','Greg Capullo','Jack Kirby','Jaime Hernandez','Jeff Smith','Jim Davis','Jim Lee','Joe Kubert','John Buscema','John Byrne','Lynn Johnston','Marjane Satrapi','Matt Groening','Mike Mignola','Moebius','Neal Adams','Osamu Tezuka','P. Craig Russell','Patrick McDonnell','Quino','Raina Telgemeier','Rob Liefeld','Robert Crumb','Rumiko Takahashi','Sergio Aragones','Stan Sakai','Steve Ditko','Terry Moore','Todd McFarlane','Walt Kelly','Winsor McCay','Will Eisner','Lynda Barry','Adrian Tomine','Alison Bechdel','Darwyn Cooke','Fiona Staples','Gerry Trudeau']
   },
   {
     family: 'Spices and herbs',
@@ -54,14 +54,14 @@ const FAMILY_POOLS = [
     items: ['acini di pepe','agnolotti','anelli','bigoli','bucatini','campanelle','cannelloni','capellini','casarecce','cavatappi','cavatelli','conchiglie','ditalini','farfalle','fettuccine','filini','fusilli','gemelli','gnocchetti','lasagna','linguine','lumache','macaroni','mafaldine','manicotti','mezzi rigatoni','orecchiette','orzo','paccheri','pappardelle','pastina','penne','perciatelli','radiatori','ravioli','rigatoni','rotelle','rotini','shells','spaghetti','stelline','strozzapreti','tagliatelle','tortellini','trofie','vermicelli','ziti']
   },
   {
-    family: 'Professions',
-    proper: false,
-    items: ['accountant','actor','architect','astronomer','attorney','baker','barber','biologist','builder','butcher','carpenter','cashier','chef','chemist','coach','dentist','designer','doctor','editor','electrician','engineer','farmer','firefighter','florist','geologist','historian','illustrator','journalist','judge','lawyer','librarian','magician','mechanic','musician','nurse','optician','painter','paramedic','pharmacist','photographer','physicist','pilot','plumber','poet','politician','professor','programmer','reporter','scientist','singer','teacher','translator','veterinarian','waiter','writer']
+    family: 'Actor names',
+    proper: true,
+    items: ['Amy Adams','Andrew Garfield','Anne Hathaway','Bill Murray','Brad Pitt','Cate Blanchett','Chris Evans','Chris Hemsworth','Christian Bale','Daniel Craig','Denzel Washington','Emma Stone','Emma Thompson','Florence Pugh','Gary Oldman','Glenn Close','Harrison Ford','Idris Elba','Jodie Foster','Julia Roberts','Julianne Moore','Kate Winslet','Keanu Reeves','Kerry Washington','Leonardo DiCaprio','Lupita Nyong\'o','Mahershala Ali','Margot Robbie','Matt Damon','Meryl Streep','Michael B. Jordan','Michelle Yeoh','Natalie Portman','Nicole Kidman','Paul Mescal','Pedro Pascal','Rachel McAdams','Regina King','Ryan Gosling','Saoirse Ronan','Scarlett Johansson','Sigourney Weaver','Tom Cruise','Tom Hanks','Viola Davis','Will Smith','Zendaya','Robert Downey Jr.','Sandra Bullock','Jake Gyllenhaal']
   },
   {
-    family: 'Kitchen appliances',
+    family: 'Things found in an office',
     proper: false,
-    items: ['air fryer','blender','bread maker','coffee grinder','coffee maker','deep fryer','dishwasher','double oven','electric kettle','espresso machine','food processor','freezer','fridge','griddle','hand mixer','hot plate','ice maker','immersion blender','induction hob','juicer','microwave','oven','pressure cooker','range hood','rice cooker','slow cooker','stand mixer','steam oven','stove','tea kettle','toaster','toaster oven','waffle maker','warming drawer']
+    items: ['binder','binder clip','bookshelf','briefcase','bulletin board','calculator','calendar','chair','clipboard','coffee mug','computer mouse','conference phone','desk','desk lamp','drawer','envelope','eraser','filing cabinet','folder','highlighter','hole punch','keyboard','lanyard','letter opener','monitor','notebook','paper clips','paper shredder','pen','pencil','pencil cup','planner','printer','projector','pushpin','recycling bin','ruler','scissors','speakerphone','stapler','sticky notes','surge protector','tape dispenser','telephone','whiteboard','work badge','writing pad','mail tray','scanner','rolling chair']
   },
   {
     family: 'Book titles',
@@ -69,14 +69,19 @@ const FAMILY_POOLS = [
     items: ['1984','A Farewell to Arms','A Little Life','A Tale of Two Cities','A Wrinkle in Time','Anne of Green Gables','Beloved','Brave New World','Catch-22','Charlotte\'s Web','Crime and Punishment','Dune','Emma','Fahrenheit 451','Frankenstein','Gone Girl','Great Expectations','Hamlet','Jane Eyre','Little Women','Lolita','Moby-Dick','Normal People','Of Mice and Men','On the Road','One Hundred Years of Solitude','Persuasion','Pride and Prejudice','Rebecca','Sense and Sensibility','Slaughterhouse-Five','The Bell Jar','The Book Thief','The Catcher in the Rye','The Color Purple','The Fellowship of the Ring','The Giver','The Goldfinch','The Great Gatsby','The Handmaid\'s Tale','The Hobbit','The Hunger Games','The Kite Runner','The Little Prince','The Lord of the Flies','The Odyssey','The Secret History','The Shining','The Sun Also Rises','The Trial','The Wind-Up Bird Chronicle','To Kill a Mockingbird','Wuthering Heights']
   },
   {
-    family: 'Film titles',
+    family: 'Movie titles',
     proper: true,
     items: ['Alien','Amadeus','Barbie','Black Panther','Blade Runner','Casablanca','Chinatown','Coco','Die Hard','Dune','E.T. the Extra-Terrestrial','Fight Club','Forrest Gump','Get Out','Gladiator','Goodfellas','Gravity','Her','Inception','Inside Out','Interstellar','Jaws','Jurassic Park','La La Land','Mad Max: Fury Road','Memento','Moonlight','No Country for Old Men','Parasite','Psycho','Ratatouille','Rear Window','Rocky','Roma','Scream','Shrek','Spotlight','The Batman','The Dark Knight','The Departed','The Godfather','The Grand Budapest Hotel','The Incredibles','The Matrix','The Silence of the Lambs','The Social Network','The Sound of Music','The Wizard of Oz','Titanic','Toy Story','Up','Whiplash']
   },
   {
+    family: 'Song titles',
+    proper: true,
+    items: ['All Too Well','Bad Romance','Because the Night','Billie Jean','Blank Space','Blinding Lights','Bohemian Rhapsody','Born to Run','Break Free','California Gurls','Call Me Maybe','Creep','Dancing Queen','Don\'t Stop Believin\'','Dreams','Every Breath You Take','Fast Car','Firework','Girls Just Want to Have Fun','Good 4 U','Halo','Happy','Hey Jude','Hound Dog','I Want It That Way','I Will Always Love You','Imagine','Ironic','Jolene','Levitating','Like a Prayer','Losing My Religion','Mr. Brightside','No Scrubs','One More Time','Rolling in the Deep','Shallow','Single Ladies','Smells Like Teen Spirit','Style','Take On Me','Teenage Dream','Umbrella','Vogue','Waterfalls','We Belong Together','Wonderwall','Yellow','You Belong with Me','Your Song']
+  },
+  {
     family: 'Authors',
     proper: true,
-    items: ['Agatha Christie','Alice Munro','Ann Patchett','Anthony Doerr','Arundhati Roy','Atwood','Barbara Kingsolver','Brandon Sanderson','C.S. Lewis','Charles Dickens','Chimamanda Ngozi Adichie','Colleen Hoover','Cormac McCarthy','Donna Tartt','Douglas Adams','Edith Wharton','Elena Ferrante','Emily Brontë','Ernest Hemingway','F. Scott Fitzgerald','George Eliot','George Orwell','Gillian Flynn','Harper Lee','Hilary Mantel','Ian McEwan','Isabel Allende','J.K. Rowling','J.R.R. Tolkien','Jane Austen','James Baldwin','John Grisham','John Steinbeck','Kazuo Ishiguro','Khaled Hosseini','Louisa May Alcott','Margaret Atwood','Michael Ondaatje','Oscar Wilde','Ray Bradbury','Salman Rushdie','Stephen King','Toni Morrison','Virginia Woolf','Zadie Smith']
+    items: ['Agatha Christie','Alice Munro','Ann Patchett','Anthony Doerr','Arundhati Roy','Margaret Laurence','Barbara Kingsolver','Brandon Sanderson','C.S. Lewis','Charles Dickens','Chimamanda Ngozi Adichie','Colleen Hoover','Cormac McCarthy','Donna Tartt','Douglas Adams','Edith Wharton','Elena Ferrante','Emily Brontë','Ernest Hemingway','F. Scott Fitzgerald','George Eliot','George Orwell','Gillian Flynn','Harper Lee','Hilary Mantel','Ian McEwan','Isabel Allende','J.K. Rowling','J.R.R. Tolkien','Jane Austen','James Baldwin','John Grisham','John Steinbeck','Kazuo Ishiguro','Khaled Hosseini','Louisa May Alcott','Margaret Atwood','Michael Ondaatje','Oscar Wilde','Ray Bradbury','Salman Rushdie','Stephen King','Toni Morrison','Virginia Woolf','Zadie Smith']
   },
   {
     family: 'TV shows',
@@ -94,9 +99,9 @@ const FAMILY_POOLS = [
     items: ['Albania','Andorra','Austria','Belarus','Belgium','Bosnia and Herzegovina','Bulgaria','Croatia','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Iceland','Ireland','Italy','Kosovo','Latvia','Liechtenstein','Lithuania','Luxembourg','Malta','Moldova','Monaco','Montenegro','Netherlands','North Macedonia','Norway','Poland','Portugal','Romania','San Marino','Serbia','Slovakia','Slovenia','Spain','Sweden','Switzerland','Ukraine','United Kingdom','Vatican City']
   },
   {
-    family: 'Household items',
-    proper: false,
-    items: ['alarm clock','armchair','bath mat','bed frame','blanket','bookshelf','broom','cabinet','calendar','candlestick','carpet','chair','coat rack','coffee table','cushion','desk lamp','dish rack','dresser','dustpan','duvet','fan','floor lamp','garbage bin','hanger','headboard','iron','ironing board','laundry basket','mattress','mirror','nightstand','ottoman','pillow','plunger','rug','shelf','shoe rack','side table','sofa','stool','table lamp','throw pillow','toilet brush','towel rack','vacuum','wardrobe','wastebasket']
+    family: 'US cities',
+    proper: true,
+    items: ['Albany','Albuquerque','Anchorage','Atlanta','Austin','Baltimore','Baton Rouge','Birmingham','Boise','Boston','Buffalo','Charleston','Charlotte','Chicago','Cincinnati','Cleveland','Columbus','Dallas','Denver','Detroit','El Paso','Fort Worth','Fresno','Hartford','Honolulu','Houston','Indianapolis','Jacksonville','Kansas City','Las Vegas','Little Rock','Los Angeles','Louisville','Memphis','Miami','Milwaukee','Minneapolis','Nashville','New Orleans','New York City','Oakland','Oklahoma City','Omaha','Orlando','Philadelphia','Phoenix','Pittsburgh','Portland','Raleigh','Richmond','Sacramento','Salt Lake City','San Antonio','San Diego','San Francisco','Seattle','St. Louis','Tampa','Tucson','Tulsa','Washington, D.C.']
   }
 ];
 
@@ -305,7 +310,6 @@ function renderMega() {
     <span class="status-pill">Week ${weekInfo.week}, ${weekInfo.year}</span>
     <span class="status-pill">Moves ${megaState.score}</span>
     <span class="status-pill">Mistakes ${megaState.mistakes}</span>
-    <span class="status-pill">Open tiles ${megaState.tiles.filter(t => !t.solved).length}</span>
   `;
 
   board.innerHTML = '';
