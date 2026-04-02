@@ -1,41 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-CA">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connections — Weekly 45×45</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Weekly Connections Wall</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app">
+  <div class="app">
     <header class="topbar">
-      <h1>Connections</h1>
-      <p class="subtitle">— Weekly 45×45</p>
+      <h1>Weekly Connections Wall</h1>
+      <p class="subtitle">A weekly puzzle set with a classic 4×4 board and a 45×45 merge wall.</p>
     </header>
 
-    <section class="controls">
-      <button id="shuffleBtn" type="button">Shuffle</button>
-      <button id="deselectBtn" type="button">Deselect</button>
+    <div class="controls mode-switch">
+      <button id="miniModeBtn" class="active">Weekly Connections</button>
+      <button id="megaModeBtn">Weekly 45×45</button>
+      <button id="resetWeekBtn">Reset This Week</button>
+    </div>
+
+    <section id="miniView" class="view active">
+      <div class="status" id="miniStatus"></div>
+      <div class="controls mini-controls">
+        <button id="miniShuffleBtn">Shuffle</button>
+        <button id="miniDeselectBtn">Deselect</button>
+        <button id="miniSubmitBtn">Submit</button>
+      </div>
+      <div id="miniSolved" class="solved-groups"></div>
+      <div id="miniBoard" class="mini-board"></div>
     </section>
 
-    <section class="status">
-      <div>Week of: <span id="puzzleDate">—</span></div>
-      <div>Mistakes: <span id="mistakes">0</span></div>
-      <div>Groups: <span id="groupCount">0 / 45</span></div>
+    <section id="megaView" class="view">
+      <div class="status" id="megaStatus"></div>
+      <div class="controls mega-controls">
+        <button id="megaDeselectBtn">Deselect</button>
+        <button id="megaAutoPackBtn">Pack Left</button>
+      </div>
+      <div id="megaBoard" class="board"></div>
     </section>
+  </div>
 
-    <section id="board" class="board" aria-label="Puzzle board"></section>
-  </main>
-
-  <script>
-    window.CONNECTIONS_CONFIG = {
-      storagePrefix: "connections-weekly45",
-      puzzleType: "weekly",
-      categoryCount: 45,
-      groupSize: 45,
-      version: "final-v1"
-    };
-  </script>
   <script src="app.js"></script>
 </body>
 </html>
