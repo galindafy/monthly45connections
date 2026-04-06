@@ -1,31 +1,44 @@
-(() => {
+document.addEventListener("DOMContentLoaded", () => {
   const GROUP_COUNT = 45;
   const GROUP_SIZE = 45;
   const SHAKE_MS = 320;
 
-  const STATUS_EL = document.getElementById('megaStatus');
-  const BOARD_EL = document.getElementById('megaBoard');
-  const SHUFFLE_BTN = document.getElementById('shuffleBtn');
-  const DESELECT_BTN = document.getElementById('deselectBtn');
+  const STATUS_EL =
+    document.getElementById("megaStatus") ||
+    document.querySelector(".status");
+
+  const BOARD_EL =
+    document.getElementById("megaBoard") ||
+    document.querySelector(".board");
+
+  const SHUFFLE_BTN = document.getElementById("shuffleBtn");
+  const DESELECT_BTN = document.getElementById("deselectBtn");
 
   const CATEGORY_BANK = Array.isArray(window.CATEGORY_BANK) ? window.CATEGORY_BANK : [];
   const STORAGE_KEY = `connections45:${getWeekInfo().key}`;
 
-  let state = loadState() || buildWeeklyState();
+  let state = loadState();
+
   if (!isValidState(state)) {
     state = buildWeeklyState();
+    saveState();
   }
 
   wireControls();
   render();
 
   function wireControls() {
-    if (SHUFFLE_BTN) SHUFFLE_BTN.addEventListener('click', shuffleOpenTiles);
-    if (DESELECT_BTN) DESELECT_BTN.addEventListener('click', () => {
-      state.selected = [];
-      saveState();
-      render();
-    });
+    if (SHUFFLE_BTN) {
+      SHUFFLE_BTN.addEventListener("click", shuffleOpenTiles);
+    }
+
+    if (DESELECT_BTN) {
+      DESELECT_BTN.addEventListener("click", () => {
+        state.selected = [];
+        saveState();
+        render();
+      });
+    }
   }
 
   function buildWeeklyState() {
@@ -51,18 +64,24 @@
       selected: [],
       mistakes: 0,
       score: 0,
-      tiles: shuffleArray(tiles, seededRandom(hashString(getWeekInfo().key + ':tiles')))
+      tiles: shuffleArray(
+        tiles,
+        seededRandom(hashString(getWeekInfo().key + ":tiles"))
+      )
     };
   }
 
   function pickWeeklyCategories() {
     const cleaned = CATEGORY_BANK.filter(isValidCategory);
+
     if (cleaned.length < GROUP_COUNT) {
-      throw new Error(`Need at least ${GROUP_COUNT} curated categories in data.js. Found ${cleaned.length}.`);
+      throw new Error(
+        `Need at least ${GROUP_COUNT} curated categories in data.js. Found ${cleaned.length}.`
+      );
     }
 
     const tries = 500;
-    const seedBase = hashString(getWeekInfo().key + ':cats');
+    const seedBase = hashString(getWeekInfo().key + ":cats");
     let best = [];
 
     for (let attempt = 0; attempt < tries; attempt += 1) {
@@ -72,29 +91,39 @@
       const used = new Set();
 
       for (const category of shuffled) {
-        if (category.items.some(item => used.has(normalize(item)))) continue;
+        if (category.items.some((item) => used.has(normalize(item)))) continue;
+
         chosen.push(category);
-        category.items.forEach(item => used.add(normalize(item)));
-        if (chosen.length === GROUP_COUNT) return chosen;
+        category.items.forEach((item) => used.add(normalize(item)));
+
+        if (chosen.length === GROUP_COUNT) {
+          return chosen;
+        }
       }
 
-      if (chosen.length > best.length) best = chosen;
+      if (chosen.length > best.length) {
+        best = chosen;
+      }
     }
 
-    throw new Error(`Only found ${best.length} duplicate-free curated categories. Need ${GROUP_COUNT}.`);
+    throw new Error(
+      `Only found ${best.length} duplicate-free curated categories. Need ${GROUP_COUNT}.`
+    );
   }
 
   function isValidCategory(category) {
-    return category
-      && typeof category.id === 'string'
-      && typeof category.title === 'string'
-      && Array.isArray(category.items)
-      && category.items.length === GROUP_SIZE
-      && new Set(category.items.map(normalize)).size === GROUP_SIZE;
+    return (
+      category &&
+      typeof category.id === "string" &&
+      typeof category.title === "string" &&
+      Array.isArray(category.items) &&
+      category.items.length === GROUP_SIZE &&
+      new Set(category.items.map(normalize)).size === GROUP_SIZE
+    );
   }
 
   function handleTileClick(id) {
-    const idx = state.tiles.findIndex(tile => tile.id === id);
+    const idx = state.tiles.findIndex((tile) => tile.id === id);
     if (idx === -1) return;
 
     const tile = state.tiles[idx];
@@ -108,6 +137,7 @@
     }
 
     const firstIdx = state.selected[0];
+
     if (firstIdx === idx) {
       state.selected = [];
       saveState();
@@ -116,6 +146,7 @@
     }
 
     const first = state.tiles[firstIdx];
+
     if (!first || first.locked) {
       state.selected = [];
       saveState();
@@ -144,9 +175,13 @@
 
     const t1 = state.tiles[i1];
     const t2 = state.tiles[i2];
-    if (!t1 || !t2 || t1.group !== t2.group || t1.locked || t2.locked) return;
+
+    if (!t1 || !t2) return;
+    if (t1.group !== t2.group) return;
+    if (t1.locked || t2.locked) return;
 
     const mergedItems = uniquePreserveOrder([...t1.items, ...t2.items]);
+
     if (mergedItems.length === t2.items.length) return;
 
     const solved = mergedItems.length === GROUP_SIZE;
@@ -169,15 +204,21 @@
   }
 
   function moveSolvedGroupToTop(group) {
-    const groupTiles = state.tiles.filter(tile => tile.group === group);
-    const others = state.tiles.filter(tile => tile.group !== group);
+    const groupTiles = state.tiles.filter((tile) => tile.group === group);
+    const others = state.tiles.filter((tile) => tile.group !== group);
     state.tiles = [...groupTiles, ...others];
   }
 
   function shuffleOpenTiles() {
-    const rng = seededRandom(hashString(`${getWeekInfo().key}:shuffle:${state.tiles.length}:${state.mistakes}:${state.score}`));
-    const locked = state.tiles.filter(tile => tile.locked);
-    const open = state.tiles.filter(tile => !tile.locked);
+    const rng = seededRandom(
+      hashString(
+        `${getWeekInfo().key}:shuffle:${state.tiles.length}:${state.mistakes}:${state.score}`
+      )
+    );
+
+    const locked = state.tiles.filter((tile) => tile.locked);
+    const open = state.tiles.filter((tile) => !tile.locked);
+
     state.tiles = [...locked, ...shuffleArray(open, rng)];
     state.selected = [];
     saveState();
@@ -186,53 +227,67 @@
 
   function countSolvedGroups() {
     const solved = new Set();
-    state.tiles.forEach(tile => {
+
+    state.tiles.forEach((tile) => {
       if (tile.locked) solved.add(tile.group);
     });
+
     return solved.size;
   }
 
   function formatPreview(items) {
-    if (items.length <= 2) return items.join(', ');
+    if (items.length <= 2) {
+      return items.join(", ");
+    }
     return `${items[0]}, ${items[1]}, ... [${items.length}]`;
   }
 
   function render(shakeIds = []) {
-    if (!STATUS_EL || !BOARD_EL) return;
+    if (STATUS_EL) {
+      const week = getWeekInfo();
+      STATUS_EL.innerHTML = [
+        `<span>Week ${week.week}, ${week.year}</span>`,
+        `<span>Score ${state.score}</span>`,
+        `<span>Mistakes ${state.mistakes}</span>`
+      ].join("");
+    }
 
-    const week = getWeekInfo();
-    STATUS_EL.innerHTML = [
-      `<span>Week ${week.week}, ${week.year}</span>`,
-      `<span>Score ${state.score}</span>`,
-      `<span>Mistakes ${state.mistakes}</span>`
-    ].join('');
+    if (!BOARD_EL) return;
 
-    BOARD_EL.innerHTML = '';
+    BOARD_EL.innerHTML = "";
 
     state.tiles.forEach((tile, idx) => {
-      const el = document.createElement('button');
-      el.type = 'button';
-      el.className = 'tile';
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "tile";
 
-      if (tile.items.length === 1) el.classList.add('single');
-      else el.classList.add('merged');
+      if (tile.items.length === 1) {
+        el.classList.add("single");
+      } else {
+        el.classList.add("merged");
+      }
 
       if (tile.locked) {
-        el.classList.add('solved-tile');
+        el.classList.add("solved-tile");
         el.style.background = solvedColour(tile.group);
       }
 
-      if (state.selected.includes(idx)) el.classList.add('selected');
-      if (shakeIds.includes(tile.id)) el.classList.add('shake');
+      if (state.selected.includes(idx)) {
+        el.classList.add("selected");
+      }
+
+      if (shakeIds.includes(tile.id)) {
+        el.classList.add("shake");
+      }
 
       el.textContent = tile.text;
-      el.addEventListener('click', () => handleTileClick(tile.id));
+      el.addEventListener("click", () => handleTileClick(tile.id));
 
       if (tile.items.length > 2 && !tile.locked) {
-        el.classList.add('hoverable');
-        const hover = document.createElement('div');
-        hover.className = 'hover-content';
-        hover.textContent = tile.items.join(', ');
+        el.classList.add("hoverable");
+        const hover = document.createElement("div");
+        hover.className = "hover-content";
+        hover.textContent = tile.items.join(", ");
         el.appendChild(hover);
       }
 
@@ -241,7 +296,12 @@
   }
 
   function solvedColour(group) {
-    const colours = ['var(--yellow)', 'var(--green)', 'var(--blue)', 'var(--purple)'];
+    const colours = [
+      "var(--yellow)",
+      "var(--green)",
+      "var(--blue)",
+      "var(--purple)"
+    ];
     return colours[group % colours.length];
   }
 
@@ -261,19 +321,22 @@
   }
 
   function isValidState(value) {
-    return value
-      && Array.isArray(value.tiles)
-      && Array.isArray(value.selected)
-      && typeof value.mistakes === 'number'
-      && typeof value.score === 'number'
-      && value.tiles.every(tile =>
-        tile
-        && typeof tile.id === 'string'
-        && typeof tile.group === 'number'
-        && typeof tile.categoryId === 'string'
-        && typeof tile.categoryTitle === 'string'
-        && Array.isArray(tile.items)
-      );
+    return (
+      value &&
+      Array.isArray(value.tiles) &&
+      Array.isArray(value.selected) &&
+      typeof value.mistakes === "number" &&
+      typeof value.score === "number" &&
+      value.tiles.every(
+        (tile) =>
+          tile &&
+          typeof tile.id === "string" &&
+          typeof tile.group === "number" &&
+          typeof tile.categoryId === "string" &&
+          typeof tile.categoryTitle === "string" &&
+          Array.isArray(tile.items)
+      )
+    );
   }
 
   function getWeekInfo() {
@@ -283,10 +346,11 @@
     date.setUTCDate(date.getUTCDate() + 4 - day);
     const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
     const week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+
     return {
       year: date.getUTCFullYear(),
       week,
-      key: `${date.getUTCFullYear()}-W${String(week).padStart(2, '0')}`
+      key: `${date.getUTCFullYear()}-W${String(week).padStart(2, "0")}`
     };
   }
 
@@ -320,19 +384,21 @@
   }
 
   function normalize(value) {
-    return String(value).trim().toLowerCase().replace(/\s+/g, ' ');
+    return String(value).trim().toLowerCase().replace(/\s+/g, " ");
   }
 
   function uniquePreserveOrder(items) {
     const seen = new Set();
     const out = [];
-    items.forEach(item => {
+
+    items.forEach((item) => {
       const key = normalize(item);
       if (!seen.has(key)) {
         seen.add(key);
         out.push(item);
       }
     });
+
     return out;
   }
-})();
+});
