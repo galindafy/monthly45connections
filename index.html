@@ -1,28 +1,28 @@
-<!DOCTYPE html>
-<html lang="en-CA">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Connections Weekly 45x45</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app">
-    <header class="topbar">
+    <div class="topbar">
       <h1>Connections</h1>
-      <p class="subtitle">Weekly 45x45</p>
-    </header>
+      <div class="subtitle">Weekly 45x45</div>
+    </div>
 
-    <section id="megaView" class="view active">
-      <div class="controls">
-        <button id="shuffleBtn" type="button">Shuffle</button>
-        <button id="deselectBtn" type="button">Deselect</button>
-      </div>
-      <div class="status" id="megaStatus"></div>
-      <div id="megaBoard" class="board"></div>
-    </section>
+    <div class="controls">
+      <button id="shuffleBtn" type="button">Shuffle</button>
+      <button id="deselectBtn" type="button">Deselect</button>
+    </div>
+
+    <div class="status" id="megaStatus"></div>
+    <div class="board" id="megaBoard"></div>
   </div>
 
+  <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
