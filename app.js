@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     wireControls();
+    maybeShowResetWarning();
     render();
   } catch (error) {
     renderFatal(error);
@@ -209,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (statusEl) {
       statusEl.innerHTML = [
         `<span>Week ${weekInfo.week}, ${weekInfo.year}</span>`,
+        `<span>Resets ${formatResetDate(weekInfo.resetDate)}</span>`,
         `<span>Score ${state.score}</span>`,
         `<span>Mistakes ${state.mistakes}</span>`
       ].join("");
@@ -320,18 +322,63 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getWeekInfo() {
-    const d = new Date();
-    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    const day = date.getUTCDay() || 7;
-    date.setUTCDate(date.getUTCDate() + 4 - day);
-    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-    const week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    const now = new Date();
+    const local = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const day = local.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+
+    const monday = new Date(local);
+    monday.setDate(local.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+
+    const nextMonday = new Date(monday);
+    nextMonday.setDate(monday.getDate() + 7);
+    nextMonday.setHours(0, 0, 0, 0);
+
+    const yearStart = new Date(monday.getFullYear(), 0, 1);
+    const daysSinceYearStart = Math.floor((monday - yearStart) / 86400000);
+    const week = Math.floor(daysSinceYearStart / 7) + 1;
 
     return {
-      year: date.getUTCFullYear(),
+      year: monday.getFullYear(),
       week,
-      key: `${date.getUTCFullYear()}-W${String(week).padStart(2, "0")}`
+      key: `${monday.getFullYear()}-W${String(week).padStart(2, "0")}`,
+      resetDate: nextMonday
     };
+  }
+
+  function formatResetDate(date) {
+    return date.toLocaleDateString("en-CA", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  }
+
+  function isOneDayBeforeReset(resetDate) {
+    const now = new Date();
+    const warningDay = new Date(resetDate);
+    warningDay.setDate(warningDay.getDate() - 1);
+
+    return (
+      now.getFullYear() === warningDay.getFullYear() &&
+      now.getMonth() === warningDay.getMonth() &&
+      now.getDate() === warningDay.getDate()
+    );
+  }
+
+  function maybeShowResetWarning() {
+    const warningKey = `connections45-reset-warning:${weekInfo.key}`;
+
+    if (!isOneDayBeforeReset(weekInfo.resetDate)) return;
+    if (localStorage.getItem(warningKey) === "shown") return;
+
+    window.alert(`This puzzle resets tomorrow: ${formatResetDate(weekInfo.resetDate)}.`);
+
+    try {
+      localStorage.setItem(warningKey, "shown");
+    } catch (_) {}
   }
 
   function hashString(str) {
