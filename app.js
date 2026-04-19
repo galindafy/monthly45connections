@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   const GROUP_COUNT = 45;
   const GROUP_SIZE = 45;
@@ -9,32 +8,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const shuffleBtn = document.getElementById("shuffleBtn");
   const deselectBtn = document.getElementById("deselectBtn");
 
-  const CATEGORY_SETS = Array.isArray(window.CATEGORY_SETS) ? window.CATEGORY_SETS : [];
+  const CATEGORY_BANK = Array.isArray(window.CATEGORY_BANK) ? window.CATEGORY_BANK : [];
   const periodInfo = getMonthlyInfo();
   const STORAGE_KEY = `connections45:${periodInfo.key}`;
 
   let state;
 
   try {
-    validateCategorySets(CATEGORY_SETS);
-
+    validateCategoryBank(CATEGORY_BANK);
     state = loadState();
     if (!isValidState(state)) {
       state = buildPeriodState();
       saveState();
     }
-
     wireControls();
+    maybeShowResetWarning();
     render();
   } catch (error) {
     renderFatal(error);
   }
 
   function wireControls() {
-    if (shuffleBtn) {
-      shuffleBtn.addEventListener("click", shuffleOpenTiles);
-    }
-
+    if (shuffleBtn) shuffleBtn.addEventListener("click", shuffleOpenTiles);
     if (deselectBtn) {
       deselectBtn.addEventListener("click", () => {
         state.selected = [];
@@ -45,11 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function buildPeriodState() {
-    const categories = getActiveCategorySet().map((category, index) => ({
-      ...category,
-      group: index
-    }));
-
+    const categories = pickMonthlyCategories().map((category, index) => ({ ...category, group: index }));
     const rawTiles = [];
     categories.forEach((category) => {
       category.items.forEach((item, itemIndex) => {
@@ -64,59 +55,50 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
     });
-
     const rng = seededRandom(hashString(`${periodInfo.key}:layout`));
-    return {
-      periodKey: periodInfo.key,
-      selected: [],
-      mistakes: 0,
-      score: 0,
-      tiles: shuffleArray(rawTiles, rng)
-    };
+    return { periodKey: periodInfo.key, selected: [], mistakes: 0, score: 0, tiles: shuffleArray(rawTiles, rng) };
   }
 
-  function getActiveCategorySet() {
-    const setIndex = periodInfo.rotationIndex % CATEGORY_SETS.length;
-    return CATEGORY_SETS[setIndex];
+  function pickMonthlyCategories() {
+    const featured = CATEGORY_BANK.filter((c) => c.bucket !== "expansion");
+    const expansion = CATEGORY_BANK.filter((c) => c.bucket === "expansion");
+    const picked = [];
+    const used = new Set();
+
+    fillFromPool(featured, 28, `${periodInfo.key}:featured`, picked, used);
+    fillFromPool(expansion, 45, `${periodInfo.key}:expansion`, picked, used);
+    if (picked.length < GROUP_COUNT) fillFromPool(CATEGORY_BANK, GROUP_COUNT, `${periodInfo.key}:fallback`, picked, used);
+    if (picked.length < GROUP_COUNT) throw new Error(`Only found ${picked.length} duplicate-free categories for this month.`);
+    return picked.slice(0, GROUP_COUNT);
   }
 
-  function validateCategorySets(sets) {
-    if (!Array.isArray(sets) || sets.length < 2) {
-      throw new Error("CATEGORY_SETS is missing.");
+  function fillFromPool(pool, targetCount, seedKey, picked, used) {
+    const shuffled = shuffleArray(pool, seededRandom(hashString(seedKey)));
+    for (const category of shuffled) {
+      if (picked.length >= targetCount) break;
+      if (picked.some((x) => x.id === category.id)) continue;
+      if (!categoryFits(category, used)) continue;
+      picked.push(category);
+      category.items.forEach((item) => used.add(normalize(item)));
     }
+  }
 
-    sets.forEach((set, setIndex) => {
-      if (!Array.isArray(set)) {
-        throw new Error(`Category set ${setIndex + 1} is malformed.`);
+  function categoryFits(category, used) {
+    return category.items.every((item) => !used.has(normalize(item)));
+  }
+
+  function validateCategoryBank(bank) {
+    if (!Array.isArray(bank) || bank.length < GROUP_COUNT) throw new Error("CATEGORY_BANK is missing.");
+    bank.forEach((category, categoryIndex) => {
+      if (!category || typeof category.id !== "string" || typeof category.title !== "string" || !Array.isArray(category.items)) {
+        throw new Error(`Category ${categoryIndex + 1} is malformed.`);
       }
-      if (set.length !== GROUP_COUNT) {
-        throw new Error(`Category set ${setIndex + 1} must contain ${GROUP_COUNT} categories.`);
-      }
-
-      const seenItems = new Map();
-
-      set.forEach((category, categoryIndex) => {
-        if (!category || typeof category.id !== "string" || typeof category.title !== "string" || !Array.isArray(category.items)) {
-          throw new Error(`Category ${categoryIndex + 1} in set ${setIndex + 1} is malformed.`);
-        }
-
-        if (category.items.length !== GROUP_SIZE) {
-          throw new Error(`"${category.title}" does not have ${GROUP_SIZE} items.`);
-        }
-
-        const local = new Set();
-        category.items.forEach((item) => {
-          const key = normalize(item);
-          if (local.has(key)) {
-            throw new Error(`"${category.title}" contains a duplicate item: ${item}`);
-          }
-          local.add(key);
-
-          if (seenItems.has(key)) {
-            throw new Error(`Duplicate item in set ${setIndex + 1}: "${item}" appears in "${seenItems.get(key)}" and "${category.title}".`);
-          }
-          seenItems.set(key, category.title);
-        });
+      if (category.items.length !== GROUP_SIZE) throw new Error(`"${category.title}" does not have ${GROUP_SIZE} items.`);
+      const local = new Set();
+      category.items.forEach((item) => {
+        const key = normalize(item);
+        if (local.has(key)) throw new Error(`"${category.title}" contains a duplicate item: ${item}`);
+        local.add(key);
       });
     });
   }
@@ -124,26 +106,21 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleTileClick(id) {
     const idx = state.tiles.findIndex((tile) => tile.id === id);
     if (idx === -1) return;
-
     const tile = state.tiles[idx];
     if (!tile || tile.locked) return;
-
     if (state.selected.length === 0) {
       state.selected = [idx];
       saveState();
       render();
       return;
     }
-
     const firstIdx = state.selected[0];
-
     if (firstIdx === idx) {
       state.selected = [];
       saveState();
       render();
       return;
     }
-
     const first = state.tiles[firstIdx];
     if (!first || first.locked) {
       state.selected = [];
@@ -151,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
       render();
       return;
     }
-
     if (first.group !== tile.group) {
       state.mistakes += 1;
       state.selected = [];
@@ -160,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => render(), SHAKE_MS);
       return;
     }
-
     mergeTiles(firstIdx, idx);
     state.selected = [];
     state.score = countSolvedGroups();
@@ -170,23 +145,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function mergeTiles(i1, i2) {
     if (i1 === i2) return;
-
     const t1 = state.tiles[i1];
     const t2 = state.tiles[i2];
     if (!t1 || !t2 || t1.group !== t2.group || t1.locked || t2.locked) return;
-
     const mergedItems = uniquePreserveOrder([...t1.items, ...t2.items]);
     if (mergedItems.length === t2.items.length) return;
-
     const solved = mergedItems.length === GROUP_SIZE;
-
-    state.tiles[i2] = {
-      ...t2,
-      items: mergedItems,
-      text: solved ? t2.categoryTitle : formatPreview(mergedItems),
-      locked: solved
-    };
-
+    state.tiles[i2] = { ...t2, items: mergedItems, text: solved ? t2.categoryTitle : formatPreview(mergedItems), locked: solved };
     state.tiles.splice(i1, 1);
   }
 
@@ -202,16 +167,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function countSolvedGroups() {
     const solvedGroups = new Set();
-    state.tiles.forEach((tile) => {
-      if (tile.locked) solvedGroups.add(tile.group);
-    });
+    state.tiles.forEach((tile) => { if (tile.locked) solvedGroups.add(tile.group); });
     return solvedGroups.size;
   }
 
   function formatPreview(items) {
-    if (items.length <= 2) {
-      return items.join(", ");
-    }
+    if (items.length <= 2) return items.join(", ");
     return `${items[0]}, ${items[1]}, ... [${items.length}]`;
   }
 
@@ -224,37 +185,22 @@ document.addEventListener("DOMContentLoaded", () => {
         `<span>Mistakes ${state.mistakes}</span>`
       ].join("");
     }
-
     if (!boardEl) return;
     boardEl.innerHTML = "";
-
     state.tiles.forEach((tile, idx) => {
       const el = document.createElement("button");
       el.type = "button";
       el.className = "tile";
-
-      if (tile.items.length === 1) {
-        el.classList.add("single");
-      } else {
-        el.classList.add("merged");
-      }
-
+      if (tile.items.length === 1) el.classList.add("single");
+      else el.classList.add("merged");
       if (tile.locked) {
         el.classList.add("solved-tile");
         el.style.background = solvedColour(tile.group);
       }
-
-      if (state.selected.includes(idx)) {
-        el.classList.add("selected");
-      }
-
-      if (shakeIds.includes(tile.id)) {
-        el.classList.add("shake");
-      }
-
+      if (state.selected.includes(idx)) el.classList.add("selected");
+      if (shakeIds.includes(tile.id)) el.classList.add("shake");
       el.textContent = tile.text;
       el.addEventListener("click", () => handleTileClick(tile.id));
-
       if (tile.items.length > 2) {
         el.classList.add("hoverable");
         const hover = document.createElement("div");
@@ -262,18 +208,13 @@ document.addEventListener("DOMContentLoaded", () => {
         hover.textContent = tile.items.join(", ");
         el.appendChild(hover);
       }
-
       boardEl.appendChild(el);
     });
   }
 
   function renderFatal(error) {
     const message = error && error.message ? error.message : "Unknown error.";
-
-    if (statusEl) {
-      statusEl.innerHTML = `<span>Board error</span><span>${escapeHtml(message)}</span>`;
-    }
-
+    if (statusEl) statusEl.innerHTML = `<span>Board error</span><span>${escapeHtml(message)}</span>`;
     if (boardEl) {
       boardEl.innerHTML = "";
       const box = document.createElement("div");
@@ -284,8 +225,22 @@ document.addEventListener("DOMContentLoaded", () => {
       box.textContent = `Board error: ${message}`;
       boardEl.appendChild(box);
     }
-
     console.error(error);
+  }
+
+  function maybeShowResetWarning() {
+    const warningKey = `connections45-reset-warning:${periodInfo.key}`;
+    if (!isOneDayBeforeReset(periodInfo.resetDate)) return;
+    if (localStorage.getItem(warningKey) === "shown") return;
+    alert(`This puzzle resets tomorrow: ${formatDate(periodInfo.resetDate)}.`);
+    try { localStorage.setItem(warningKey, "shown"); } catch (_) {}
+  }
+
+  function isOneDayBeforeReset(resetDate) {
+    const now = new Date();
+    const marker = new Date(resetDate);
+    marker.setDate(marker.getDate() - 1);
+    return now.getFullYear() === marker.getFullYear() && now.getMonth() === marker.getMonth() && now.getDate() === marker.getDate();
   }
 
   function solvedColour(group) {
@@ -293,70 +248,22 @@ document.addEventListener("DOMContentLoaded", () => {
     return colours[group % colours.length];
   }
 
-  function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (_) {}
-  }
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch (_) {
-      return null;
-    }
-  }
+  function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
+  function loadState() { try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch (_) { return null; } }
 
   function isValidState(value) {
-    return (
-      value &&
-      value.periodKey === periodInfo.key &&
-      Array.isArray(value.tiles) &&
-      Array.isArray(value.selected) &&
-      typeof value.mistakes === "number" &&
-      typeof value.score === "number" &&
-      value.tiles.every(
-        (tile) =>
-          tile &&
-          typeof tile.id === "string" &&
-          typeof tile.group === "number" &&
-          typeof tile.categoryId === "string" &&
-          typeof tile.categoryTitle === "string" &&
-          typeof tile.text === "string" &&
-          Array.isArray(tile.items) &&
-          typeof tile.locked === "boolean"
-      )
-    );
+    return value && value.periodKey === periodInfo.key && Array.isArray(value.tiles) && Array.isArray(value.selected) && typeof value.mistakes === "number" && typeof value.score === "number" && value.tiles.every((tile) => tile && typeof tile.id === "string" && typeof tile.group === "number" && typeof tile.categoryId === "string" && typeof tile.categoryTitle === "string" && typeof tile.text === "string" && Array.isArray(tile.items) && typeof tile.locked === "boolean");
   }
 
   function getMonthlyInfo() {
     const now = new Date();
     const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    periodStart.setHours(0, 0, 0, 0);
-
     const resetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    resetDate.setHours(0, 0, 0, 0);
-
-    const monthIndex = periodStart.getMonth();
-
-    return {
-      year: periodStart.getFullYear(),
-      number: monthIndex + 1,
-      rotationIndex: (periodStart.getFullYear() * 12) + monthIndex,
-      key: `${periodStart.getFullYear()}-M${String(monthIndex + 1).padStart(2, "0")}`,
-      startDate: periodStart,
-      resetDate
-    };
+    return { year: periodStart.getFullYear(), number: periodStart.getMonth() + 1, key: `${periodStart.getFullYear()}-M${String(periodStart.getMonth() + 1).padStart(2, "0")}`, startDate: periodStart, resetDate };
   }
 
   function formatDate(date) {
-    return date.toLocaleDateString("en-CA", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric"
-    });
+    return date.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
   }
 
   function hashString(str) {
@@ -388,14 +295,11 @@ document.addEventListener("DOMContentLoaded", () => {
     return out;
   }
 
-  function normalize(value) {
-    return String(value).trim().toLowerCase().replace(/\s+/g, " ");
-  }
+  function normalize(value) { return String(value).trim().toLowerCase().replace(/\s+/g, " "); }
 
   function uniquePreserveOrder(items) {
     const seen = new Set();
     const out = [];
-
     items.forEach((item) => {
       const key = normalize(item);
       if (!seen.has(key)) {
@@ -403,14 +307,10 @@ document.addEventListener("DOMContentLoaded", () => {
         out.push(item);
       }
     });
-
     return out;
   }
 
   function escapeHtml(value) {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;");
+    return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
   }
 });
