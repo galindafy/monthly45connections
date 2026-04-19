@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function validateCategoryBank(bank) {
     if (!Array.isArray(bank) || bank.length < GROUP_COUNT) throw new Error("CATEGORY_BANK is missing.");
+    const global = new Map();
     bank.forEach((category, categoryIndex) => {
       if (!category || typeof category.id !== "string" || typeof category.title !== "string" || !Array.isArray(category.items)) {
         throw new Error(`Category ${categoryIndex + 1} is malformed.`);
@@ -99,6 +100,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const key = normalize(item);
         if (local.has(key)) throw new Error(`"${category.title}" contains a duplicate item: ${item}`);
         local.add(key);
+        if (global.has(key)) {
+          throw new Error(`Global overlap detected: "${item}" appears in both "${global.get(key)}" and "${category.title}".`);
+        }
+        global.set(key, category.title);
       });
     });
   }
