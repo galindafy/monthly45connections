@@ -9,8 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const deselectBtn = document.getElementById("deselectBtn");
 
   const CATEGORY_BANK = Array.isArray(window.CATEGORY_BANK) ? window.CATEGORY_BANK : [];
+  const BANK_SIGNATURE = hashString(CATEGORY_BANK.map((category) => category.id).join("|"));
   const periodInfo = getMonthlyInfo();
-  const STORAGE_KEY = `connections45:${periodInfo.key}`;
+  const STORAGE_KEY = `connections45:${periodInfo.key}:${BANK_SIGNATURE}`;
 
   let state;
 
@@ -56,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
     const rng = seededRandom(hashString(`${periodInfo.key}:layout`));
-    return { periodKey: periodInfo.key, selected: [], mistakes: 0, score: 0, tiles: shuffleArray(rawTiles, rng) };
+    return { periodKey: periodInfo.key, bankSignature: BANK_SIGNATURE, selected: [], mistakes: 0, score: 0, tiles: shuffleArray(rawTiles, rng) };
   }
 
   function pickMonthlyCategories() {
@@ -65,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const picked = [];
     const used = new Set();
 
-    fillFromPool(featured, GROUP_COUNT, `${periodInfo.key}:featured`, picked, used);
+    fillFromPool(featured, 28, `${periodInfo.key}:featured`, picked, used);
     fillFromPool(expansion, 45, `${periodInfo.key}:expansion`, picked, used);
     if (picked.length < GROUP_COUNT) fillFromPool(CATEGORY_BANK, GROUP_COUNT, `${periodInfo.key}:fallback`, picked, used);
     if (picked.length < GROUP_COUNT) throw new Error(`Only found ${picked.length} duplicate-free categories for this month.`);
@@ -89,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function validateCategoryBank(bank) {
     if (!Array.isArray(bank) || bank.length < GROUP_COUNT) throw new Error("CATEGORY_BANK is missing.");
+    const global = new Map();
     bank.forEach((category, categoryIndex) => {
       if (!category || typeof category.id !== "string" || typeof category.title !== "string" || !Array.isArray(category.items)) {
         throw new Error(`Category ${categoryIndex + 1} is malformed.`);
@@ -99,6 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const key = normalize(item);
         if (local.has(key)) throw new Error(`"${category.title}" contains a duplicate item: ${item}`);
         local.add(key);
+        if (global.has(key)) throw new Error(`Global overlap found: "${item}" appears in both "${global.get(key)}" and "${category.title}".`);
+        global.set(key, category.title);
       });
     });
   }
@@ -252,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function loadState() { try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch (_) { return null; } }
 
   function isValidState(value) {
-    return value && value.periodKey === periodInfo.key && Array.isArray(value.tiles) && Array.isArray(value.selected) && typeof value.mistakes === "number" && typeof value.score === "number" && value.tiles.every((tile) => tile && typeof tile.id === "string" && typeof tile.group === "number" && typeof tile.categoryId === "string" && typeof tile.categoryTitle === "string" && typeof tile.text === "string" && Array.isArray(tile.items) && typeof tile.locked === "boolean");
+    return value && value.periodKey === periodInfo.key && value.bankSignature === BANK_SIGNATURE && Array.isArray(value.tiles) && Array.isArray(value.selected) && typeof value.mistakes === "number" && typeof value.score === "number" && value.tiles.every((tile) => tile && typeof tile.id === "string" && typeof tile.group === "number" && typeof tile.categoryId === "string" && typeof tile.categoryTitle === "string" && typeof tile.text === "string" && Array.isArray(tile.items) && typeof tile.locked === "boolean");
   }
 
   function getMonthlyInfo() {
