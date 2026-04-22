@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const picked = [];
     const used = new Set();
 
-    fillFromPool(featured, 28, `${periodInfo.key}:featured`, picked, used);
-    fillFromPool(expansion, 45, `${periodInfo.key}:expansion`, picked, used);
+    fillFromPool(featured, GROUP_COUNT, `${periodInfo.key}:featured`, picked, used);
+    if (picked.length < GROUP_COUNT) fillFromPool(expansion, GROUP_COUNT, `${periodInfo.key}:expansion`, picked, used);
     if (picked.length < GROUP_COUNT) fillFromPool(CATEGORY_BANK, GROUP_COUNT, `${periodInfo.key}:fallback`, picked, used);
     if (picked.length < GROUP_COUNT) throw new Error(`Only found ${picked.length} duplicate-free categories for this month.`);
     return picked.slice(0, GROUP_COUNT);
