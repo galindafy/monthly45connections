@@ -1,28 +1,26 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Connections Monthly 45x45</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Connections Monthly 45x45</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <div class="topbar">
-      <h1>Connections</h1>
-      <div class="subtitle">Current Monthly Puzzle 45x45</div>
-    </div>
 
-    <div class="controls">
-      <button id="shuffleBtn" type="button">Shuffle</button>
-      <button id="deselectBtn" type="button">Deselect</button>
-    </div>
+<h1>Connections<br>Monthly 45x45</h1>
 
-    <div class="status" id="megaStatus"></div>
-    <div class="board" id="megaBoard"></div>
-  </div>
+<div id="status"></div>
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+<div class="controls">
+  <button id="shuffle">Shuffle</button>
+  <button id="deselect">Deselect</button>
+</div>
+
+<div id="board"></div>
+
+<button id="shareBtn">Share</button>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
