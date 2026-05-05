@@ -1,7 +1,4 @@
-body {
-  font-family: sans-serif;
-  text-align: center;
-}
+body { font-family: sans-serif; text-align: center; }
 
 #board {
   display: grid;
@@ -20,14 +17,12 @@ body {
 .tile.selected { background: #ddd; }
 .tile.solved { background: #bbb; }
 
-.shake {
-  animation: shake 0.3s;
-}
+.shake { animation: shake 0.3s; }
 
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-5px)}
+  50%{transform:translateX(5px)}
+  75%{transform:translateX(-5px)}
+  100%{transform:translateX(0)}
 }
