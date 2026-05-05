@@ -5,12 +5,8 @@ let state = init();
 
 render();
 
-/* INIT */
-
 function init() {
-  validateBank(CATEGORY_BANK);
-
-  const cats = pickCategories();
+  const cats = CATEGORY_BANK.slice(0, 45);
 
   const tiles = [];
 
@@ -19,7 +15,6 @@ function init() {
       tiles.push({
         text: item.text,
         group: gi,
-        decoys: item.decoys || [],
         items: [item.text],
         title: c.title,
         solved: false
@@ -31,57 +26,9 @@ function init() {
     tiles: shuffle(tiles),
     selected: [],
     score: 0,
-    mistakes: 0,
-    streak: load("streak") || 0
+    mistakes: 0
   };
 }
-
-/* CATEGORY PICKER (NO REPEATS) */
-
-function pickCategories() {
-  const used = new Set(JSON.parse(localStorage.getItem("used") || "[]"));
-
-  let available = CATEGORY_BANK.filter(c => !used.has(c.id));
-
-  if (available.length < 45) {
-    localStorage.setItem("used", "[]");
-    available = CATEGORY_BANK;
-  }
-
-  const chosen = shuffle(available).slice(0, 45);
-
-  localStorage.setItem("used", JSON.stringify([
-    ...used,
-    ...chosen.map(c => c.id)
-  ]));
-
-  return injectTraps(chosen);
-}
-
-/* TRICK LOGIC */
-
-function injectTraps(cats) {
-  const map = {};
-
-  cats.forEach(c => {
-    c.items.forEach(i => {
-      map[i.text] = map[i.text] || [];
-      map[i.text].push(c.title);
-    });
-  });
-
-  cats.forEach(c => {
-    c.items.forEach(i => {
-      if (map[i.text].length > 1) {
-        i.decoys = map[i.text].filter(x => x !== c.title);
-      }
-    });
-  });
-
-  return cats;
-}
-
-/* GAME */
 
 function clickTile(i) {
   if (state.selected.includes(i)) {
@@ -136,23 +83,13 @@ function merge(indices) {
 
   indices.slice(1).sort((a,b)=>b-a).forEach(i => state.tiles.splice(i,1));
 
-  if (done) {
-    state.score++;
-    state.streak++;
-    save("streak", state.streak);
-  }
+  if (done) state.score++;
 }
-
-/* UI */
 
 function render() {
   BOARD.innerHTML = "";
 
-  STATUS.innerHTML = `
-    Score ${state.score} |
-    Mistakes ${state.mistakes} |
-    Streak ${state.streak}
-  `;
+  STATUS.innerHTML = `Score ${state.score} | Mistakes ${state.mistakes}`;
 
   state.tiles.forEach((t,i)=>{
     const el = document.createElement("div");
@@ -170,19 +107,16 @@ function render() {
   });
 }
 
-/* HELPERS */
-
 function shuffle(a){ return [...a].sort(()=>Math.random()-0.5); }
 
-function validateBank(bank){
-  const seen = new Set();
-  bank.forEach(c=>{
-    c.items.forEach(i=>{
-      const key = i.text.toLowerCase();
-      if(seen.has(key)) throw new Error("Duplicate: "+i.text);
-      seen.add(key);
-    });
-  });
+function shuffleBoard() {
+  state.tiles = shuffle(state.tiles);
+  render();
+}
+
+function deselect() {
+  state.selected = [];
+  render();
 }
 
 function shake(){
@@ -190,13 +124,8 @@ function shake(){
   setTimeout(()=>BOARD.classList.remove("shake"),300);
 }
 
-function save(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
-function load(k){ return JSON.parse(localStorage.getItem(k)); }
-
-/* SHARE */
-
-document.getElementById("shareBtn").onclick = () => {
-  const txt = `Connections 45x45\nScore: ${state.score}\nMistakes: ${state.mistakes}\nStreak: ${state.streak}`;
+function share() {
+  const txt = `Connections 45x45\nScore: ${state.score}\nMistakes: ${state.mistakes}`;
   navigator.clipboard.writeText(txt);
   alert("Copied!");
-};
+}
