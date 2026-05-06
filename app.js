@@ -15,14 +15,13 @@ function init() {
   cats.forEach((c, gi) => {
     c.items.forEach(item => {
       tiles.push({
-        text: item.text,
-        group: gi,
-        items: [item.text],
-        title: c.title,
-        solved: false
-      });
-    });
-  });
+  text: item.text,
+  group: gi,                 // correct group
+  altGroups: item.alt || [], // trap groups
+  items: [item.text],
+  title: c.title,
+  solved: false
+});
 
   return {
     tiles: shuffle(tiles),
@@ -34,21 +33,29 @@ function init() {
 
 /* ---------- QUARTER PICKER (no repeats across quarters) ---------- */
 function pickQuarterCategories() {
-  const all = CATEGORY_BANK.slice(); // 180 built at runtime
-  let used = loadSet(HISTORY_KEY);
+  const shuffled = shuffle(CATEGORY_BANK);
 
-  let available = all.filter(c => !used.has(c.id));
-  if (available.length < 45) {
-    used = new Set();
-    available = all;
+  const selected = [];
+
+  while (selected.length < 45) {
+    const candidate = shuffled.pop();
+
+    // ensure at least some overlap with existing categories
+    const hasTrap = selected.some(s =>
+      intersects(candidate.items, s.items)
+    );
+
+    if (selected.length < 10 || hasTrap) {
+      selected.push(candidate);
+    }
   }
 
-  const chosen = shuffleSeeded(available, hash(PERIOD_KEY)).slice(0, 45);
+  return selected;
+}
 
-  chosen.forEach(c => used.add(c.id));
-  saveSet(HISTORY_KEY, used);
-
-  return chosen;
+function intersects(a,b){
+  const set = new Set(b.map(x=>x.text));
+  return a.items.some(x => set.has(x.text));
 }
 
 function getQuarterKey() {
@@ -71,16 +78,25 @@ function clickTile(i) {
 
 function attemptMerge() {
   const tiles = state.selected.map(i => state.tiles[i]);
-  const groups = new Set(tiles.map(t => t.group));
 
-  if (groups.size !== 1) {
+  const correctGroups = new Set(tiles.map(t => t.group));
+
+  // detect trap grouping (all tiles share a fake alt group)
+  const possibleTrapGroups = tiles
+    .map(t => t.altGroups || [])
+    .reduce((a,b)=>a.filter(x=>b.includes(x)));
+
+  if (correctGroups.size === 1) {
+    merge(state.selected);
+  } else if (possibleTrapGroups.length > 0) {
+    // looks right but wrong → harder penalty
+    state.mistakes += 2;
+    shake();
+  } else {
     state.mistakes++;
     shake();
-    state.selected = [];
-    return;
   }
 
-  merge(state.selected);
   state.selected = [];
 }
 
