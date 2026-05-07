@@ -1,182 +1,345 @@
-const BOARD = document.getElementById("board");
-const STATUS = document.getElementById("status");
+const BOARD_SIZE = 45;
 
-const PERIOD_KEY = getQuarterKey();
-const HISTORY_KEY = "connections:q:used";
+const state = {
+  tiles: [],
+  selected: [],
+  score: 0,
+  mistakes: 0,
+  solved: [],
+  stats: loadStats(),
+};
 
-let state = init();
-render();
+const board = document.getElementById("board");
+const scoreEl = document.getElementById("score");
+const mistakesEl = document.getElementById("mistakes");
+const puzzleEl = document.getElementById("puzzle");
+const resetEl = document.getElementById("reset");
 
-/* ---------- INIT ---------- */
+init();
+
 function init() {
-  const cats = pickQuarterCategories();
-
-  const tiles = [];
-  cats.forEach((c, gi) => {
-    c.items.forEach(item => {
-      tiles.push({
-  text: item.text,
-  group: gi,                 // correct group
-  altGroups: item.alt || [], // trap groups
-  items: [item.text],
-  title: c.title,
-  solved: false
-});
-
-  return {
-    tiles: shuffle(tiles),
-    selected: [],
-    score: 0,
-    mistakes: 0
-  };
-}
-
-/* ---------- QUARTER PICKER (no repeats across quarters) ---------- */
-function pickQuarterCategories() {
-  const shuffled = shuffle(CATEGORY_BANK);
-
-  const selected = [];
-
-  while (selected.length < 45) {
-    const candidate = shuffled.pop();
-
-    // ensure at least some overlap with existing categories
-    const hasTrap = selected.some(s =>
-      intersects(candidate.items, s.items)
-    );
-
-    if (selected.length < 10 || hasTrap) {
-      selected.push(candidate);
-    }
-  }
-
-  return selected;
-}
-
-function intersects(a,b){
-  const set = new Set(b.map(x=>x.text));
-  return a.items.some(x => set.has(x.text));
-}
-
-function getQuarterKey() {
-  const d = new Date();
-  const q = Math.floor(d.getMonth() / 3) + 1;
-  return `${d.getFullYear()}-Q${q}`;
-}
-
-/* ---------- GAME ---------- */
-function clickTile(i) {
-  if (state.selected.includes(i)) {
-    state.selected = state.selected.filter(x => x !== i);
-    return render();
-  }
-
-  state.selected.push(i);
-  if (state.selected.length >= 2) attemptMerge();
+  generateBoard();
   render();
 }
 
-function attemptMerge() {
-  const tiles = state.selected.map(i => state.tiles[i]);
+function generateBoard() {
+  const quarter = getQuarterKey();
 
-  const correctGroups = new Set(tiles.map(t => t.group));
+  const rng = seededRandom(hashCode(quarter));
 
-  // detect trap grouping (all tiles share a fake alt group)
-  const possibleTrapGroups = tiles
-    .map(t => t.altGroups || [])
-    .reduce((a,b)=>a.filter(x=>b.includes(x)));
+  const categories = pickQuarterCategories(rng);
 
-  if (correctGroups.size === 1) {
-    merge(state.selected);
-  } else if (possibleTrapGroups.length > 0) {
-    // looks right but wrong → harder penalty
-    state.mistakes += 2;
-    shake();
-  } else {
-    state.mistakes++;
-    shake();
+  const tiles = [];
+
+  categories.forEach((cat, gi) => {
+
+    cat.items.forEach(item => {
+
+      const normalized = normalizeItem(item);
+
+      tiles.push({
+        id: crypto.randomUUID(),
+
+        text: normalized.text,
+
+        group: gi,
+
+        altGroups: normalized.alt || [],
+
+        title: cat.title,
+
+        solved: false,
+
+        merged: [normalized.text]
+      });
+
+    });
+
+  });
+
+  shuffleArray(tiles, rng);
+
+  state.tiles = tiles;
+
+  puzzleEl.textContent =
+    `Puzzle ${quarter}`;
+
+  resetEl.textContent =
+    `Resets ${getNextQuarterDate()}`;
+}
+
+function normalizeItem(item) {
+
+  if (typeof item === "string") {
+    return {
+      text: item,
+      alt: []
+    };
   }
+
+  return {
+    text: item.text,
+    alt: item.alt || []
+  };
+}
+
+function render() {
+
+  board.innerHTML = "";
+
+  scoreEl.textContent = state.score;
+  mistakesEl.textContent = state.mistakes;
+
+  state.tiles.forEach((tile, index) => {
+
+    const div = document.createElement("button");
+
+    div.className = "tile";
+
+    if (state.selected.includes(index)) {
+      div.classList.add("selected");
+    }
+
+    if (tile.solved) {
+      div.classList.add("solved");
+    }
+
+    div.innerHTML = tile.solved
+      ? `
+        <strong>${tile.title} [45]</strong>
+      `
+      : tile.text;
+
+    if (tile.solved) {
+
+      div.title =
+        tile.merged.join(", ");
+    }
+
+    div.onclick = () => selectTile(index);
+
+    board.appendChild(div);
+
+  });
+
+}
+
+function selectTile(index) {
+
+  const tile = state.tiles[index];
+
+  if (tile.solved) return;
+
+  if (state.selected.includes(index)) {
+
+    state.selected =
+      state.selected.filter(i => i !== index);
+
+    render();
+
+    return;
+  }
+
+  state.selected.push(index);
+
+  render();
+
+  if (state.selected.length >= 2) {
+    attemptMerge();
+  }
+}
+
+function attemptMerge() {
+
+  const indexes = [...state.selected];
+
+  const tiles =
+    indexes.map(i => state.tiles[i]);
+
+  const correct =
+    tiles.every(t => t.group === tiles[0].group);
+
+  if (!correct) {
+
+    shake(indexes);
+
+    state.mistakes++;
+
+    state.selected = [];
+
+    render();
+
+    return;
+  }
+
+  mergeTiles(indexes);
+}
+
+function mergeTiles(indexes) {
+
+  const tiles =
+    indexes.map(i => state.tiles[i]);
+
+  const base =
+    state.tiles[indexes[1]];
+
+  const mergedItems =
+    tiles.flatMap(t =>
+      t.merged || [t.text]
+    );
+
+  base.solved =
+    mergedItems.length >= 45;
+
+  base.title =
+    tiles[0].title;
+
+  base.group =
+    tiles[0].group;
+
+  base.merged =
+    mergedItems;
+
+  base.text =
+    mergedItems.join(", ");
+
+  indexes
+    .sort((a,b)=>b-a)
+    .forEach(i => {
+
+      if (state.tiles[i] !== base) {
+        state.tiles.splice(i,1);
+      }
+
+    });
+
+  state.score++;
 
   state.selected = [];
+
+  render();
 }
 
-function merge(indices) {
-  const base = indices[0];
-  let merged = [];
+function shake(indexes) {
 
-  indices.forEach(i => merged.push(...state.tiles[i].items));
-  merged = [...new Set(merged)];
+  const buttons =
+    [...document.querySelectorAll(".tile")];
 
-  const done = merged.length === 45;
+  indexes.forEach(i => {
 
-  state.tiles[base] = {
-    ...state.tiles[base],
-    items: merged,
-    text: done ? state.tiles[base].title
-               : `${merged[0]}, ${merged[1]} ... [${merged.length}]`,
-    solved: done
-  };
+    buttons[i]?.classList.add("shake");
 
-  indices.slice(1).sort((a,b)=>b-a).forEach(i => state.tiles.splice(i,1));
+    setTimeout(() => {
+      buttons[i]?.classList.remove("shake");
+    }, 400);
 
-  if (done) state.score++;
-}
-
-/* ---------- UI ---------- */
-function render() {
-  BOARD.innerHTML = "";
-  STATUS.innerHTML = `Score ${state.score} | Mistakes ${state.mistakes}`;
-
-  state.tiles.forEach((t,i)=>{
-    const el = document.createElement("div");
-    el.className = "tile";
-    if (state.selected.includes(i)) el.classList.add("selected");
-    if (t.solved) el.classList.add("solved");
-
-    el.textContent = t.text;
-    el.title = t.solved ? t.items.join(", ") : "";
-    el.onclick = ()=>clickTile(i);
-
-    BOARD.appendChild(el);
   });
+
 }
 
-/* ---------- HELPERS ---------- */
-function shuffle(a){ return [...a].sort(()=>Math.random()-0.5); }
+function deselectAll() {
 
-function shuffleSeeded(arr, seed) {
-  const a = arr.slice();
-  let s = seed;
-  for (let i = a.length - 1; i > 0; i--) {
-    s = (s * 9301 + 49297) % 233280;
-    const j = Math.floor((s / 233280) * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+  state.selected = [];
+
+  render();
+}
+
+function shuffleBoard() {
+
+  shuffleArray(state.tiles);
+
+  render();
+}
+
+function pickQuarterCategories(rng) {
+
+  const shuffled =
+    [...CATEGORY_BANK];
+
+  shuffleArray(shuffled, rng);
+
+  return shuffled.slice(0, BOARD_SIZE);
+}
+
+function getQuarterKey() {
+
+  const d = new Date();
+
+  const q =
+    Math.floor(d.getMonth()/3)+1;
+
+  return `${d.getFullYear()}-Q${q}`;
+}
+
+function getNextQuarterDate() {
+
+  const d = new Date();
+
+  const q =
+    Math.floor(d.getMonth()/3);
+
+  const next =
+    new Date(
+      d.getFullYear(),
+      (q+1)*3,
+      1
+    );
+
+  return next.toDateString();
+}
+
+function shuffleArray(arr, rng=Math.random) {
+
+  for (let i=arr.length-1;i>0;i--) {
+
+    const j =
+      Math.floor(rng()*(i+1));
+
+    [arr[i],arr[j]] =
+      [arr[j],arr[i]];
   }
-  return a;
 }
 
-function hash(str) {
+function seededRandom(seed) {
+
+  return function() {
+
+    seed |= 0;
+    seed = seed + 0x6D2B79F5 | 0;
+
+    let t =
+      Math.imul(seed ^ seed >>> 15, 1 | seed);
+
+    t ^= t + Math.imul(
+      t ^ t >>> 7,
+      61 | t
+    );
+
+    return (
+      ((t ^ t >>> 14) >>> 0)
+      / 4294967296
+    );
+  };
+}
+
+function hashCode(str) {
+
   let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
+
+  for (let i=0;i<str.length;i++) {
+    h =
+      Math.imul(31,h)
+      + str.charCodeAt(i)
+      | 0;
   }
-  return Math.abs(h);
+
+  return h;
 }
 
-function shake(){
-  BOARD.classList.add("shake");
-  setTimeout(()=>BOARD.classList.remove("shake"),300);
-}
+function loadStats() {
 
-function saveSet(k,set){ localStorage.setItem(k, JSON.stringify([...set])); }
-function loadSet(k){ try { return new Set(JSON.parse(localStorage.getItem(k)||"[]")); } catch { return new Set(); } }
-
-function shuffleBoard(){ state.tiles = shuffle(state.tiles); render(); }
-function deselect(){ state.selected = []; render(); }
-
-function share() {
-  const txt = `Connections 45x45\nScore: ${state.score}\nMistakes: ${state.mistakes}`;
-  navigator.clipboard.writeText(txt);
-  alert("Copied!");
+  return JSON.parse(
+    localStorage.getItem("quarterly45Stats")
+    || "{}"
+  );
 }
