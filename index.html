@@ -1,38 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Connections Quarterly 45x45</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Connections Monthly 45x45</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>Connections<br>Quarterly 45x45</h1>
+<div class="container">
+<header>
+<h1>Connections</h1>
+<p id="puzzle"></p>
+</header>
+
+<div class="stats">
+<div>Score: <span id="score">0</span></div>
+<div>Mistakes: <span id="mistakes">0</span>/4</div>
+<div>Streak: <span id="streak">0</span></div>
+</div>
 
 <div id="status"></div>
-
-<div class="controls">
-  <button onclick="shuffleBoard()">Shuffle</button>
-  <button onclick="deselect()">Deselect</button>
-</div>
-
-<div class="topbar">
-  <span id="puzzle"></span>
-  <span id="reset"></span>
-  <span>Score <span id="score">0</span></span>
-  <span>Mistakes <span id="mistakes">0</span></span>
-</div>
-
-<div class="controls">
-  <button onclick="shuffleBoard()">Shuffle</button>
-  <button onclick="deselectAll()">Deselect</button>
-</div>
-
+<div id="solved"></div>
 <div id="board"></div>
-  
-<button onclick="share()">Share</button>
+
+<div class="controls">
+<button id="shuffleBtn">Shuffle</button>
+<button id="deselectBtn">Deselect</button>
+<button id="newBtn">Reload</button>
+</div>
+</div>
 
 <script src="data.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>

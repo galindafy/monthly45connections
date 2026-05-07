@@ -1,28 +1,39 @@
-body { font-family: sans-serif; text-align: center; }
+body {
+font-family: Arial, sans-serif;
+background: #121212;
+color: white;
+margin: 0;
+padding: 20px;
+}
+
+.container {
+max-width: 700px;
+margin: 0 auto;
+}
 
 #board {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 6px;
-  max-width: 900px;
-  margin: 20px auto;
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 10px;
 }
 
 .tile {
-  padding: 10px;
-  border: 1px solid #ccc;
-  cursor: pointer;
+min-height: 80px;
+border: none;
+border-radius: 12px;
+background: #2a2a2a;
+color: white;
+padding: 10px;
+cursor: pointer;
 }
 
-.tile.selected { background: #ddd; }
-.tile.solved { background: #bbb; }
+.tile.selected {
+background: #555;
+}
 
-.shake { animation: shake 0.3s; }
-
-@keyframes shake {
-  0%{transform:translateX(0)}
-  25%{transform:translateX(-5px)}
-  50%{transform:translateX(5px)}
-  75%{transform:translateX(-5px)}
-  100%{transform:translateX(0)}
+.controls {
+display: flex;
+gap: 10px;
+justify-content: center;
+margin-top: 20px;
 }
