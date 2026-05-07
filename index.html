@@ -16,8 +16,20 @@
   <button onclick="deselect()">Deselect</button>
 </div>
 
-<div id="board"></div>
+<div class="topbar">
+  <span id="puzzle"></span>
+  <span id="reset"></span>
+  <span>Score <span id="score">0</span></span>
+  <span>Mistakes <span id="mistakes">0</span></span>
+</div>
 
+<div class="controls">
+  <button onclick="shuffleBoard()">Shuffle</button>
+  <button onclick="deselectAll()">Deselect</button>
+</div>
+
+<div id="board"></div>
+  
 <button onclick="share()">Share</button>
 
 <script src="data.js"></script>
