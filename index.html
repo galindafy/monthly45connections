@@ -3,33 +3,35 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Connections Monthly 45x45</title>
+<title>Connections Monthly</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div class="container">
+<main class="container">
 <header>
+<p class="eyebrow">Monthly puzzle</p>
 <h1>Connections</h1>
 <p id="puzzle"></p>
 </header>
 
-<div class="stats">
-<div>Score: <span id="score">0</span></div>
-<div>Mistakes: <span id="mistakes">0</span>/4</div>
-<div>Streak: <span id="streak">0</span></div>
+<div class="stats" aria-label="Game stats">
+<div><span>Score</span><strong id="score">0</strong></div>
+<div><span>Mistakes</span><strong><span id="mistakes">0</span>/4</strong></div>
+<div><span>Streak</span><strong id="streak">0</strong></div>
 </div>
 
-<div id="status"></div>
+<div id="status" class="status" role="status" aria-live="polite"></div>
 <div id="solved"></div>
-<div id="board"></div>
+<div id="board" aria-label="Puzzle board"></div>
 
 <div class="controls">
+<button id="submitBtn">Submit</button>
 <button id="shuffleBtn">Shuffle</button>
 <button id="deselectBtn">Deselect</button>
-<button id="newBtn">Reload</button>
+<button id="newBtn">Restart</button>
 </div>
-</div>
+</main>
 
 <script src="data.js"></script>
 <script src="app.js"></script>
