@@ -3,34 +3,33 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Connections Monthly</title>
+<title>Connections Monthly 45x45</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
 <main class="container">
 <header>
-<p class="eyebrow">Monthly puzzle</p>
 <h1>Connections</h1>
 <p id="puzzle"></p>
+<p id="resetDate" class="reset-date"></p>
 </header>
 
-<div class="stats" aria-label="Game stats">
-<div><span>Score</span><strong id="score">0</strong></div>
-<div><span>Mistakes</span><strong><span id="mistakes">0</span>/4</strong></div>
-<div><span>Streak</span><strong id="streak">0</strong></div>
-</div>
+<section class="topbar" aria-label="Puzzle controls">
+<div class="stat"><span>Score</span><strong id="score">0</strong></div>
+<div class="stat"><span>Mistakes</span><strong id="mistakes">0</strong></div>
+<button id="shuffleBtn" type="button">Shuffle</button>
+<button id="deselectBtn" type="button">Deselect</button>
+<button id="resetBtn" type="button">Reset</button>
+</section>
+
+<section class="goal">
+<strong>Make 45 groups of 45</strong>
+<span id="progress">0 / 45 groups complete</span>
+</section>
 
 <div id="status" class="status" role="status" aria-live="polite"></div>
-<div id="solved"></div>
-<div id="board" aria-label="Puzzle board"></div>
-
-<div class="controls">
-<button id="submitBtn">Submit</button>
-<button id="shuffleBtn">Shuffle</button>
-<button id="deselectBtn">Deselect</button>
-<button id="newBtn">Restart</button>
-</div>
+<section id="board" class="board" aria-label="Puzzle board"></section>
 </main>
 
 <script src="data.js"></script>

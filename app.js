@@ -1,31 +1,36 @@
-const boardEl = document.getElementById('board');
-const solvedEl = document.getElementById('solved');
-const statusEl = document.getElementById('status');
+const EXPECTED_BANK_SIZE = 600;
+const DEFAULT_MONTHLY_CATEGORY_COUNT = 45;
+const DEFAULT_ANSWERS_PER_CATEGORY = 45;
+
 const puzzleEl = document.getElementById('puzzle');
+const resetDateEl = document.getElementById('resetDate');
 const scoreEl = document.getElementById('score');
 const mistakesEl = document.getElementById('mistakes');
-const streakEl = document.getElementById('streak');
-const submitBtn = document.getElementById('submitBtn');
+const progressEl = document.getElementById('progress');
+const statusEl = document.getElementById('status');
+const boardEl = document.getElementById('board');
 const shuffleBtn = document.getElementById('shuffleBtn');
 const deselectBtn = document.getElementById('deselectBtn');
-const newBtn = document.getElementById('newBtn');
+const resetBtn = document.getElementById('resetBtn');
 
-const MAX_MISTAKES = 4;
-const GROUP_SIZE = 4;
-const VISIBLE_GROUPS = 4;
+const answersPerCategory = window.ANSWERS_PER_CATEGORY || DEFAULT_ANSWERS_PER_CATEGORY;
+const monthlyCategoryCount = window.MONTHLY_CATEGORY_COUNT || DEFAULT_MONTHLY_CATEGORY_COUNT;
 const monthFormatter = new Intl.DateTimeFormat('en', {
   month: 'long',
   year: 'numeric'
 });
+const resetFormatter = new Intl.DateTimeFormat('en', {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric'
+});
 
-let puzzleGroups = [];
-let remainingTiles = [];
-let selectedItems = new Set();
-let solvedGroups = [];
+let monthlyCategories = [];
+let boardGroups = [];
+let selectedGroupIds = [];
 let mistakes = 0;
 let score = 0;
-let streak = Number(localStorage.getItem('connectionsStreak') || 0);
-let gameOver = false;
 
 function seededRandom(seed) {
   let value = seed % 2147483647;
@@ -41,6 +46,10 @@ function getMonthlySeed(date = new Date()) {
   return date.getFullYear() * 100 + date.getMonth() + 1;
 }
 
+function getNextResetDate(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 1);
+}
+
 function shuffle(items, random = Math.random) {
   const result = [...items];
 
@@ -52,170 +61,204 @@ function shuffle(items, random = Math.random) {
   return result;
 }
 
-function pickMonthlyGroups() {
-  const seed = getMonthlySeed();
-  const random = seededRandom(seed);
-  return shuffle(CATEGORY_BANK, random).slice(0, VISIBLE_GROUPS);
+function validateBank() {
+  const errors = [];
+
+  if (!Array.isArray(CATEGORY_BANK)) {
+    return ['CATEGORY_BANK is missing.'];
+  }
+
+  if (CATEGORY_BANK.length !== EXPECTED_BANK_SIZE) {
+    errors.push(`Expected ${EXPECTED_BANK_SIZE} categories, found ${CATEGORY_BANK.length}.`);
+  }
+
+  CATEGORY_BANK.forEach(category => {
+    if (!category.title || !Array.isArray(category.items)) {
+      errors.push(`${category.id || 'A category'} is missing a title or item list.`);
+      return;
+    }
+
+    if (category.items.length !== answersPerCategory) {
+      errors.push(`${category.title} has ${category.items.length} answers instead of ${answersPerCategory}.`);
+    }
+  });
+
+  return errors;
 }
 
-function startGame() {
-  puzzleGroups = pickMonthlyGroups();
-  remainingTiles = shuffle(
-    puzzleGroups.flatMap(group => group.items.map(item => ({
-      item,
-      groupId: group.id
-    })))
-  );
-  selectedItems = new Set();
-  solvedGroups = [];
+function pickMonthlyCategories(date = new Date()) {
+  const random = seededRandom(getMonthlySeed(date));
+  return shuffle(CATEGORY_BANK, random).slice(0, monthlyCategoryCount);
+}
+
+function createBoardGroups() {
+  return monthlyCategories.flatMap(category => category.items.map((item, index) => ({
+    id: `${category.id}-${index}`,
+    categoryId: category.id,
+    categoryTitle: category.title,
+    items: [cleanAnswerLabel(item)],
+    solved: false
+  })));
+}
+
+function cleanAnswerLabel(value) {
+  return String(value)
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function startPuzzle() {
+  monthlyCategories = pickMonthlyCategories();
+  boardGroups = shuffle(createBoardGroups());
+  selectedGroupIds = [];
   mistakes = 0;
   score = 0;
-  gameOver = false;
 
   puzzleEl.textContent = monthFormatter.format(new Date());
-  setStatus('Find the four hidden groups.', 'neutral');
-  updateStats();
+  resetDateEl.textContent = `Resets ${resetFormatter.format(getNextResetDate())}`;
+
   render();
 }
 
 function render() {
-  renderSolvedGroups();
-  renderBoard();
-  submitBtn.disabled = selectedItems.size !== GROUP_SIZE || gameOver;
-  deselectBtn.disabled = selectedItems.size === 0 || gameOver;
-  shuffleBtn.disabled = gameOver || remainingTiles.length === 0;
-}
+  const solvedCount = boardGroups.filter(group => group.items.length === answersPerCategory).length;
 
-function renderSolvedGroups() {
-  solvedEl.innerHTML = '';
+  scoreEl.textContent = score;
+  mistakesEl.textContent = mistakes;
+  progressEl.textContent = `${solvedCount} / ${monthlyCategoryCount} groups complete`;
+  deselectBtn.disabled = selectedGroupIds.length === 0;
+  statusEl.textContent = '';
+  statusEl.classList.add('status--hidden');
 
-  solvedGroups.forEach(group => {
-    const groupEl = document.createElement('section');
-    groupEl.className = `solved-group solved-group--${group.level || 'default'}`;
-    groupEl.innerHTML = `
-      <h2>${group.title}</h2>
-      <p>${group.items.join(', ')}</p>
-    `;
-    solvedEl.appendChild(groupEl);
-  });
-}
-
-function renderBoard() {
   boardEl.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
-  remainingTiles.forEach(tile => {
-    const tileButton = document.createElement('button');
-    tileButton.className = 'tile';
-    tileButton.type = 'button';
-    tileButton.textContent = tile.item;
-    tileButton.setAttribute('aria-pressed', selectedItems.has(tile.item));
-
-    if (selectedItems.has(tile.item)) {
-      tileButton.classList.add('selected');
-    }
-
-    tileButton.addEventListener('click', () => toggleSelection(tile.item));
-    boardEl.appendChild(tileButton);
+  boardGroups.forEach(group => {
+    const tile = document.createElement('button');
+    tile.className = getTileClassName(group);
+    tile.type = 'button';
+    tile.dataset.groupId = group.id;
+    tile.setAttribute('aria-pressed', selectedGroupIds.includes(group.id));
+    tile.innerHTML = getTileLabel(group);
+    tile.addEventListener('click', () => selectGroup(group.id));
+    fragment.appendChild(tile);
   });
+
+  boardEl.appendChild(fragment);
 }
 
-function toggleSelection(item) {
-  if (gameOver) return;
+function getTileClassName(group) {
+  const classes = ['tile'];
 
-  if (selectedItems.has(item)) {
-    selectedItems.delete(item);
-  } else if (selectedItems.size < GROUP_SIZE) {
-    selectedItems.add(item);
-  } else {
-    setStatus('You can select four tiles at a time.', 'warning');
+  if (group.items.length > 1) classes.push('tile--group');
+  if (group.items.length === answersPerCategory) classes.push('tile--complete');
+  if (selectedGroupIds.includes(group.id)) classes.push('selected');
+
+  return classes.join(' ');
+}
+
+function getTileLabel(group) {
+  const safeItems = group.items.map(escapeHtml);
+
+  if (group.items.length === answersPerCategory) {
+    return `<span class="tile-title">${escapeHtml(group.categoryTitle)}</span><span class="tile-count">${answersPerCategory} tiles</span>`;
   }
 
-  render();
+  if (group.items.length >= 3) {
+    return `<strong>${safeItems[0]}, ${safeItems[1]}, ... ${group.items.length} tiles</strong>`;
+  }
+
+  if (group.items.length === 2) {
+    return `<strong>${safeItems.join(', ')}</strong>`;
+  }
+
+  return `<span>${safeItems[0]}</span>`;
 }
 
-function submitGuess() {
-  if (selectedItems.size !== GROUP_SIZE || gameOver) return;
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-  const matchingGroup = puzzleGroups.find(group => (
-    !solvedGroups.some(solved => solved.id === group.id)
-    && group.items.every(item => selectedItems.has(item))
-  ));
-
-  if (matchingGroup) {
-    solveGroup(matchingGroup);
+function selectGroup(groupId) {
+  if (selectedGroupIds.includes(groupId)) {
+    selectedGroupIds = selectedGroupIds.filter(id => id !== groupId);
+    render();
     return;
   }
 
-  mistakes += 1;
-  selectedItems.clear();
-  setStatus(
-    mistakes >= MAX_MISTAKES
-      ? 'No more guesses. Here are the answers.'
-      : `${MAX_MISTAKES - mistakes} mistake${MAX_MISTAKES - mistakes === 1 ? '' : 's'} left.`,
-    mistakes >= MAX_MISTAKES ? 'error' : 'warning'
-  );
+  selectedGroupIds.push(groupId);
 
-  if (mistakes >= MAX_MISTAKES) {
-    revealAnswers();
+  if (selectedGroupIds.length === 2) {
+    attemptCombine();
+    return;
   }
 
-  updateStats();
   render();
 }
 
-function solveGroup(group) {
-  solvedGroups.push(group);
-  remainingTiles = remainingTiles.filter(tile => tile.groupId !== group.id);
-  selectedItems.clear();
-  score += Math.max(10 - mistakes * 2, 2);
+function attemptCombine() {
+  const [firstId, secondId] = selectedGroupIds;
+  const first = boardGroups.find(group => group.id === firstId);
+  const second = boardGroups.find(group => group.id === secondId);
 
-  if (solvedGroups.length === puzzleGroups.length) {
-    streak += 1;
-    localStorage.setItem('connectionsStreak', String(streak));
-    gameOver = true;
-    setStatus('Solved. Nice work.', 'success');
-  } else {
-    setStatus(`Found: ${group.title}`, 'success');
+  if (!first || !second) {
+    selectedGroupIds = [];
+    render();
+    return;
   }
 
-  updateStats();
+  if (first.categoryId !== second.categoryId) {
+    mistakes += 1;
+    selectedGroupIds = [];
+    render();
+    return;
+  }
+
+  const merged = {
+    id: `${first.id}+${second.id}`,
+    categoryId: first.categoryId,
+    categoryTitle: first.categoryTitle,
+    items: [...first.items, ...second.items],
+    solved: first.items.length + second.items.length === answersPerCategory
+  };
+
+  boardGroups = boardGroups.filter(group => group.id !== first.id && group.id !== second.id);
+  boardGroups.unshift(merged);
+  selectedGroupIds = [];
+  score += merged.solved ? 45 : 1;
   render();
 }
 
-function revealAnswers() {
-  puzzleGroups.forEach(group => {
-    if (!solvedGroups.some(solved => solved.id === group.id)) {
-      solvedGroups.push(group);
-    }
-  });
-  remainingTiles = [];
-  selectedItems.clear();
-  streak = 0;
-  localStorage.setItem('connectionsStreak', '0');
-  gameOver = true;
-}
-
-function setStatus(message, type) {
-  statusEl.textContent = message;
-  statusEl.className = type ? `status status--${type}` : 'status';
-}
-
-function updateStats() {
-  scoreEl.textContent = score;
-  mistakesEl.textContent = mistakes;
-  streakEl.textContent = streak;
-}
-
-submitBtn.addEventListener('click', submitGuess);
-shuffleBtn.addEventListener('click', () => {
-  remainingTiles = shuffle(remainingTiles);
+function shuffleBoard() {
+  boardGroups = shuffle(boardGroups);
+  selectedGroupIds = [];
   render();
-});
-deselectBtn.addEventListener('click', () => {
-  selectedItems.clear();
-  setStatus('Selection cleared.', 'neutral');
-  render();
-});
-newBtn.addEventListener('click', startGame);
+}
 
-startGame();
+function deselectAll() {
+  selectedGroupIds = [];
+  render();
+}
+
+function showValidationErrors(errors) {
+  statusEl.textContent = errors[0];
+  statusEl.classList.remove('status--hidden');
+  statusEl.classList.add('status--error');
+}
+
+shuffleBtn.addEventListener('click', shuffleBoard);
+deselectBtn.addEventListener('click', deselectAll);
+resetBtn.addEventListener('click', startPuzzle);
+
+const validationErrors = validateBank();
+startPuzzle();
+
+if (validationErrors.length > 0) {
+  showValidationErrors(validationErrors);
+}
