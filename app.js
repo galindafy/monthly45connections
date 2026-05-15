@@ -29,6 +29,7 @@ const resetFormatter = new Intl.DateTimeFormat('en', {
 let monthlyCategories = [];
 let boardGroups = [];
 let selectedGroupIds = [];
+let shakingGroupIds = [];
 let mistakes = 0;
 let score = 0;
 
@@ -87,8 +88,36 @@ function validateBank() {
 }
 
 function pickMonthlyCategories(date = new Date()) {
-  const random = seededRandom(getMonthlySeed(date));
-  return shuffle(CATEGORY_BANK, random).slice(0, monthlyCategoryCount);
+  const seed = getMonthlySeed(date);
+  let bestSelection = [];
+
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    const selected = [];
+    const usedAnswers = new Set();
+    const random = seededRandom(seed + attempt * 7919);
+
+    shuffle(CATEGORY_BANK, random).forEach(category => {
+      if (selected.length >= monthlyCategoryCount) return;
+
+      const normalizedItems = category.items.map(item => normalizeAnswer(cleanAnswerLabel(item)));
+      const hasDuplicateAnswer = normalizedItems.some(item => usedAnswers.has(item));
+
+      if (hasDuplicateAnswer) return;
+
+      selected.push(category);
+      normalizedItems.forEach(item => usedAnswers.add(item));
+    });
+
+    if (selected.length === monthlyCategoryCount) {
+      return selected;
+    }
+
+    if (selected.length > bestSelection.length) {
+      bestSelection = selected;
+    }
+  }
+
+  return bestSelection;
 }
 
 function createBoardGroups() {
@@ -108,10 +137,15 @@ function cleanAnswerLabel(value) {
     .trim();
 }
 
+function normalizeAnswer(value) {
+  return String(value).toLowerCase().trim();
+}
+
 function startPuzzle() {
   monthlyCategories = pickMonthlyCategories();
   boardGroups = shuffle(createBoardGroups());
   selectedGroupIds = [];
+  shakingGroupIds = [];
   mistakes = 0;
   score = 0;
 
@@ -154,6 +188,7 @@ function getTileClassName(group) {
   if (group.items.length > 1) classes.push('tile--group');
   if (group.items.length === answersPerCategory) classes.push('tile--complete');
   if (selectedGroupIds.includes(group.id)) classes.push('selected');
+  if (shakingGroupIds.includes(group.id)) classes.push('tile--shake');
 
   return classes.join(' ');
 }
@@ -186,6 +221,8 @@ function escapeHtml(value) {
 }
 
 function selectGroup(groupId) {
+  if (shakingGroupIds.length > 0) return;
+
   if (selectedGroupIds.includes(groupId)) {
     selectedGroupIds = selectedGroupIds.filter(id => id !== groupId);
     render();
@@ -215,18 +252,17 @@ function attemptCombine() {
 
   if (first.categoryId !== second.categoryId) {
     mistakes += 1;
-    selectedGroupIds = [];
+    shakingGroupIds = [...selectedGroupIds];
     render();
+    window.setTimeout(() => {
+      shakingGroupIds = [];
+      selectedGroupIds = [];
+      render();
+    }, 420);
     return;
   }
 
-  const merged = {
-    id: `${first.id}+${second.id}`,
-    categoryId: first.categoryId,
-    categoryTitle: first.categoryTitle,
-    items: [...first.items, ...second.items],
-    solved: first.items.length + second.items.length === answersPerCategory
-  };
+  const merged = mergeGroups(first, second);
 
   boardGroups = boardGroups.filter(group => group.id !== first.id && group.id !== second.id);
   boardGroups.unshift(merged);
@@ -235,14 +271,28 @@ function attemptCombine() {
   render();
 }
 
+function mergeGroups(first, second) {
+  const items = [...first.items, ...second.items];
+
+  return {
+    id: `${first.id}__${second.id}`,
+    categoryId: first.categoryId,
+    categoryTitle: first.categoryTitle,
+    items,
+    solved: items.length === answersPerCategory
+  };
+}
+
 function shuffleBoard() {
   boardGroups = shuffle(boardGroups);
   selectedGroupIds = [];
+  shakingGroupIds = [];
   render();
 }
 
 function deselectAll() {
   selectedGroupIds = [];
+  shakingGroupIds = [];
   render();
 }
 
