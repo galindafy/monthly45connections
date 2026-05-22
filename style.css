@@ -167,7 +167,9 @@ h1 {
   background: var(--tile);
   color: var(--ink);
   padding: 8px;
-  cursor: pointer;
+  cursor: grab;
+  font-size: 0.78rem;
+  font-weight: 650;
   line-height: 1.08;
   overflow-wrap: anywhere;
   transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
@@ -176,6 +178,10 @@ h1 {
 .tile:hover {
   background: var(--tile-hover);
   transform: translateY(-1px);
+}
+
+.tile:active {
+  cursor: grabbing;
 }
 
 .tile.selected {
@@ -195,7 +201,15 @@ h1 {
 
 .tile--shake {
   border-color: var(--danger);
-  animation: shake 420ms ease;
+  background: #f4c7bd;
+  color: var(--ink);
+  animation: shake 680ms ease-in-out;
+}
+
+.tile.selected.tile--shake {
+  border-color: var(--danger);
+  background: #f4c7bd;
+  color: var(--ink);
 }
 
 .tile-title,
@@ -248,10 +262,6 @@ h1 {
   .topbar button {
     transition: none;
   }
-
-  .tile--shake {
-    animation: none;
-  }
 }
 
 @media (max-width: 760px) {
@@ -284,7 +294,7 @@ h1 {
   .tile {
     min-height: 68px;
     padding: 7px;
-    font-size: 0.82rem;
+    font-size: 0.72rem;
   }
 }
 

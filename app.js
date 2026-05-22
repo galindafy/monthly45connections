@@ -30,6 +30,7 @@ let monthlyCategories = [];
 let boardGroups = [];
 let selectedGroupIds = [];
 let shakingGroupIds = [];
+let draggedGroupId = null;
 let mistakes = 0;
 let score = 0;
 
@@ -146,6 +147,7 @@ function startPuzzle() {
   boardGroups = shuffle(createBoardGroups());
   selectedGroupIds = [];
   shakingGroupIds = [];
+  draggedGroupId = null;
   mistakes = 0;
   score = 0;
 
@@ -172,10 +174,15 @@ function render() {
     const tile = document.createElement('button');
     tile.className = getTileClassName(group);
     tile.type = 'button';
+    tile.draggable = shakingGroupIds.length === 0;
     tile.dataset.groupId = group.id;
     tile.setAttribute('aria-pressed', selectedGroupIds.includes(group.id));
     tile.innerHTML = getTileLabel(group);
     tile.addEventListener('click', () => selectGroup(group.id));
+    tile.addEventListener('dragstart', event => startDrag(event, group.id));
+    tile.addEventListener('dragover', allowDrop);
+    tile.addEventListener('drop', event => dropOnGroup(event, group.id));
+    tile.addEventListener('dragend', endDrag);
     fragment.appendChild(tile);
   });
 
@@ -201,7 +208,7 @@ function getTileLabel(group) {
   }
 
   if (group.items.length >= 3) {
-    return `<strong>${safeItems[0]}, ${safeItems[1]}, ... ${group.items.length} tiles</strong>`;
+    return `<strong>${safeItems[0]}, ${safeItems[1]}, ... ${group.items.length}</strong>`;
   }
 
   if (group.items.length === 2) {
@@ -241,8 +248,10 @@ function selectGroup(groupId) {
 
 function attemptCombine() {
   const [firstId, secondId] = selectedGroupIds;
-  const first = boardGroups.find(group => group.id === firstId);
-  const second = boardGroups.find(group => group.id === secondId);
+  const firstIndex = boardGroups.findIndex(group => group.id === firstId);
+  const secondIndex = boardGroups.findIndex(group => group.id === secondId);
+  const first = boardGroups[firstIndex];
+  const second = boardGroups[secondIndex];
 
   if (!first || !second) {
     selectedGroupIds = [];
@@ -258,15 +267,18 @@ function attemptCombine() {
       shakingGroupIds = [];
       selectedGroupIds = [];
       render();
-    }, 420);
+    }, 680);
     return;
   }
 
   const merged = mergeGroups(first, second);
+  const remainingGroups = boardGroups.filter(group => group.id !== first.id && group.id !== second.id);
+  const insertIndex = Math.min(secondIndex, remainingGroups.length);
 
-  boardGroups = boardGroups.filter(group => group.id !== first.id && group.id !== second.id);
-  boardGroups.unshift(merged);
+  remainingGroups.splice(insertIndex, 0, merged);
+  boardGroups = remainingGroups;
   selectedGroupIds = [];
+  draggedGroupId = null;
   score += merged.solved ? 45 : 1;
   render();
 }
@@ -287,13 +299,51 @@ function shuffleBoard() {
   boardGroups = shuffle(boardGroups);
   selectedGroupIds = [];
   shakingGroupIds = [];
+  draggedGroupId = null;
   render();
 }
 
 function deselectAll() {
   selectedGroupIds = [];
   shakingGroupIds = [];
+  draggedGroupId = null;
   render();
+}
+
+function startDrag(event, groupId) {
+  if (shakingGroupIds.length > 0) {
+    event.preventDefault();
+    return;
+  }
+
+  draggedGroupId = groupId;
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', groupId);
+}
+
+function allowDrop(event) {
+  if (!draggedGroupId || shakingGroupIds.length > 0) return;
+
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+}
+
+function dropOnGroup(event, targetGroupId) {
+  event.preventDefault();
+
+  const sourceGroupId = draggedGroupId || event.dataTransfer.getData('text/plain');
+  draggedGroupId = null;
+
+  if (!sourceGroupId || sourceGroupId === targetGroupId || shakingGroupIds.length > 0) {
+    return;
+  }
+
+  selectedGroupIds = [sourceGroupId, targetGroupId];
+  attemptCombine();
+}
+
+function endDrag() {
+  draggedGroupId = null;
 }
 
 function showValidationErrors(errors) {
