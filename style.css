@@ -176,6 +176,11 @@ h1 {
   transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
 
+.tile:hover,
+.tile:focus-visible {
+  z-index: 30;
+}
+
 .tile:hover {
   background: var(--tile-hover);
   transform: translateY(-1px);
@@ -229,7 +234,7 @@ h1 {
   font-weight: 800;
 }
 
-.tile-preview {
+.tile[data-preview]::before {
   position: absolute;
   z-index: 20;
   left: 50%;
@@ -253,26 +258,39 @@ h1 {
   transform: translate(-50%, 6px);
   transition: opacity 120ms ease, transform 120ms ease;
   visibility: hidden;
+  content: attr(data-preview);
+  white-space: normal;
 }
 
-.tile-preview::after {
+.tile[data-preview]::after {
   position: absolute;
+  z-index: 21;
   left: 50%;
-  bottom: -7px;
+  bottom: calc(100% + 2px);
   width: 12px;
   height: 12px;
   border-right: 2px solid var(--line);
   border-bottom: 2px solid var(--line);
   background: var(--button);
   content: "";
+  opacity: 0;
+  pointer-events: none;
   transform: translateX(-50%) rotate(45deg);
+  transition: opacity 120ms ease;
+  visibility: hidden;
 }
 
-.tile:hover .tile-preview,
-.tile:focus-visible .tile-preview {
+.tile[data-preview]:hover::before,
+.tile[data-preview]:focus-visible::before {
   opacity: 1;
   pointer-events: auto;
   transform: translate(-50%, 0);
+  visibility: visible;
+}
+
+.tile[data-preview]:hover::after,
+.tile[data-preview]:focus-visible::after {
+  opacity: 1;
   visibility: visible;
 }
 
@@ -345,32 +363,32 @@ h1 {
     font-size: 0.72rem;
   }
 
-  .board .tile:nth-child(3n+1) .tile-preview {
+  .board .tile:nth-child(3n+1)[data-preview]::before {
     left: 0;
     transform: translate(0, 6px);
   }
 
-  .board .tile:nth-child(3n+1):hover .tile-preview,
-  .board .tile:nth-child(3n+1):focus-visible .tile-preview {
+  .board .tile:nth-child(3n+1)[data-preview]:hover::before,
+  .board .tile:nth-child(3n+1)[data-preview]:focus-visible::before {
     transform: translate(0, 0);
   }
 
-  .board .tile:nth-child(3n+1) .tile-preview::after {
+  .board .tile:nth-child(3n+1)[data-preview]::after {
     left: 26px;
   }
 
-  .board .tile:nth-child(3n) .tile-preview {
+  .board .tile:nth-child(3n)[data-preview]::before {
     right: 0;
     left: auto;
     transform: translate(0, 6px);
   }
 
-  .board .tile:nth-child(3n):hover .tile-preview,
-  .board .tile:nth-child(3n):focus-visible .tile-preview {
+  .board .tile:nth-child(3n)[data-preview]:hover::before,
+  .board .tile:nth-child(3n)[data-preview]:focus-visible::before {
     transform: translate(0, 0);
   }
 
-  .board .tile:nth-child(3n) .tile-preview::after {
+  .board .tile:nth-child(3n)[data-preview]::after {
     right: 26px;
     left: auto;
   }

@@ -1,6 +1,7 @@
 const EXPECTED_BANK_SIZE = 600;
 const DEFAULT_MONTHLY_CATEGORY_COUNT = 45;
 const DEFAULT_ANSWERS_PER_CATEGORY = 45;
+const STORAGE_PREFIX = 'connections-monthly-progress-v1';
 
 const puzzleEl = document.getElementById('puzzle');
 const resetDateEl = document.getElementById('resetDate');
@@ -142,17 +143,37 @@ function normalizeAnswer(value) {
   return String(value).toLowerCase().trim();
 }
 
-function startPuzzle() {
+function getStorageKey(date = new Date()) {
+  return `${STORAGE_PREFIX}-${getMonthlySeed(date)}`;
+}
+
+function startPuzzle(options = {}) {
+  const shouldRestore = options.restore !== false;
+  const shouldClearSaved = options.clearSaved === true;
+
   monthlyCategories = pickMonthlyCategories();
-  boardGroups = shuffle(createBoardGroups());
   selectedGroupIds = [];
   shakingGroupIds = [];
   draggedGroupId = null;
-  mistakes = 0;
-  score = 0;
 
   puzzleEl.textContent = monthFormatter.format(new Date());
   resetDateEl.textContent = `Resets ${resetFormatter.format(getNextResetDate())}`;
+
+  if (shouldClearSaved) {
+    clearSavedProgress();
+  }
+
+  const savedProgress = shouldRestore ? loadProgress() : null;
+
+  if (savedProgress) {
+    boardGroups = savedProgress.boardGroups;
+    mistakes = savedProgress.mistakes;
+    score = savedProgress.score;
+  } else {
+    boardGroups = shuffle(createBoardGroups());
+    mistakes = 0;
+    score = 0;
+  }
 
   render();
 }
@@ -176,6 +197,9 @@ function render() {
     tile.type = 'button';
     tile.draggable = shakingGroupIds.length === 0;
     tile.dataset.groupId = group.id;
+    if (group.items.length > 1) {
+      tile.dataset.preview = group.items.join(', ');
+    }
     tile.setAttribute('aria-pressed', selectedGroupIds.includes(group.id));
     tile.innerHTML = getTileLabel(group);
     tile.addEventListener('click', () => selectGroup(group.id));
@@ -187,6 +211,7 @@ function render() {
   });
 
   boardEl.appendChild(fragment);
+  saveProgress();
 }
 
 function getTileClassName(group) {
@@ -202,27 +227,20 @@ function getTileClassName(group) {
 
 function getTileLabel(group) {
   const safeItems = group.items.map(escapeHtml);
-  const preview = getGroupPreview(safeItems);
 
   if (group.items.length === answersPerCategory) {
-    return `<span class="tile-title">${escapeHtml(group.categoryTitle)}</span><span class="tile-count">${answersPerCategory} tiles</span>${preview}`;
+    return `<span class="tile-title">${escapeHtml(group.categoryTitle)}</span><span class="tile-count">${answersPerCategory} tiles</span>`;
   }
 
   if (group.items.length >= 3) {
-    return `<strong>${safeItems[0]}, ${safeItems[1]}, ... ${group.items.length}</strong>${preview}`;
+    return `<strong>${safeItems[0]}, ${safeItems[1]}, ... ${group.items.length}</strong>`;
   }
 
   if (group.items.length === 2) {
-    return `<strong>${safeItems.join(', ')}</strong>${preview}`;
+    return `<strong>${safeItems.join(', ')}</strong>`;
   }
 
   return `<span>${safeItems[0]}</span>`;
-}
-
-function getGroupPreview(safeItems) {
-  if (safeItems.length < 2) return '';
-
-  return `<span class="tile-preview" role="tooltip">${safeItems.join(', ')}</span>`;
 }
 
 function escapeHtml(value) {
@@ -353,6 +371,88 @@ function endDrag() {
   draggedGroupId = null;
 }
 
+function saveProgress() {
+  const storage = getStorage();
+  if (!storage || boardGroups.length === 0) return;
+
+  try {
+    storage.setItem(getStorageKey(), JSON.stringify({
+      seed: getMonthlySeed(),
+      boardGroups,
+      mistakes,
+      score,
+      savedAt: new Date().toISOString()
+    }));
+  } catch (error) {
+    // Ignore storage failures so private browsing or full storage never breaks the game.
+  }
+}
+
+function loadProgress() {
+  const storage = getStorage();
+  if (!storage) return null;
+
+  try {
+    const rawProgress = storage.getItem(getStorageKey());
+    if (!rawProgress) return null;
+
+    const progress = JSON.parse(rawProgress);
+    if (!isValidProgress(progress)) return null;
+
+    return {
+      boardGroups: progress.boardGroups,
+      mistakes: Number(progress.mistakes) || 0,
+      score: Number(progress.score) || 0
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+function clearSavedProgress() {
+  const storage = getStorage();
+  if (!storage) return;
+
+  try {
+    storage.removeItem(getStorageKey());
+  } catch (error) {
+    // Ignore storage failures so reset still works.
+  }
+}
+
+function getStorage() {
+  try {
+    return window.localStorage || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function isValidProgress(progress) {
+  if (!progress || progress.seed !== getMonthlySeed() || !Array.isArray(progress.boardGroups)) {
+    return false;
+  }
+
+  const validCategoryIds = new Set(monthlyCategories.map(category => category.id));
+  const itemTotal = progress.boardGroups.reduce((total, group) => {
+    if (!isValidSavedGroup(group, validCategoryIds)) return Number.NaN;
+    return total + group.items.length;
+  }, 0);
+
+  return itemTotal === monthlyCategoryCount * answersPerCategory;
+}
+
+function isValidSavedGroup(group, validCategoryIds) {
+  return group
+    && typeof group.id === 'string'
+    && validCategoryIds.has(group.categoryId)
+    && typeof group.categoryTitle === 'string'
+    && Array.isArray(group.items)
+    && group.items.length > 0
+    && group.items.length <= answersPerCategory
+    && group.items.every(item => typeof item === 'string' && item.trim().length > 0);
+}
+
 function showValidationErrors(errors) {
   statusEl.textContent = errors[0];
   statusEl.classList.remove('status--hidden');
@@ -361,7 +461,7 @@ function showValidationErrors(errors) {
 
 shuffleBtn.addEventListener('click', shuffleBoard);
 deselectBtn.addEventListener('click', deselectAll);
-resetBtn.addEventListener('click', startPuzzle);
+resetBtn.addEventListener('click', () => startPuzzle({ restore: false, clearSaved: true }));
 
 const validationErrors = validateBank();
 startPuzzle();
