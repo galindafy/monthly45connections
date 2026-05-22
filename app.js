@@ -202,20 +202,27 @@ function getTileClassName(group) {
 
 function getTileLabel(group) {
   const safeItems = group.items.map(escapeHtml);
+  const preview = getGroupPreview(safeItems);
 
   if (group.items.length === answersPerCategory) {
-    return `<span class="tile-title">${escapeHtml(group.categoryTitle)}</span><span class="tile-count">${answersPerCategory} tiles</span>`;
+    return `<span class="tile-title">${escapeHtml(group.categoryTitle)}</span><span class="tile-count">${answersPerCategory} tiles</span>${preview}`;
   }
 
   if (group.items.length >= 3) {
-    return `<strong>${safeItems[0]}, ${safeItems[1]}, ... ${group.items.length}</strong>`;
+    return `<strong>${safeItems[0]}, ${safeItems[1]}, ... ${group.items.length}</strong>${preview}`;
   }
 
   if (group.items.length === 2) {
-    return `<strong>${safeItems.join(', ')}</strong>`;
+    return `<strong>${safeItems.join(', ')}</strong>${preview}`;
   }
 
   return `<span>${safeItems[0]}</span>`;
+}
+
+function getGroupPreview(safeItems) {
+  if (safeItems.length < 2) return '';
+
+  return `<span class="tile-preview" role="tooltip">${safeItems.join(', ')}</span>`;
 }
 
 function escapeHtml(value) {
