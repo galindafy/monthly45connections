@@ -13,6 +13,12 @@ const boardEl = document.getElementById('board');
 const shuffleBtn = document.getElementById('shuffleBtn');
 const deselectBtn = document.getElementById('deselectBtn');
 const resetBtn = document.getElementById('resetBtn');
+const tooltipEl = document.createElement('div');
+const TOOLTIP_DELAY_MS = 450;
+
+tooltipEl.className = 'group-tooltip';
+tooltipEl.setAttribute('role', 'tooltip');
+document.body.appendChild(tooltipEl);
 
 const answersPerCategory = window.ANSWERS_PER_CATEGORY || DEFAULT_ANSWERS_PER_CATEGORY;
 const monthlyCategoryCount = window.MONTHLY_CATEGORY_COUNT || DEFAULT_MONTHLY_CATEGORY_COUNT;
@@ -32,6 +38,7 @@ let boardGroups = [];
 let selectedGroupIds = [];
 let shakingGroupIds = [];
 let draggedGroupId = null;
+let tooltipTimer = null;
 let mistakes = 0;
 let score = 0;
 
@@ -207,6 +214,13 @@ function render() {
     tile.addEventListener('dragover', allowDrop);
     tile.addEventListener('drop', event => dropOnGroup(event, group.id));
     tile.addEventListener('dragend', endDrag);
+    if (group.items.length > 1) {
+      tile.addEventListener('mouseenter', () => scheduleGroupTooltip(tile, group));
+      tile.addEventListener('mousemove', () => positionGroupTooltip(tile));
+      tile.addEventListener('mouseleave', hideGroupTooltip);
+      tile.addEventListener('focus', () => showGroupTooltip(tile, group));
+      tile.addEventListener('blur', hideGroupTooltip);
+    }
     fragment.appendChild(tile);
   });
 
@@ -369,6 +383,52 @@ function dropOnGroup(event, targetGroupId) {
 
 function endDrag() {
   draggedGroupId = null;
+}
+
+function scheduleGroupTooltip(tile, group) {
+  clearGroupTooltipTimer();
+  tooltipTimer = window.setTimeout(() => {
+    showGroupTooltip(tile, group);
+  }, TOOLTIP_DELAY_MS);
+}
+
+function showGroupTooltip(tile, group) {
+  clearGroupTooltipTimer();
+  tooltipEl.textContent = group.items.join(', ');
+  tooltipEl.classList.add('group-tooltip--visible');
+  positionGroupTooltip(tile);
+}
+
+function positionGroupTooltip(tile) {
+  if (!tooltipEl.classList.contains('group-tooltip--visible')) return;
+
+  const tileRect = tile.getBoundingClientRect();
+  const tooltipRect = tooltipEl.getBoundingClientRect();
+  const margin = 8;
+  const centeredLeft = tileRect.left + tileRect.width / 2 - tooltipRect.width / 2;
+  const left = Math.max(margin, Math.min(centeredLeft, window.innerWidth - tooltipRect.width - margin));
+  let top = tileRect.top - tooltipRect.height - margin;
+
+  tooltipEl.classList.toggle('group-tooltip--below', top < margin);
+
+  if (top < margin) {
+    top = tileRect.bottom + margin;
+  }
+
+  tooltipEl.style.left = `${left}px`;
+  tooltipEl.style.top = `${top}px`;
+}
+
+function hideGroupTooltip() {
+  clearGroupTooltipTimer();
+  tooltipEl.classList.remove('group-tooltip--visible', 'group-tooltip--below');
+}
+
+function clearGroupTooltipTimer() {
+  if (!tooltipTimer) return;
+
+  window.clearTimeout(tooltipTimer);
+  tooltipTimer = null;
 }
 
 function saveProgress() {

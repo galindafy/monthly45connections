@@ -234,14 +234,11 @@ h1 {
   font-weight: 800;
 }
 
-.tile[data-preview]::before {
-  position: absolute;
-  z-index: 20;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  width: max-content;
-  max-width: min(320px, 84vw);
-  max-height: 180px;
+.group-tooltip {
+  position: fixed;
+  z-index: 1000;
+  max-width: min(360px, calc(100vw - 16px));
+  max-height: 220px;
   overflow: auto;
   border: 2px solid var(--line);
   border-radius: 8px;
@@ -249,49 +246,26 @@ h1 {
   background: var(--button);
   color: var(--button-text);
   box-shadow: 0 12px 30px rgba(35, 32, 27, 0.22);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 750;
   line-height: 1.35;
   text-align: left;
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, 6px);
+  user-select: none;
+  transform: translateY(6px);
   transition: opacity 120ms ease, transform 120ms ease;
   visibility: hidden;
-  content: attr(data-preview);
-  white-space: normal;
 }
 
-.tile[data-preview]::after {
-  position: absolute;
-  z-index: 21;
-  left: 50%;
-  bottom: calc(100% + 2px);
-  width: 12px;
-  height: 12px;
-  border-right: 2px solid var(--line);
-  border-bottom: 2px solid var(--line);
-  background: var(--button);
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-50%) rotate(45deg);
-  transition: opacity 120ms ease;
-  visibility: hidden;
-}
-
-.tile[data-preview]:hover::before,
-.tile[data-preview]:focus-visible::before {
+.group-tooltip--visible {
   opacity: 1;
-  pointer-events: auto;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
   visibility: visible;
 }
 
-.tile[data-preview]:hover::after,
-.tile[data-preview]:focus-visible::after {
-  opacity: 1;
-  visibility: visible;
+.group-tooltip--below {
+  transform: translateY(0);
 }
 
 .tile:focus-visible,
@@ -363,34 +337,8 @@ h1 {
     font-size: 0.72rem;
   }
 
-  .board .tile:nth-child(3n+1)[data-preview]::before {
-    left: 0;
-    transform: translate(0, 6px);
-  }
-
-  .board .tile:nth-child(3n+1)[data-preview]:hover::before,
-  .board .tile:nth-child(3n+1)[data-preview]:focus-visible::before {
-    transform: translate(0, 0);
-  }
-
-  .board .tile:nth-child(3n+1)[data-preview]::after {
-    left: 26px;
-  }
-
-  .board .tile:nth-child(3n)[data-preview]::before {
-    right: 0;
-    left: auto;
-    transform: translate(0, 6px);
-  }
-
-  .board .tile:nth-child(3n)[data-preview]:hover::before,
-  .board .tile:nth-child(3n)[data-preview]:focus-visible::before {
-    transform: translate(0, 0);
-  }
-
-  .board .tile:nth-child(3n)[data-preview]::after {
-    right: 26px;
-    left: auto;
+  .group-tooltip {
+    font-size: 0.7rem;
   }
 }
 
