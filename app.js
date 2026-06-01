@@ -385,8 +385,18 @@ function updateTiles(groupIds) {
 
     if (group && tile) {
       updateTileState(tile, group);
+
+      if (shakingGroupIds.includes(groupId)) {
+        restartTileShake(tile);
+      }
     }
   });
+}
+
+function restartTileShake(tile) {
+  tile.classList.remove('tile--shake');
+  void tile.offsetWidth;
+  tile.classList.add('tile--shake');
 }
 
 function updateTileContent(group) {

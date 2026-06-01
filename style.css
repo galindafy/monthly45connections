@@ -265,6 +265,7 @@ h1 {
 }
 
 .tile--shake {
+  contain: layout style;
   border-color: var(--danger);
   background: #f4c7bd;
   color: var(--ink);
