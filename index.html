@@ -23,6 +23,13 @@
 <button id="resetBtn" type="button">Reset</button>
 </section>
 
+<section class="selection-bar" aria-label="Selected group">
+<div class="selection-summary">
+<span>Selected</span>
+<strong id="selectedSummary">No tile selected</strong>
+</div>
+</section>
+
 <section class="goal">
 <strong>Make 45 groups of 45</strong>
 <span id="progress">0 / 45 groups complete</span>
@@ -31,6 +38,16 @@
 <div id="status" class="status" role="status" aria-live="polite"></div>
 <section id="board" class="board" aria-label="Puzzle board"></section>
 </main>
+
+<div id="shareModal" class="share-modal" hidden>
+<section class="share-card" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+<button id="closeShareBtn" class="share-close" type="button" aria-label="Close share popup">&times;</button>
+<h2 id="shareTitle">Puzzle Complete</h2>
+<p id="shareStats"></p>
+<textarea id="shareText" readonly rows="5"></textarea>
+<button id="copyShareBtn" type="button">Copy Share</button>
+</section>
+</div>
 
 <script src="data.js"></script>
 <script src="app.js"></script>

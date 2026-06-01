@@ -34,7 +34,7 @@ button {
 }
 
 .container {
-  width: min(100%, 1180px);
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -74,7 +74,8 @@ h1 {
 
 .stat,
 .topbar button,
-.goal {
+.goal,
+.selection-bar {
   border: 2px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -129,6 +130,50 @@ h1 {
   padding: 12px 14px;
 }
 
+.selection-bar {
+  position: sticky;
+  z-index: 100;
+  top: 8px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: stretch;
+  margin-bottom: 12px;
+  padding: 10px;
+  box-shadow: 0 6px 18px rgba(35, 32, 27, 0.14);
+}
+
+.selection-summary {
+  min-width: 0;
+}
+
+.selection-summary span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.selection-summary strong {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-card button {
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--button-text);
+  cursor: pointer;
+  font-weight: 900;
+}
+
 .goal strong {
   font-size: 1.05rem;
 }
@@ -154,7 +199,7 @@ h1 {
 
 .board {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
   gap: 8px;
   align-items: stretch;
 }
@@ -203,6 +248,23 @@ h1 {
 
 .tile--complete {
   background: var(--complete);
+}
+
+.tile--complete:hover {
+  background: var(--complete);
+}
+
+.tile-name-input {
+  width: 100%;
+  min-width: 0;
+  border: 2px solid var(--selected);
+  border-radius: 6px;
+  padding: 7px;
+  background: #ffffff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
 }
 
 .tile--shake {
@@ -266,6 +328,71 @@ h1 {
 
 .group-tooltip--below {
   transform: translateY(0);
+}
+
+.share-modal {
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(35, 32, 27, 0.48);
+}
+
+.share-modal[hidden] {
+  display: none;
+}
+
+.share-card {
+  position: relative;
+  width: min(100%, 420px);
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  background: var(--panel);
+  box-shadow: 0 22px 70px rgba(35, 32, 27, 0.28);
+}
+
+.share-card h2 {
+  margin: 0 36px 8px 0;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.share-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.share-card textarea {
+  width: 100%;
+  resize: vertical;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #ffffff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 750;
+}
+
+.share-card button {
+  min-height: 42px;
+  margin-top: 12px;
+  padding: 0 16px;
+}
+
+.share-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  min-height: 34px;
+  margin: 0;
+  padding: 0;
 }
 
 .tile:focus-visible,

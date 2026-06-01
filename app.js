@@ -13,8 +13,14 @@ const boardEl = document.getElementById('board');
 const shuffleBtn = document.getElementById('shuffleBtn');
 const deselectBtn = document.getElementById('deselectBtn');
 const resetBtn = document.getElementById('resetBtn');
+const selectedSummaryEl = document.getElementById('selectedSummary');
+const shareModal = document.getElementById('shareModal');
+const shareStatsEl = document.getElementById('shareStats');
+const shareTextEl = document.getElementById('shareText');
+const copyShareBtn = document.getElementById('copyShareBtn');
+const closeShareBtn = document.getElementById('closeShareBtn');
 const tooltipEl = document.createElement('div');
-const TOOLTIP_DELAY_MS = 450;
+const TOOLTIP_DELAY_MS = 650;
 
 tooltipEl.className = 'group-tooltip';
 tooltipEl.setAttribute('role', 'tooltip');
@@ -32,6 +38,8 @@ const resetFormatter = new Intl.DateTimeFormat('en', {
   day: 'numeric',
   year: 'numeric'
 });
+const categoryFamilyCounts = getCategoryFamilyCounts();
+const monthlySelectionCache = new Map();
 
 let monthlyCategories = [];
 let boardGroups = [];
@@ -39,6 +47,8 @@ let selectedGroupIds = [];
 let shakingGroupIds = [];
 let draggedGroupId = null;
 let tooltipTimer = null;
+let groupClickTimer = null;
+let shareShown = false;
 let mistakes = 0;
 let score = 0;
 
@@ -96,26 +106,71 @@ function validateBank() {
   return errors;
 }
 
-function pickMonthlyCategories(date = new Date()) {
+function pickPuzzleCategories(date = new Date()) {
+  const cacheKey = getMonthlySeed(date);
+  if (monthlySelectionCache.has(cacheKey)) {
+    return monthlySelectionCache.get(cacheKey);
+  }
+
+  const previousMonth = new Date(date.getFullYear(), date.getMonth() - 1, 15);
+  const previousCategories = shouldCompareWithPreviousMonth(date)
+    ? pickPuzzleCategories(previousMonth)
+    : [];
+  const excludedCategoryIds = new Set(previousCategories.map(category => category.id));
+  const previousFamilies = new Set(previousCategories.map(category => normalizeAnswer(getCategoryDisplayTitle(category.title))));
+  const freshSelection = pickMonthlyCategories(date, {
+    excludedCategoryIds,
+    previousFamilies
+  });
+
+  if (freshSelection.length === monthlyCategoryCount) {
+    monthlySelectionCache.set(cacheKey, freshSelection);
+    return freshSelection;
+  }
+
+  const relaxedSelection = pickMonthlyCategories(date, {
+    previousFamilies
+  });
+
+  if (relaxedSelection.length === monthlyCategoryCount) {
+    monthlySelectionCache.set(cacheKey, relaxedSelection);
+    return relaxedSelection;
+  }
+
+  const fallbackSelection = pickMonthlyCategories(date);
+  monthlySelectionCache.set(cacheKey, fallbackSelection);
+  return fallbackSelection;
+}
+
+function shouldCompareWithPreviousMonth(date) {
+  return date.getFullYear() > 2026 || (date.getFullYear() === 2026 && date.getMonth() > 0);
+}
+
+function pickMonthlyCategories(date = new Date(), options = {}) {
   const seed = getMonthlySeed(date);
   let bestSelection = [];
+  const excludedCategoryIds = options.excludedCategoryIds || new Set();
+  const previousFamilies = options.previousFamilies || new Set();
 
-  for (let attempt = 0; attempt < 80; attempt += 1) {
+  for (let attempt = 0; attempt < 48; attempt += 1) {
     const selected = [];
     const usedAnswers = new Set();
+    const usedFamilies = new Set();
     const random = seededRandom(seed + attempt * 7919);
+    const orderedCategories = orderCategoriesForMonth(
+      shuffle(CATEGORY_BANK, random).filter(category => !excludedCategoryIds.has(category.id)),
+      previousFamilies
+    );
 
-    shuffle(CATEGORY_BANK, random).forEach(category => {
-      if (selected.length >= monthlyCategoryCount) return;
-
-      const normalizedItems = category.items.map(item => normalizeAnswer(cleanAnswerLabel(item)));
-      const hasDuplicateAnswer = normalizedItems.some(item => usedAnswers.has(item));
-
-      if (hasDuplicateAnswer) return;
-
-      selected.push(category);
-      normalizedItems.forEach(item => usedAnswers.add(item));
+    orderedCategories.forEach(category => {
+      addCategoryToSelection(category, selected, usedAnswers, usedFamilies, false);
     });
+
+    if (selected.length < monthlyCategoryCount) {
+      orderedCategories.forEach(category => {
+        addCategoryToSelection(category, selected, usedAnswers, usedFamilies, true);
+      });
+    }
 
     if (selected.length === monthlyCategoryCount) {
       return selected;
@@ -129,12 +184,46 @@ function pickMonthlyCategories(date = new Date()) {
   return bestSelection;
 }
 
+function orderCategoriesForMonth(categories, previousFamilies) {
+  return categories.sort((first, second) => {
+    return getCategoryPriority(first, previousFamilies) - getCategoryPriority(second, previousFamilies);
+  });
+}
+
+function getCategoryPriority(category, previousFamilies) {
+  const familyTitle = normalizeAnswer(getCategoryDisplayTitle(category.title));
+  const repeatsPreviousFamily = previousFamilies.has(familyTitle);
+  const reusableFamily = (categoryFamilyCounts.get(familyTitle) || 0) > 1;
+
+  if (!repeatsPreviousFamily && reusableFamily) return 0;
+  if (!repeatsPreviousFamily) return 1;
+  if (reusableFamily) return 2;
+  return 3;
+}
+
+function addCategoryToSelection(category, selected, usedAnswers, usedFamilies, allowUsedFamily) {
+  if (selected.length >= monthlyCategoryCount || selected.includes(category)) return;
+
+  const familyTitle = normalizeAnswer(getCategoryDisplayTitle(category.title));
+  if (!allowUsedFamily && usedFamilies.has(familyTitle)) return;
+
+  const normalizedItems = category.items.map(item => normalizeAnswer(cleanAnswerLabel(item)));
+  const hasDuplicateAnswer = normalizedItems.some(item => usedAnswers.has(item));
+
+  if (hasDuplicateAnswer) return;
+
+  selected.push(category);
+  usedFamilies.add(familyTitle);
+  normalizedItems.forEach(item => usedAnswers.add(item));
+}
+
 function createBoardGroups() {
   return monthlyCategories.flatMap(category => category.items.map((item, index) => ({
     id: `${category.id}-${index}`,
     categoryId: category.id,
     categoryTitle: category.title,
     items: [cleanAnswerLabel(item)],
+    customName: '',
     solved: false
   })));
 }
@@ -150,6 +239,21 @@ function normalizeAnswer(value) {
   return String(value).toLowerCase().trim();
 }
 
+function getCategoryDisplayTitle(title) {
+  return String(title).replace(/\s+Set\s+\d+$/i, '').trim();
+}
+
+function getCategoryFamilyCounts() {
+  const counts = new Map();
+
+  CATEGORY_BANK.forEach(category => {
+    const familyTitle = normalizeAnswer(getCategoryDisplayTitle(category.title));
+    counts.set(familyTitle, (counts.get(familyTitle) || 0) + 1);
+  });
+
+  return counts;
+}
+
 function getStorageKey(date = new Date()) {
   return `${STORAGE_PREFIX}-${getMonthlySeed(date)}`;
 }
@@ -158,10 +262,12 @@ function startPuzzle(options = {}) {
   const shouldRestore = options.restore !== false;
   const shouldClearSaved = options.clearSaved === true;
 
-  monthlyCategories = pickMonthlyCategories();
+  monthlyCategories = pickPuzzleCategories();
   selectedGroupIds = [];
   shakingGroupIds = [];
   draggedGroupId = null;
+  shareShown = false;
+  hideSharePopup();
 
   puzzleEl.textContent = monthFormatter.format(new Date());
   resetDateEl.textContent = `Resets ${resetFormatter.format(getNextResetDate())}`;
@@ -192,6 +298,7 @@ function render() {
   mistakesEl.textContent = mistakes;
   progressEl.textContent = `${solvedCount} / ${monthlyCategoryCount} groups complete`;
   deselectBtn.disabled = selectedGroupIds.length === 0;
+  updateSelectionBar();
   statusEl.textContent = '';
   statusEl.classList.add('status--hidden');
 
@@ -209,7 +316,8 @@ function render() {
     }
     tile.setAttribute('aria-pressed', selectedGroupIds.includes(group.id));
     tile.innerHTML = getTileLabel(group);
-    tile.addEventListener('click', () => selectGroup(group.id));
+    tile.addEventListener('click', event => handleTileClick(event, group));
+    tile.addEventListener('dblclick', event => startInlineGroupNaming(event, tile, group));
     tile.addEventListener('dragstart', event => startDrag(event, group.id));
     tile.addEventListener('dragover', allowDrop);
     tile.addEventListener('drop', event => dropOnGroup(event, group.id));
@@ -226,6 +334,10 @@ function render() {
 
   boardEl.appendChild(fragment);
   saveProgress();
+
+  if (solvedCount === monthlyCategoryCount && !shareShown) {
+    showSharePopup();
+  }
 }
 
 function getTileClassName(group) {
@@ -243,7 +355,11 @@ function getTileLabel(group) {
   const safeItems = group.items.map(escapeHtml);
 
   if (group.items.length === answersPerCategory) {
-    return `<span class="tile-title">${escapeHtml(group.categoryTitle)}</span><span class="tile-count">${answersPerCategory} tiles</span>`;
+    return `<span class="tile-title">${escapeHtml(group.categoryTitle)}</span>`;
+  }
+
+  if (group.customName) {
+    return `<strong>${escapeHtml(group.customName)}</strong><span class="tile-count">${group.items.length} grouped</span>`;
   }
 
   if (group.items.length >= 3) {
@@ -285,6 +401,28 @@ function selectGroup(groupId) {
   render();
 }
 
+function handleTileClick(event, group) {
+  if (event.target.classList.contains('tile-name-input')) return;
+
+  if (group.items.length < 2 || group.items.length === answersPerCategory) {
+    selectGroup(group.id);
+    return;
+  }
+
+  clearGroupClickTimer();
+  groupClickTimer = window.setTimeout(() => {
+    groupClickTimer = null;
+    selectGroup(group.id);
+  }, 240);
+}
+
+function clearGroupClickTimer() {
+  if (!groupClickTimer) return;
+
+  window.clearTimeout(groupClickTimer);
+  groupClickTimer = null;
+}
+
 function attemptCombine() {
   const [firstId, secondId] = selectedGroupIds;
   const firstIndex = boardGroups.findIndex(group => group.id === firstId);
@@ -324,14 +462,23 @@ function attemptCombine() {
 
 function mergeGroups(first, second) {
   const items = [...first.items, ...second.items];
+  const customName = getMergedCustomName(first, second);
 
   return {
     id: `${first.id}__${second.id}`,
     categoryId: first.categoryId,
     categoryTitle: first.categoryTitle,
     items,
+    customName,
     solved: items.length === answersPerCategory
   };
+}
+
+function getMergedCustomName(first, second) {
+  if (first.customName && !second.customName) return first.customName;
+  if (second.customName && !first.customName) return second.customName;
+  if (first.customName && first.customName === second.customName) return first.customName;
+  return '';
 }
 
 function shuffleBoard() {
@@ -346,6 +493,7 @@ function deselectAll() {
   selectedGroupIds = [];
   shakingGroupIds = [];
   draggedGroupId = null;
+  hideGroupTooltip();
   render();
 }
 
@@ -431,6 +579,105 @@ function clearGroupTooltipTimer() {
   tooltipTimer = null;
 }
 
+function updateSelectionBar() {
+  const selectedGroups = selectedGroupIds
+    .map(id => boardGroups.find(group => group.id === id))
+    .filter(Boolean);
+
+  if (selectedGroups.length === 0) {
+    selectedSummaryEl.textContent = 'No tile selected';
+    return;
+  }
+
+  selectedSummaryEl.textContent = selectedGroups.map(getSelectedGroupSummary).join(' + ');
+}
+
+function getSelectedGroupSummary(group) {
+  if (group.items.length === answersPerCategory) {
+    return group.categoryTitle;
+  }
+
+  return group.items.join(', ');
+}
+
+function startInlineGroupNaming(event, tile, group) {
+  if (group.items.length < 2 || group.items.length === answersPerCategory) {
+    return;
+  }
+
+  clearGroupClickTimer();
+  event.preventDefault();
+  event.stopPropagation();
+  hideGroupTooltip();
+
+  const input = document.createElement('input');
+  input.className = 'tile-name-input';
+  input.type = 'text';
+  input.maxLength = 42;
+  input.value = group.customName || '';
+  input.placeholder = 'Name this group';
+
+  tile.innerHTML = '';
+  tile.appendChild(input);
+  input.focus();
+  input.select();
+
+  const saveName = () => {
+    group.customName = input.value.trim();
+    render();
+  };
+
+  input.addEventListener('click', inputEvent => inputEvent.stopPropagation());
+  input.addEventListener('dblclick', inputEvent => inputEvent.stopPropagation());
+  input.addEventListener('keydown', inputEvent => {
+    if (inputEvent.key === 'Enter') saveName();
+    if (inputEvent.key === 'Escape') render();
+  });
+  input.addEventListener('blur', saveName);
+}
+
+function showSharePopup() {
+  shareShown = true;
+  shareStatsEl.textContent = `${monthFormatter.format(new Date())} completed with ${mistakes} mistakes.`;
+  shareTextEl.value = createShareText();
+  shareModal.hidden = false;
+}
+
+function hideSharePopup() {
+  if (!shareModal) return;
+
+  shareModal.hidden = true;
+}
+
+function createShareText() {
+  return [
+    `Connections Monthly - ${monthFormatter.format(new Date())}`,
+    `${monthlyCategoryCount} / ${monthlyCategoryCount} groups complete`,
+    `Mistakes: ${mistakes}`,
+    `Score: ${score}`
+  ].join('\n');
+}
+
+async function copyShareText() {
+  const shareText = shareTextEl.value;
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(shareText);
+    } else {
+      shareTextEl.select();
+      document.execCommand('copy');
+    }
+
+    copyShareBtn.textContent = 'Copied';
+    window.setTimeout(() => {
+      copyShareBtn.textContent = 'Copy Share';
+    }, 1200);
+  } catch (error) {
+    shareTextEl.select();
+  }
+}
+
 function saveProgress() {
   const storage = getStorage();
   if (!storage || boardGroups.length === 0) return;
@@ -510,6 +757,7 @@ function isValidSavedGroup(group, validCategoryIds) {
     && Array.isArray(group.items)
     && group.items.length > 0
     && group.items.length <= answersPerCategory
+    && (group.customName === undefined || typeof group.customName === 'string')
     && group.items.every(item => typeof item === 'string' && item.trim().length > 0);
 }
 
@@ -522,6 +770,8 @@ function showValidationErrors(errors) {
 shuffleBtn.addEventListener('click', shuffleBoard);
 deselectBtn.addEventListener('click', deselectAll);
 resetBtn.addEventListener('click', () => startPuzzle({ restore: false, clearSaved: true }));
+closeShareBtn.addEventListener('click', hideSharePopup);
+copyShareBtn.addEventListener('click', copyShareText);
 
 const validationErrors = validateBank();
 startPuzzle();
