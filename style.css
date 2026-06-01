@@ -111,14 +111,9 @@ h1 {
   font-weight: 900;
 }
 
-.topbar button:hover {
-  transform: translateY(-1px);
-}
-
 .topbar button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
-  transform: none;
 }
 
 .goal {
@@ -206,6 +201,9 @@ h1 {
 
 .tile {
   position: relative;
+  contain: layout paint style;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 74px;
   min-width: 0;
   min-height: 74px;
   border: 2px solid transparent;
@@ -218,7 +216,7 @@ h1 {
   font-weight: 650;
   line-height: 1.08;
   overflow-wrap: anywhere;
-  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+  transition: background 120ms ease, border-color 120ms ease;
 }
 
 .tile:hover,
@@ -228,7 +226,6 @@ h1 {
 
 .tile:hover {
   background: var(--tile-hover);
-  transform: translateY(-1px);
 }
 
 .tile:active {
@@ -272,6 +269,7 @@ h1 {
   background: #f4c7bd;
   color: var(--ink);
   animation: shake 680ms ease-in-out;
+  will-change: transform;
 }
 
 .tile.selected.tile--shake {
@@ -428,6 +426,10 @@ h1 {
   .tile,
   .topbar button {
     transition: none;
+  }
+
+  .tile--shake {
+    animation: none;
   }
 }
 

@@ -21,6 +21,7 @@ const copyShareBtn = document.getElementById('copyShareBtn');
 const closeShareBtn = document.getElementById('closeShareBtn');
 const tooltipEl = document.createElement('div');
 const TOOLTIP_DELAY_MS = 650;
+const SAVE_DELAY_MS = 180;
 
 tooltipEl.className = 'group-tooltip';
 tooltipEl.setAttribute('role', 'tooltip');
@@ -40,6 +41,8 @@ const resetFormatter = new Intl.DateTimeFormat('en', {
 });
 const categoryFamilyCounts = getCategoryFamilyCounts();
 const monthlySelectionCache = new Map();
+const groupById = new Map();
+const tileById = new Map();
 
 let monthlyCategories = [];
 let boardGroups = [];
@@ -48,6 +51,7 @@ let shakingGroupIds = [];
 let draggedGroupId = null;
 let tooltipTimer = null;
 let groupClickTimer = null;
+let saveTimer = null;
 let shareShown = false;
 let mistakes = 0;
 let score = 0;
@@ -316,7 +320,9 @@ function startPuzzle(options = {}) {
   render();
 }
 
-function render() {
+function render(options = {}) {
+  const shouldRenderBoard = options.board !== false;
+  const shouldSave = options.save !== false;
   const solvedCount = boardGroups.filter(group => group.items.length === answersPerCategory).length;
 
   scoreEl.textContent = score;
@@ -327,41 +333,68 @@ function render() {
   statusEl.textContent = '';
   statusEl.classList.add('status--hidden');
 
+  if (shouldRenderBoard) {
+    renderBoard();
+  }
+
+  if (shouldSave) {
+    scheduleSaveProgress();
+  }
+
+  if (solvedCount === monthlyCategoryCount && !shareShown) {
+    showSharePopup();
+  }
+}
+
+function renderBoard() {
+  hideGroupTooltip();
   boardEl.innerHTML = '';
+  groupById.clear();
+  tileById.clear();
   const fragment = document.createDocumentFragment();
 
   boardGroups.forEach(group => {
-    const tile = document.createElement('button');
-    tile.className = getTileClassName(group);
-    tile.type = 'button';
-    tile.draggable = shakingGroupIds.length === 0;
-    tile.dataset.groupId = group.id;
-    if (group.items.length > 1) {
-      tile.dataset.preview = group.items.join(', ');
-    }
-    tile.setAttribute('aria-pressed', selectedGroupIds.includes(group.id));
-    tile.innerHTML = getTileLabel(group);
-    tile.addEventListener('click', event => handleTileClick(event, group));
-    tile.addEventListener('dblclick', event => startInlineGroupNaming(event, tile, group));
-    tile.addEventListener('dragstart', event => startDrag(event, group.id));
-    tile.addEventListener('dragover', allowDrop);
-    tile.addEventListener('drop', event => dropOnGroup(event, group.id));
-    tile.addEventListener('dragend', endDrag);
-    if (group.items.length > 1) {
-      tile.addEventListener('mouseenter', () => scheduleGroupTooltip(tile, group));
-      tile.addEventListener('mousemove', () => positionGroupTooltip(tile));
-      tile.addEventListener('mouseleave', hideGroupTooltip);
-      tile.addEventListener('focus', () => showGroupTooltip(tile, group));
-      tile.addEventListener('blur', hideGroupTooltip);
-    }
+    const tile = createTile(group);
+    groupById.set(group.id, group);
+    tileById.set(group.id, tile);
     fragment.appendChild(tile);
   });
 
   boardEl.appendChild(fragment);
-  saveProgress();
+}
 
-  if (solvedCount === monthlyCategoryCount && !shareShown) {
-    showSharePopup();
+function createTile(group) {
+  const tile = document.createElement('button');
+  tile.type = 'button';
+  tile.dataset.groupId = group.id;
+  tile.innerHTML = getTileLabel(group);
+  updateTileState(tile, group);
+  return tile;
+}
+
+function updateTileState(tile, group) {
+  tile.className = getTileClassName(group);
+  tile.draggable = shakingGroupIds.length === 0;
+  tile.setAttribute('aria-pressed', selectedGroupIds.includes(group.id));
+}
+
+function updateTiles(groupIds) {
+  new Set(groupIds).forEach(groupId => {
+    const group = groupById.get(groupId);
+    const tile = tileById.get(groupId);
+
+    if (group && tile) {
+      updateTileState(tile, group);
+    }
+  });
+}
+
+function updateTileContent(group) {
+  const tile = tileById.get(group.id);
+
+  if (tile) {
+    tile.innerHTML = getTileLabel(group);
+    updateTileState(tile, group);
   }
 }
 
@@ -412,7 +445,8 @@ function selectGroup(groupId) {
 
   if (selectedGroupIds.includes(groupId)) {
     selectedGroupIds = selectedGroupIds.filter(id => id !== groupId);
-    render();
+    updateTiles([groupId]);
+    render({ board: false, save: false });
     return;
   }
 
@@ -423,7 +457,8 @@ function selectGroup(groupId) {
     return;
   }
 
-  render();
+  updateTiles([groupId]);
+  render({ board: false, save: false });
 }
 
 function handleTileClick(event, group) {
@@ -456,19 +491,24 @@ function attemptCombine() {
   const second = boardGroups[secondIndex];
 
   if (!first || !second) {
+    const staleSelectedIds = [...selectedGroupIds];
     selectedGroupIds = [];
-    render();
+    updateTiles(staleSelectedIds);
+    render({ board: false, save: false });
     return;
   }
 
   if (first.categoryId !== second.categoryId) {
     mistakes += 1;
     shakingGroupIds = [...selectedGroupIds];
-    render();
+    updateTiles(shakingGroupIds);
+    render({ board: false });
     window.setTimeout(() => {
+      const previouslyShakingIds = [...shakingGroupIds];
       shakingGroupIds = [];
       selectedGroupIds = [];
-      render();
+      updateTiles(previouslyShakingIds);
+      render({ board: false, save: false });
     }, 680);
     return;
   }
@@ -482,7 +522,8 @@ function attemptCombine() {
   selectedGroupIds = [];
   draggedGroupId = null;
   score += merged.solved ? 45 : 1;
-  render();
+  replaceTilesWithMergedGroup(first, second, merged, insertIndex);
+  render({ board: false });
 }
 
 function mergeGroups(first, second) {
@@ -506,6 +547,24 @@ function getMergedCustomName(first, second) {
   return '';
 }
 
+function replaceTilesWithMergedGroup(first, second, merged, insertIndex) {
+  hideGroupTooltip();
+  tileById.get(first.id)?.remove();
+  tileById.get(second.id)?.remove();
+  groupById.delete(first.id);
+  groupById.delete(second.id);
+  tileById.delete(first.id);
+  tileById.delete(second.id);
+
+  const tile = createTile(merged);
+  const nextGroup = boardGroups[insertIndex + 1];
+  const nextTile = nextGroup ? tileById.get(nextGroup.id) : null;
+
+  groupById.set(merged.id, merged);
+  tileById.set(merged.id, tile);
+  boardEl.insertBefore(tile, nextTile || null);
+}
+
 function shuffleBoard() {
   boardGroups = shuffle(boardGroups);
   selectedGroupIds = [];
@@ -515,11 +574,13 @@ function shuffleBoard() {
 }
 
 function deselectAll() {
+  const selectedIds = [...selectedGroupIds, ...shakingGroupIds];
   selectedGroupIds = [];
   shakingGroupIds = [];
   draggedGroupId = null;
   hideGroupTooltip();
-  render();
+  updateTiles(selectedIds);
+  render({ board: false, save: false });
 }
 
 function startDrag(event, groupId) {
@@ -646,19 +707,27 @@ function startInlineGroupNaming(event, tile, group) {
   tile.appendChild(input);
   input.focus();
   input.select();
+  let finished = false;
 
-  const saveName = () => {
-    group.customName = input.value.trim();
-    render();
+  const finishNaming = shouldSave => {
+    if (finished) return;
+
+    finished = true;
+    if (shouldSave) {
+      group.customName = input.value.trim();
+      scheduleSaveProgress();
+    }
+
+    updateTileContent(group);
   };
 
   input.addEventListener('click', inputEvent => inputEvent.stopPropagation());
   input.addEventListener('dblclick', inputEvent => inputEvent.stopPropagation());
   input.addEventListener('keydown', inputEvent => {
-    if (inputEvent.key === 'Enter') saveName();
-    if (inputEvent.key === 'Escape') render();
+    if (inputEvent.key === 'Enter') finishNaming(true);
+    if (inputEvent.key === 'Escape') finishNaming(false);
   });
-  input.addEventListener('blur', saveName);
+  input.addEventListener('blur', () => finishNaming(true));
 }
 
 function showSharePopup() {
@@ -701,6 +770,17 @@ async function copyShareText() {
   } catch (error) {
     shareTextEl.select();
   }
+}
+
+function scheduleSaveProgress() {
+  if (saveTimer) {
+    window.clearTimeout(saveTimer);
+  }
+
+  saveTimer = window.setTimeout(() => {
+    saveTimer = null;
+    saveProgress();
+  }, SAVE_DELAY_MS);
 }
 
 function saveProgress() {
@@ -746,6 +826,11 @@ function clearSavedProgress() {
   if (!storage) return;
 
   try {
+    if (saveTimer) {
+      window.clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+
     storage.removeItem(getStorageKey());
   } catch (error) {
     // Ignore storage failures so reset still works.
@@ -795,11 +880,108 @@ function showValidationErrors(errors) {
   statusEl.classList.add('status--error');
 }
 
+function getEventTile(event) {
+  const tile = event.target.closest('.tile');
+  return tile && boardEl.contains(tile) ? tile : null;
+}
+
+function getTileGroup(tile) {
+  return tile ? groupById.get(tile.dataset.groupId) : null;
+}
+
+function handleBoardClick(event) {
+  const tile = getEventTile(event);
+  const group = getTileGroup(tile);
+
+  if (group) {
+    handleTileClick(event, group);
+  }
+}
+
+function handleBoardDoubleClick(event) {
+  const tile = getEventTile(event);
+  const group = getTileGroup(tile);
+
+  if (group) {
+    startInlineGroupNaming(event, tile, group);
+  }
+}
+
+function handleBoardMouseOver(event) {
+  const tile = getEventTile(event);
+  const group = getTileGroup(tile);
+
+  if (group && group.items.length > 1 && !tile.contains(event.relatedTarget)) {
+    scheduleGroupTooltip(tile, group);
+  }
+}
+
+function handleBoardMouseMove(event) {
+  const tile = getEventTile(event);
+
+  if (tile) {
+    positionGroupTooltip(tile);
+  }
+}
+
+function handleBoardMouseOut(event) {
+  const tile = getEventTile(event);
+
+  if (tile && !tile.contains(event.relatedTarget)) {
+    hideGroupTooltip();
+  }
+}
+
+function handleBoardFocusIn(event) {
+  const tile = getEventTile(event);
+  const group = getTileGroup(tile);
+
+  if (event.target === tile && group && group.items.length > 1) {
+    showGroupTooltip(tile, group);
+  }
+}
+
+function handleBoardFocusOut(event) {
+  const tile = getEventTile(event);
+
+  if (tile && !tile.contains(event.relatedTarget)) {
+    hideGroupTooltip();
+  }
+}
+
+function handleBoardDragStart(event) {
+  const tile = getEventTile(event);
+
+  if (tile) {
+    startDrag(event, tile.dataset.groupId);
+  }
+}
+
+function handleBoardDrop(event) {
+  const tile = getEventTile(event);
+
+  if (tile) {
+    dropOnGroup(event, tile.dataset.groupId);
+  }
+}
+
+boardEl.addEventListener('click', handleBoardClick);
+boardEl.addEventListener('dblclick', handleBoardDoubleClick);
+boardEl.addEventListener('mouseover', handleBoardMouseOver);
+boardEl.addEventListener('mousemove', handleBoardMouseMove);
+boardEl.addEventListener('mouseout', handleBoardMouseOut);
+boardEl.addEventListener('focusin', handleBoardFocusIn);
+boardEl.addEventListener('focusout', handleBoardFocusOut);
+boardEl.addEventListener('dragstart', handleBoardDragStart);
+boardEl.addEventListener('dragover', allowDrop);
+boardEl.addEventListener('drop', handleBoardDrop);
+boardEl.addEventListener('dragend', endDrag);
 shuffleBtn.addEventListener('click', shuffleBoard);
 deselectBtn.addEventListener('click', deselectAll);
 resetBtn.addEventListener('click', () => startPuzzle({ restore: false, clearSaved: true }));
 closeShareBtn.addEventListener('click', hideSharePopup);
 copyShareBtn.addEventListener('click', copyShareText);
+window.addEventListener('pagehide', saveProgress);
 
 const validationErrors = validateBank();
 startPuzzle();
