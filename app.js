@@ -1,7 +1,7 @@
 const EXPECTED_BANK_SIZE = 600;
 const DEFAULT_MONTHLY_CATEGORY_COUNT = 45;
 const DEFAULT_ANSWERS_PER_CATEGORY = 45;
-const STORAGE_PREFIX = 'connections-monthly-progress-v1';
+const STORAGE_PREFIX = 'connections-monthly-progress-v2';
 
 const puzzleEl = document.getElementById('puzzle');
 const resetDateEl = document.getElementById('resetDate');
@@ -120,7 +120,8 @@ function pickPuzzleCategories(date = new Date()) {
   const previousFamilies = new Set(previousCategories.map(category => normalizeAnswer(getCategoryDisplayTitle(category.title))));
   const freshSelection = pickMonthlyCategories(date, {
     excludedCategoryIds,
-    previousFamilies
+    previousFamilies,
+    excludePreviousFamilies: true
   });
 
   if (freshSelection.length === monthlyCategoryCount) {
@@ -128,18 +129,7 @@ function pickPuzzleCategories(date = new Date()) {
     return freshSelection;
   }
 
-  const relaxedSelection = pickMonthlyCategories(date, {
-    previousFamilies
-  });
-
-  if (relaxedSelection.length === monthlyCategoryCount) {
-    monthlySelectionCache.set(cacheKey, relaxedSelection);
-    return relaxedSelection;
-  }
-
-  const fallbackSelection = pickMonthlyCategories(date);
-  monthlySelectionCache.set(cacheKey, fallbackSelection);
-  return fallbackSelection;
+  return freshSelection;
 }
 
 function shouldCompareWithPreviousMonth(date) {
@@ -151,6 +141,7 @@ function pickMonthlyCategories(date = new Date(), options = {}) {
   let bestSelection = [];
   const excludedCategoryIds = options.excludedCategoryIds || new Set();
   const previousFamilies = options.previousFamilies || new Set();
+  const excludePreviousFamilies = options.excludePreviousFamilies === true;
 
   for (let attempt = 0; attempt < 48; attempt += 1) {
     const selected = [];
@@ -158,7 +149,11 @@ function pickMonthlyCategories(date = new Date(), options = {}) {
     const usedFamilies = new Set();
     const random = seededRandom(seed + attempt * 7919);
     const orderedCategories = orderCategoriesForMonth(
-      shuffle(CATEGORY_BANK, random).filter(category => !excludedCategoryIds.has(category.id)),
+      shuffle(CATEGORY_BANK, random).filter(category => {
+        const familyTitle = normalizeAnswer(getCategoryDisplayTitle(category.title));
+        return !excludedCategoryIds.has(category.id)
+          && (!excludePreviousFamilies || !previousFamilies.has(familyTitle));
+      }),
       previousFamilies
     );
 
@@ -240,7 +235,10 @@ function normalizeAnswer(value) {
 }
 
 function getCategoryDisplayTitle(title) {
-  return String(title).replace(/\s+Set\s+\d+$/i, '').trim();
+  return String(title)
+    .replace(/\s+Set\s+\d+$/i, '')
+    .replace(/:\s+\d+$/i, '')
+    .trim();
 }
 
 function getCategoryFamilyCounts() {
@@ -741,12 +739,15 @@ function isValidProgress(progress) {
   }
 
   const validCategoryIds = new Set(monthlyCategories.map(category => category.id));
+  const savedCategoryIds = new Set(progress.boardGroups.map(group => group.categoryId));
   const itemTotal = progress.boardGroups.reduce((total, group) => {
     if (!isValidSavedGroup(group, validCategoryIds)) return Number.NaN;
     return total + group.items.length;
   }, 0);
 
-  return itemTotal === monthlyCategoryCount * answersPerCategory;
+  return itemTotal === monthlyCategoryCount * answersPerCategory
+    && savedCategoryIds.size === validCategoryIds.size
+    && [...validCategoryIds].every(categoryId => savedCategoryIds.has(categoryId));
 }
 
 function isValidSavedGroup(group, validCategoryIds) {
