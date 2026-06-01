@@ -1,7 +1,7 @@
 const EXPECTED_BANK_SIZE = 600;
 const DEFAULT_MONTHLY_CATEGORY_COUNT = 45;
 const DEFAULT_ANSWERS_PER_CATEGORY = 45;
-const STORAGE_PREFIX = 'connections-monthly-progress-v2';
+const STORAGE_PREFIX = 'connections-monthly-progress-v3';
 
 const puzzleEl = document.getElementById('puzzle');
 const resetDateEl = document.getElementById('resetDate');
@@ -117,7 +117,7 @@ function pickPuzzleCategories(date = new Date()) {
     ? pickPuzzleCategories(previousMonth)
     : [];
   const excludedCategoryIds = new Set(previousCategories.map(category => category.id));
-  const previousFamilies = new Set(previousCategories.map(category => normalizeAnswer(getCategoryDisplayTitle(category.title))));
+  const previousFamilies = new Set(previousCategories.map(category => getCategoryRotationTheme(category.title)));
   const freshSelection = pickMonthlyCategories(date, {
     excludedCategoryIds,
     previousFamilies,
@@ -150,7 +150,7 @@ function pickMonthlyCategories(date = new Date(), options = {}) {
     const random = seededRandom(seed + attempt * 7919);
     const orderedCategories = orderCategoriesForMonth(
       shuffle(CATEGORY_BANK, random).filter(category => {
-        const familyTitle = normalizeAnswer(getCategoryDisplayTitle(category.title));
+        const familyTitle = getCategoryRotationTheme(category.title);
         return !excludedCategoryIds.has(category.id)
           && (!excludePreviousFamilies || !previousFamilies.has(familyTitle));
       }),
@@ -186,7 +186,7 @@ function orderCategoriesForMonth(categories, previousFamilies) {
 }
 
 function getCategoryPriority(category, previousFamilies) {
-  const familyTitle = normalizeAnswer(getCategoryDisplayTitle(category.title));
+  const familyTitle = getCategoryRotationTheme(category.title);
   const repeatsPreviousFamily = previousFamilies.has(familyTitle);
   const reusableFamily = (categoryFamilyCounts.get(familyTitle) || 0) > 1;
 
@@ -199,7 +199,7 @@ function getCategoryPriority(category, previousFamilies) {
 function addCategoryToSelection(category, selected, usedAnswers, usedFamilies, allowUsedFamily) {
   if (selected.length >= monthlyCategoryCount || selected.includes(category)) return;
 
-  const familyTitle = normalizeAnswer(getCategoryDisplayTitle(category.title));
+  const familyTitle = getCategoryRotationTheme(category.title);
   if (!allowUsedFamily && usedFamilies.has(familyTitle)) return;
 
   const normalizedItems = category.items.map(item => normalizeAnswer(cleanAnswerLabel(item)));
@@ -241,11 +241,25 @@ function getCategoryDisplayTitle(title) {
     .trim();
 }
 
+function getCategoryRotationTheme(title) {
+  const familyTitle = normalizeAnswer(getCategoryDisplayTitle(title));
+  const themedPatterns = [
+    ['automotive', /^(car brands|car manufacturers|car parts|car parts and brands)$/],
+    ['kitchen-and-ingredients', /^(kitchen items|cooking ingredients|baking ingredients)$/],
+    ['clothing-items', /^(items of clothing|clothing items)$/],
+    ['colors', /^(colors|colour names)$/],
+    ['spices-and-herbs', /^(spices and herbs|culinary spices|culinary herbs)$/]
+  ];
+
+  const matchedTheme = themedPatterns.find(([, pattern]) => pattern.test(familyTitle));
+  return matchedTheme ? matchedTheme[0] : familyTitle;
+}
+
 function getCategoryFamilyCounts() {
   const counts = new Map();
 
   CATEGORY_BANK.forEach(category => {
-    const familyTitle = normalizeAnswer(getCategoryDisplayTitle(category.title));
+    const familyTitle = getCategoryRotationTheme(category.title);
     counts.set(familyTitle, (counts.get(familyTitle) || 0) + 1);
   });
 
