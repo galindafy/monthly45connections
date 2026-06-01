@@ -1,7 +1,7 @@
 const EXPECTED_BANK_SIZE = 600;
 const DEFAULT_MONTHLY_CATEGORY_COUNT = 45;
 const DEFAULT_ANSWERS_PER_CATEGORY = 45;
-const STORAGE_PREFIX = 'connections-monthly-progress-v3';
+const STORAGE_PREFIX = 'connections-monthly-progress-v5';
 
 const puzzleEl = document.getElementById('puzzle');
 const resetDateEl = document.getElementById('resetDate');
@@ -88,8 +88,14 @@ function validateBank() {
     return ['CATEGORY_BANK is missing.'];
   }
 
+  const playableCategories = CATEGORY_BANK.filter(category => category.playable !== false);
+
   if (CATEGORY_BANK.length !== EXPECTED_BANK_SIZE) {
     errors.push(`Expected ${EXPECTED_BANK_SIZE} categories, found ${CATEGORY_BANK.length}.`);
+  }
+
+  if (playableCategories.length < monthlyCategoryCount * 2) {
+    errors.push(`Expected at least ${monthlyCategoryCount * 2} reviewed categories for monthly refreshes, found ${playableCategories.length}.`);
   }
 
   CATEGORY_BANK.forEach(category => {
@@ -151,7 +157,8 @@ function pickMonthlyCategories(date = new Date(), options = {}) {
     const orderedCategories = orderCategoriesForMonth(
       shuffle(CATEGORY_BANK, random).filter(category => {
         const familyTitle = getCategoryRotationTheme(category.title);
-        return !excludedCategoryIds.has(category.id)
+        return category.playable !== false
+          && !excludedCategoryIds.has(category.id)
           && (!excludePreviousFamilies || !previousFamilies.has(familyTitle));
       }),
       previousFamilies
@@ -248,7 +255,13 @@ function getCategoryRotationTheme(title) {
     ['kitchen-and-ingredients', /^(kitchen items|cooking ingredients|baking ingredients)$/],
     ['clothing-items', /^(items of clothing|clothing items)$/],
     ['colors', /^(colors|colour names)$/],
-    ['spices-and-herbs', /^(spices and herbs|culinary spices|culinary herbs)$/]
+    ['spices-and-herbs', /^(spices and herbs|culinary spices|culinary herbs)$/],
+    ['flowers', /^(flowers|common garden flowers)$/],
+    ['fruits', /^(fruits|fruit trees)$/],
+    ['trees', /^(trees|conifers)$/],
+    ['tools-and-hardware', /^(things in a toolbox|hardware store items)$/],
+    ['travel-and-airports', /^(travel items|airport items)$/],
+    ['fitness-equipment', /^(exercise equipment|gym equipment)$/]
   ];
 
   const matchedTheme = themedPatterns.find(([, pattern]) => pattern.test(familyTitle));
@@ -258,7 +271,7 @@ function getCategoryRotationTheme(title) {
 function getCategoryFamilyCounts() {
   const counts = new Map();
 
-  CATEGORY_BANK.forEach(category => {
+  CATEGORY_BANK.filter(category => category.playable !== false).forEach(category => {
     const familyTitle = getCategoryRotationTheme(category.title);
     counts.set(familyTitle, (counts.get(familyTitle) || 0) + 1);
   });
