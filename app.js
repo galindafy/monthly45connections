@@ -1,7 +1,7 @@
 const EXPECTED_BANK_SIZE = 600;
 const DEFAULT_MONTHLY_CATEGORY_COUNT = 45;
 const DEFAULT_ANSWERS_PER_CATEGORY = 45;
-const STORAGE_PREFIX = 'connections-monthly-progress-v5';
+const STORAGE_PREFIX = 'connections-monthly-progress-v6';
 
 const puzzleEl = document.getElementById('puzzle');
 const resetDateEl = document.getElementById('resetDate');
@@ -43,6 +43,76 @@ const categoryFamilyCounts = getCategoryFamilyCounts();
 const monthlySelectionCache = new Map();
 const groupById = new Map();
 const tileById = new Map();
+const historicalPreviousMonthTitles = {
+  202606: [
+    'Car Brands Set 01',
+    'Baking Ingredients',
+    'Computer Parts',
+    'Things at a Football Game Set 01',
+    'Disney Movies Set 01',
+    'Sports Equipment',
+    'Gardening Tools',
+    'Mammals Set 01',
+    'Baked Goods',
+    'Gemstones',
+    'Pop Singers Set 01',
+    'NHL Teams and Historic Clubs Set 01',
+    'Medical Terminology Set 01',
+    'School Supplies Set 01',
+    'Sitcom Characters',
+    'Grey\'s Anatomy Characters Set 01',
+    'Languages',
+    'US Cities Set 01',
+    'Beatles Songs',
+    'Vegetables Set 01',
+    'Book Genres',
+    'Bedroom Items',
+    'Science Fiction TV Shows',
+    'Birds',
+    'Movie Directors Set 01',
+    'Real Housewives Cast Members',
+    'Clothing Brands',
+    'Musical Genres',
+    'Cat Breeds',
+    'Classical Composers',
+    'Pasta Shapes Set 01',
+    'Clothing Items Set 01',
+    'Sandwiches',
+    'World Capitals Set 01',
+    'Dog Breeds',
+    'Countries',
+    'Bathroom Items',
+    'Fabrics',
+    'Cocktails Set 01',
+    'Space Objects',
+    'Trees',
+    'US States',
+    'Chemical Elements',
+    'Musical Instruments',
+    'Human Bones',
+    'Fruit Trees',
+    'Flowers',
+    'Things in a Toolbox Set 01',
+    'Car Parts Set 01',
+    'Conifers',
+    'Travel Items',
+    'Makeup Products',
+    'Friends Characters',
+    'Superheroes',
+    'Art Supplies',
+    'Constellations',
+    'Fish',
+    'Video Games',
+    'Furniture',
+    'Wedding Items',
+    'Desserts',
+    'The Office Characters',
+    '90s Movies Set 01',
+    'Vegetables Set 01',
+    'National Parks',
+    'Soups'
+  ]
+};
 
 let monthlyCategories = [];
 let boardGroups = [];
@@ -122,12 +192,14 @@ function pickPuzzleCategories(date = new Date()) {
     return monthlySelectionCache.get(cacheKey);
   }
 
+  const historicalPreviousFamilies = getHistoricalPreviousFamilies(date);
   const previousMonth = new Date(date.getFullYear(), date.getMonth() - 1, 15);
-  const previousCategories = shouldCompareWithPreviousMonth(date)
+  const previousCategories = shouldCompareWithPreviousMonth(date) && historicalPreviousFamilies.length === 0
     ? pickPuzzleCategories(previousMonth)
     : [];
   const excludedCategoryIds = new Set(previousCategories.map(category => category.id));
   const previousFamilies = new Set(previousCategories.map(category => getCategoryRotationTheme(category.title)));
+  historicalPreviousFamilies.forEach(family => previousFamilies.add(family));
   const freshSelection = pickMonthlyCategories(date, {
     excludedCategoryIds,
     previousFamilies,
@@ -144,6 +216,11 @@ function pickPuzzleCategories(date = new Date()) {
 
 function shouldCompareWithPreviousMonth(date) {
   return date.getFullYear() > 2026 || (date.getFullYear() === 2026 && date.getMonth() > 0);
+}
+
+function getHistoricalPreviousFamilies(date) {
+  return (historicalPreviousMonthTitles[getMonthlySeed(date)] || [])
+    .map(title => getCategoryRotationTheme(title));
 }
 
 function pickMonthlyCategories(date = new Date(), options = {}) {
