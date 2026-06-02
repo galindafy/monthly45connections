@@ -267,6 +267,7 @@ h1 {
 .tile--shake {
   contain: layout style;
   content-visibility: visible;
+  animation: tile-shake 520ms ease-in-out;
   border-color: var(--danger);
   background: #f4c7bd;
   color: var(--ink);
@@ -277,6 +278,24 @@ h1 {
   border-color: var(--danger);
   background: #f4c7bd;
   color: var(--ink);
+}
+
+@keyframes tile-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  15%,
+  45%,
+  75% {
+    transform: translateX(-8px);
+  }
+
+  30%,
+  60% {
+    transform: translateX(8px);
+  }
 }
 
 .tile-title,

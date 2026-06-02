@@ -476,32 +476,11 @@ function updateTiles(groupIds) {
 }
 
 function restartTileShake(tile) {
-  if (tile.shakeAnimation) {
-    tile.shakeAnimation.cancel();
-  }
-
+  tile.style.animation = 'none';
   tile.classList.remove('tile--shake');
   void tile.offsetWidth;
   tile.classList.add('tile--shake');
-
-  if (typeof tile.animate !== 'function') return;
-
-  tile.shakeAnimation = tile.animate([
-    { transform: 'translateX(0)' },
-    { transform: 'translateX(-8px)' },
-    { transform: 'translateX(8px)' },
-    { transform: 'translateX(-6px)' },
-    { transform: 'translateX(6px)' },
-    { transform: 'translateX(0)' }
-  ], {
-    duration: 520,
-    easing: 'ease-in-out'
-  });
-  tile.shakeAnimation.onfinish = () => {
-    if (tile.shakeAnimation) {
-      tile.shakeAnimation = null;
-    }
-  };
+  tile.style.animation = '';
 }
 
 function updateTileContent(group) {
