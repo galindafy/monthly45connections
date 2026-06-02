@@ -1,7 +1,7 @@
 const EXPECTED_BANK_SIZE = 600;
 const DEFAULT_MONTHLY_CATEGORY_COUNT = 45;
 const DEFAULT_ANSWERS_PER_CATEGORY = 45;
-const STORAGE_PREFIX = 'connections-monthly-progress-v6';
+const STORAGE_PREFIX = 'connections-monthly-progress-v7';
 
 const puzzleEl = document.getElementById('puzzle');
 const resetDateEl = document.getElementById('resetDate');
@@ -172,6 +172,11 @@ function validateBank() {
     errors.push(`Expected at least ${monthlyCategoryCount * 2} reviewed categories for monthly refreshes, found ${playableCategories.length}.`);
   }
 
+  const playableFamilies = new Set(playableCategories.map(category => getCategoryRotationTheme(category.title)));
+  if (playableFamilies.size < monthlyCategoryCount * 2) {
+    errors.push(`Expected at least ${monthlyCategoryCount * 2} distinct reviewed category themes for monthly refreshes, found ${playableFamilies.size}.`);
+  }
+
   CATEGORY_BANK.forEach(category => {
     if (!category.title || !Array.isArray(category.items)) {
       errors.push(`${category.id || 'A category'} is missing a title or item list.`);
@@ -194,7 +199,7 @@ function pickPuzzleCategories(date = new Date()) {
 
   const historicalPreviousFamilies = getHistoricalPreviousFamilies(date);
   const previousMonth = new Date(date.getFullYear(), date.getMonth() - 1, 15);
-  const previousCategories = shouldCompareWithPreviousMonth(date) && historicalPreviousFamilies.length === 0
+  const previousCategories = shouldCompareWithPreviousMonth(date)
     ? pickPuzzleCategories(previousMonth)
     : [];
   const excludedCategoryIds = new Set(previousCategories.map(category => category.id));
@@ -471,9 +476,32 @@ function updateTiles(groupIds) {
 }
 
 function restartTileShake(tile) {
+  if (tile.shakeAnimation) {
+    tile.shakeAnimation.cancel();
+  }
+
   tile.classList.remove('tile--shake');
   void tile.offsetWidth;
   tile.classList.add('tile--shake');
+
+  if (typeof tile.animate !== 'function') return;
+
+  tile.shakeAnimation = tile.animate([
+    { transform: 'translateX(0)' },
+    { transform: 'translateX(-8px)' },
+    { transform: 'translateX(8px)' },
+    { transform: 'translateX(-6px)' },
+    { transform: 'translateX(6px)' },
+    { transform: 'translateX(0)' }
+  ], {
+    duration: 520,
+    easing: 'ease-in-out'
+  });
+  tile.shakeAnimation.onfinish = () => {
+    if (tile.shakeAnimation) {
+      tile.shakeAnimation = null;
+    }
+  };
 }
 
 function updateTileContent(group) {
