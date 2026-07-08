@@ -1,7 +1,7 @@
 const EXPECTED_BANK_SIZE = 600;
 const DEFAULT_MONTHLY_CATEGORY_COUNT = 45;
 const DEFAULT_ANSWERS_PER_CATEGORY = 45;
-const STORAGE_PREFIX = 'connections-monthly-progress-v7';
+const STORAGE_PREFIX = 'connections-monthly-progress-v8';
 
 const puzzleEl = document.getElementById('puzzle');
 const resetDateEl = document.getElementById('resetDate');
@@ -43,76 +43,7 @@ const categoryFamilyCounts = getCategoryFamilyCounts();
 const monthlySelectionCache = new Map();
 const groupById = new Map();
 const tileById = new Map();
-const historicalPreviousMonthTitles = {
-  202606: [
-    'Car Brands Set 01',
-    'Baking Ingredients',
-    'Computer Parts',
-    'Things at a Football Game Set 01',
-    'Disney Movies Set 01',
-    'Sports Equipment',
-    'Gardening Tools',
-    'Mammals Set 01',
-    'Baked Goods',
-    'Gemstones',
-    'Pop Singers Set 01',
-    'NHL Teams and Historic Clubs Set 01',
-    'Medical Terminology Set 01',
-    'School Supplies Set 01',
-    'Sitcom Characters',
-    'Grey\'s Anatomy Characters Set 01',
-    'Languages',
-    'US Cities Set 01',
-    'Beatles Songs',
-    'Vegetables Set 01',
-    'Book Genres',
-    'Bedroom Items',
-    'Science Fiction TV Shows',
-    'Birds',
-    'Movie Directors Set 01',
-    'Real Housewives Cast Members',
-    'Clothing Brands',
-    'Musical Genres',
-    'Cat Breeds',
-    'Classical Composers',
-    'Pasta Shapes Set 01',
-    'Clothing Items Set 01',
-    'Sandwiches',
-    'World Capitals Set 01',
-    'Dog Breeds',
-    'Countries',
-    'Bathroom Items',
-    'Fabrics',
-    'Cocktails Set 01',
-    'Space Objects',
-    'Trees',
-    'US States',
-    'Chemical Elements',
-    'Musical Instruments',
-    'Human Bones',
-    'Fruit Trees',
-    'Flowers',
-    'Things in a Toolbox Set 01',
-    'Car Parts Set 01',
-    'Conifers',
-    'Travel Items',
-    'Makeup Products',
-    'Friends Characters',
-    'Superheroes',
-    'Art Supplies',
-    'Constellations',
-    'Fish',
-    'Video Games',
-    'Furniture',
-    'Wedding Items',
-    'Desserts',
-    'The Office Characters',
-    '90s Movies Set 01',
-    'Vegetables Set 01',
-    'National Parks',
-    'Soups'
-  ]
-};
+const historicalPreviousMonthTitles = {};
 
 let monthlyCategories = [];
 let boardGroups = [];
@@ -204,10 +135,14 @@ function pickPuzzleCategories(date = new Date()) {
     : [];
   const excludedCategoryIds = new Set(previousCategories.map(category => category.id));
   const previousFamilies = new Set(previousCategories.map(category => getCategoryRotationTheme(category.title)));
+  const previousAnswers = new Set(previousCategories.flatMap(category => {
+    return category.items.map(item => normalizeAnswer(cleanAnswerLabel(item)));
+  }));
   historicalPreviousFamilies.forEach(family => previousFamilies.add(family));
   const freshSelection = pickMonthlyCategories(date, {
     excludedCategoryIds,
     previousFamilies,
+    previousAnswers,
     excludePreviousFamilies: true
   });
 
@@ -233,6 +168,7 @@ function pickMonthlyCategories(date = new Date(), options = {}) {
   let bestSelection = [];
   const excludedCategoryIds = options.excludedCategoryIds || new Set();
   const previousFamilies = options.previousFamilies || new Set();
+  const previousAnswers = options.previousAnswers || new Set();
   const excludePreviousFamilies = options.excludePreviousFamilies === true;
 
   for (let attempt = 0; attempt < 48; attempt += 1) {
@@ -245,20 +181,15 @@ function pickMonthlyCategories(date = new Date(), options = {}) {
         const familyTitle = getCategoryRotationTheme(category.title);
         return category.playable !== false
           && !excludedCategoryIds.has(category.id)
-          && (!excludePreviousFamilies || !previousFamilies.has(familyTitle));
+          && (!excludePreviousFamilies || !previousFamilies.has(familyTitle))
+          && !hasPreviousMonthAnswer(category, previousAnswers);
       }),
       previousFamilies
     );
 
     orderedCategories.forEach(category => {
-      addCategoryToSelection(category, selected, usedAnswers, usedFamilies, false);
+      addCategoryToSelection(category, selected, usedAnswers, usedFamilies);
     });
-
-    if (selected.length < monthlyCategoryCount) {
-      orderedCategories.forEach(category => {
-        addCategoryToSelection(category, selected, usedAnswers, usedFamilies, true);
-      });
-    }
 
     if (selected.length === monthlyCategoryCount) {
       return selected;
@@ -270,6 +201,14 @@ function pickMonthlyCategories(date = new Date(), options = {}) {
   }
 
   return bestSelection;
+}
+
+function hasPreviousMonthAnswer(category, previousAnswers) {
+  if (previousAnswers.size === 0) return false;
+
+  return category.items.some(item => {
+    return previousAnswers.has(normalizeAnswer(cleanAnswerLabel(item)));
+  });
 }
 
 function orderCategoriesForMonth(categories, previousFamilies) {
@@ -289,11 +228,11 @@ function getCategoryPriority(category, previousFamilies) {
   return 3;
 }
 
-function addCategoryToSelection(category, selected, usedAnswers, usedFamilies, allowUsedFamily) {
+function addCategoryToSelection(category, selected, usedAnswers, usedFamilies) {
   if (selected.length >= monthlyCategoryCount || selected.includes(category)) return;
 
   const familyTitle = getCategoryRotationTheme(category.title);
-  if (!allowUsedFamily && usedFamilies.has(familyTitle)) return;
+  if (usedFamilies.has(familyTitle)) return;
 
   const normalizedItems = category.items.map(item => normalizeAnswer(cleanAnswerLabel(item)));
   const hasDuplicateAnswer = normalizedItems.some(item => usedAnswers.has(item));
